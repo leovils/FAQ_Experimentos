@@ -3,562 +3,224 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>100 FAQs — Desenho e Análise de Experimentos</title>
-<meta name="description" content="100 perguntas frequentes sobre desenho experimental, ANOVA, tamanho de efeito, validade, randomização e análises avançadas para pesquisa em Ciências Sociais Aplicadas.">
-<meta property="og:title" content="100 FAQs — Desenho e Análise de Experimentos">
-<meta property="og:description" content="Guia interativo com busca semântica TF-IDF para pesquisa experimental em Ciências Sociais Aplicadas.">
-<meta property="og:type" content="website">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,700;1,9..144,400&display=swap" rel="stylesheet">
+<title>Fundamentos de Estudos Experimentais I — Portal</title>
 <style>
-/* ── RESET & BASE ── */
 *{margin:0;padding:0;box-sizing:border-box}
 :root{
-  --bg:#0F0B1E;
-  --bg2:#150F2A;
-  --surface:rgba(255,255,255,0.04);
-  --surface2:rgba(255,255,255,0.07);
-  --surface3:rgba(255,255,255,0.10);
-  --glass:rgba(255,255,255,0.06);
-  --glass-border:rgba(255,255,255,0.08);
-  --glass-hover:rgba(255,255,255,0.10);
-  --text:#F1F0F5;
-  --text2:#A8A3B8;
-  --text3:#6B6580;
-  --accent:#818CF8;
-  --accent2:#C084FC;
-  --accent-glow:rgba(129,140,248,0.15);
-  --gradient:linear-gradient(135deg,#6366F1,#8B5CF6,#C084FC);
-  --radius:14px;
-  --radius-sm:10px;
-  --font:'Inter',system-ui,sans-serif;
-  --font-display:'Fraunces','Georgia',serif;
-  --shadow:0 4px 24px rgba(0,0,0,0.3);
-  --transition:all 0.25s cubic-bezier(.4,0,.2,1);
+  --bg:#0a0a0f;--glass:rgba(255,255,255,.06);--border:rgba(255,255,255,.08);
+  --text:#ECF0F1;--text2:#95A5A6;--text3:#7F8C8D;
+  --accent:#1ABC9C;--gold:#F4D03F;--blue:#3498DB;--purple:#9B59B6;--red:#E74C3C;--green:#2ECC71;--orange:#E67E22;--pink:#E91E8F;
 }
+body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
 
-html{scroll-behavior:smooth}
-body{
-  font-family:var(--font);background:var(--bg);color:var(--text);
-  line-height:1.65;min-height:100vh;
-  background-image:
-    radial-gradient(ellipse 80% 60% at 50% 0%, rgba(99,102,241,0.12) 0%, transparent 70%),
-    radial-gradient(ellipse 60% 50% at 80% 100%, rgba(192,132,252,0.08) 0%, transparent 60%),
-    radial-gradient(ellipse 40% 40% at 10% 60%, rgba(236,72,153,0.06) 0%, transparent 50%);
-  background-attachment:fixed;
-}
-a{color:var(--accent);text-decoration:none;transition:color .2s}
-a:hover{color:var(--accent2)}
-::selection{background:rgba(129,140,248,0.3);color:#fff}
+.hero{text-align:center;padding:3rem 1.5rem 2rem;background:linear-gradient(135deg,rgba(26,188,156,.1),rgba(244,208,63,.05))}
+.hero-badge{display:inline-block;background:var(--accent);color:#fff;font-size:.65rem;font-weight:700;padding:.25rem .8rem;border-radius:20px;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:1rem}
+.hero h1{font-family:Georgia,serif;font-size:2.2rem;font-weight:700;line-height:1.25;margin-bottom:.5rem}
+.hero h1 span{color:var(--accent)}
+.hero p{color:var(--text2);font-size:1rem;max-width:550px;margin:0 auto}
 
-/* ── HERO HEADER ── */
-.hero{
-  padding:3.5rem 1.5rem 2.5rem;text-align:center;
-  position:relative;overflow:hidden;
-}
-.hero::before{
-  content:'';position:absolute;top:-40%;left:50%;transform:translateX(-50%);
-  width:600px;height:400px;
-  background:radial-gradient(circle,rgba(99,102,241,0.2),transparent 70%);
-  pointer-events:none;
-}
-.hero-badge{
-  display:inline-flex;align-items:center;gap:.4rem;
-  background:var(--surface2);border:1px solid var(--glass-border);
-  border-radius:20px;padding:.35rem .9rem;font-size:.75rem;
-  color:var(--accent);font-weight:600;margin-bottom:1rem;
-  backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
-}
-.hero-badge .dot{width:6px;height:6px;background:var(--accent);border-radius:50%;animation:pulse 2s infinite}
-@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
-.hero h1{
-  font-family:var(--font-display);font-size:2.5rem;font-weight:700;
-  line-height:1.2;margin-bottom:.6rem;
-  background:var(--gradient);-webkit-background-clip:text;-webkit-text-fill-color:transparent;
-  background-clip:text;
-}
-.hero p{color:var(--text2);font-size:1.05rem;max-width:520px;margin:0 auto}
-.hero .author{
-  margin-top:.8rem;font-size:.85rem;color:var(--text3);font-weight:500;
-}
-.hero .stats-row{
-  display:flex;justify-content:center;gap:2rem;margin-top:1.5rem;flex-wrap:wrap;
-}
-.hero .stat{text-align:center}
-.hero .stat-num{
-  font-family:var(--font-display);font-size:1.8rem;font-weight:700;
-  background:var(--gradient);-webkit-background-clip:text;-webkit-text-fill-color:transparent;
-  background-clip:text;
-}
-.hero .stat-label{font-size:.75rem;color:var(--text3);text-transform:uppercase;letter-spacing:.05em}
+.container{max-width:900px;margin:0 auto;padding:2rem 1.5rem}
 
-/* ── SEARCH ── */
-.search-section{max-width:680px;margin:0 auto 1.5rem;padding:0 1.5rem}
-.search-container{
-  position:relative;
-  background:var(--glass);
-  border:1px solid var(--glass-border);
-  border-radius:var(--radius);
-  backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
-  transition:var(--transition);
-  overflow:hidden;
-}
-.search-container:focus-within{
-  border-color:var(--accent);
-  box-shadow:0 0 0 3px var(--accent-glow),0 8px 32px rgba(0,0,0,0.3);
-}
-.search-container input{
-  width:100%;padding:1rem 3rem 1rem 3.2rem;
-  background:transparent;border:none;outline:none;
-  font-family:var(--font);font-size:1rem;color:var(--text);
-}
-.search-container input::placeholder{color:var(--text3)}
-.search-icon{
-  position:absolute;left:1.1rem;top:50%;transform:translateY(-50%);
-  color:var(--text3);pointer-events:none;transition:color .2s;
-}
-.search-container:focus-within .search-icon{color:var(--accent)}
-.clear-btn{
-  position:absolute;right:.8rem;top:50%;transform:translateY(-50%);
-  background:var(--surface2);border:none;color:var(--text3);
-  cursor:pointer;width:28px;height:28px;border-radius:50%;
-  display:none;align-items:center;justify-content:center;
-  font-size:1rem;transition:var(--transition);
-}
-.clear-btn:hover{background:var(--surface3);color:var(--text)}
-.search-hint{
-  font-size:.75rem;color:var(--text3);margin-top:.5rem;
-  display:flex;align-items:center;gap:.5rem;
-}
-.kbd{
-  display:inline-flex;padding:.1rem .4rem;background:var(--surface2);
-  border:1px solid var(--glass-border);border-radius:4px;
-  font-family:monospace;font-size:.7rem;color:var(--text2);
-}
-.search-meta{font-size:.8rem;color:var(--text3);margin-top:.6rem;min-height:1em}
+.section-title{font-family:Georgia,serif;font-size:1.3rem;font-weight:700;margin-bottom:1rem;padding-bottom:.5rem;border-bottom:1px solid var(--border)}
 
-/* ── CATEGORY FILTERS ── */
-.filters{
-  max-width:680px;margin:0 auto 1.5rem;padding:0 1.5rem;
-  display:flex;flex-wrap:wrap;gap:.45rem;
-}
-.filter-btn{
-  display:inline-flex;align-items:center;gap:.35rem;
-  background:var(--glass);border:1px solid var(--glass-border);
-  border-radius:20px;padding:.4rem .8rem;
-  font-size:.78rem;color:var(--text2);cursor:pointer;
-  backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
-  transition:var(--transition);white-space:nowrap;font-family:var(--font);font-weight:500;
-}
-.filter-btn:hover{background:var(--glass-hover);color:var(--text);border-color:rgba(255,255,255,0.15)}
-.filter-btn.active{
-  background:linear-gradient(135deg,rgba(99,102,241,0.25),rgba(139,92,246,0.2));
-  border-color:rgba(129,140,248,0.4);color:#fff;
-}
-.filter-btn svg{opacity:.7}
-.filter-btn.active svg{opacity:1}
-.filter-count{
-  background:var(--surface2);border-radius:8px;padding:.05rem .35rem;
-  font-size:.7rem;font-weight:600;
-}
-.filter-btn.active .filter-count{background:rgba(255,255,255,0.15)}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:1rem;margin-bottom:2.5rem}
 
-/* ── FAQ LIST ── */
-.faq-list{max-width:680px;margin:0 auto 3rem;padding:0 1.5rem}
-.faq-item{
-  background:var(--glass);
-  border:1px solid var(--glass-border);
-  border-radius:var(--radius);
-  margin-bottom:.7rem;
-  backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);
-  transition:var(--transition);
-  overflow:hidden;
-}
-.faq-item:hover{
-  background:var(--glass-hover);
-  border-color:rgba(255,255,255,0.12);
-  transform:translateY(-1px);
-  box-shadow:0 4px 20px rgba(0,0,0,0.2);
-}
-.faq-item.open{
-  background:var(--surface2);
-  border-color:rgba(129,140,248,0.2);
-  box-shadow:0 8px 32px rgba(0,0,0,0.3),inset 0 1px 0 rgba(255,255,255,0.05);
-  transform:translateY(-1px);
-}
+.card{background:var(--glass);border:1px solid var(--border);border-radius:14px;padding:1.2rem;transition:all .3s;cursor:pointer;text-decoration:none;color:inherit;display:flex;flex-direction:column;position:relative;overflow:hidden}
+.card:hover{border-color:rgba(255,255,255,.18);transform:translateY(-3px);box-shadow:0 8px 30px rgba(0,0,0,.3)}
+.card-stripe{position:absolute;top:0;left:0;right:0;height:3px}
+.card-top{display:flex;align-items:center;gap:.6rem;margin-bottom:.6rem}
+.card-icon{width:38px;height:38px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.1rem;flex-shrink:0}
+.card-label{font-size:.6rem;text-transform:uppercase;letter-spacing:1px;font-weight:700;opacity:.7}
+.card-title{font-size:1rem;font-weight:700;line-height:1.3;margin-bottom:.4rem}
+.card-desc{font-size:.82rem;color:var(--text2);line-height:1.5;flex:1}
+.card-tag{display:inline-block;font-size:.65rem;padding:.15rem .5rem;border-radius:10px;margin-top:.6rem;font-weight:600}
 
-.faq-q{
-  padding:1rem 2.8rem 1rem 1.15rem;cursor:pointer;position:relative;
-  font-weight:600;font-size:.92rem;color:var(--text);user-select:none;
-  display:flex;align-items:flex-start;gap:.6rem;
-  transition:color .2s;
-}
-.faq-q:hover{color:#fff}
-.faq-num{
-  flex-shrink:0;
-  font-size:.7rem;font-weight:700;
-  background:var(--surface2);border-radius:6px;
-  padding:.2rem .45rem;color:var(--accent);
-  min-width:2rem;text-align:center;
-  margin-top:.1rem;
-}
-.faq-item.open .faq-num{
-  background:linear-gradient(135deg,#6366F1,#8B5CF6);
-  color:#fff;
-}
-.faq-q-text{flex:1}
-.faq-cat-tag{
-  display:inline-block;font-size:.65rem;font-weight:600;
-  padding:.12rem .45rem;border-radius:6px;
-  margin-left:.4rem;vertical-align:middle;
-  background:var(--surface2);color:var(--text2);
-}
+.footer{text-align:center;padding:2rem 1rem;color:var(--text3);font-size:.8rem;border-top:1px solid var(--border);margin-top:1rem}
+.footer a{color:var(--accent);text-decoration:none}
+.footer a:hover{text-decoration:underline}
 
-.faq-chevron{
-  position:absolute;right:1rem;top:1.1rem;
-  width:20px;height:20px;color:var(--text3);
-  transition:transform .3s cubic-bezier(.4,0,.2,1);
-}
-.faq-item.open .faq-chevron{transform:rotate(180deg);color:var(--accent)}
-
-.faq-a{
-  max-height:0;overflow:hidden;
-  transition:max-height .4s cubic-bezier(.4,0,.2,1),padding .3s;
-  padding:0 1.15rem;
-}
-.faq-item.open .faq-a{
-  max-height:800px;
-  padding:0 1.15rem 1.2rem;
-}
-.faq-a-inner{
-  border-top:1px solid rgba(255,255,255,0.06);
-  padding-top:.9rem;
-}
-.faq-a p{font-size:.88rem;color:var(--text2);line-height:1.75}
-.faq-a .ref{
-  margin-top:.8rem;padding:.7rem .9rem;
-  background:var(--surface);border-radius:var(--radius-sm);
-  border-left:3px solid var(--accent);
-  font-size:.78rem;color:var(--text3);line-height:1.6;
-}
-.faq-a .ref-label{
-  font-size:.68rem;font-weight:700;text-transform:uppercase;
-  letter-spacing:.08em;color:var(--accent);margin-bottom:.25rem;
-}
-
-/* HIGHLIGHT */
-mark{background:rgba(129,140,248,0.25);color:var(--accent);padding:.05rem .2rem;border-radius:3px;font-weight:600}
-
-/* ── NO RESULTS ── */
-.no-results{text-align:center;padding:4rem 1.5rem;color:var(--text3);display:none}
-.no-results .emoji{font-size:3rem;margin-bottom:.75rem;opacity:.5}
-.no-results p{font-size:.95rem}
-
-/* ── FOOTER ── */
-.footer{
-  text-align:center;padding:2.5rem 1.5rem;
-  border-top:1px solid var(--glass-border);
-  margin-top:2rem;
-}
-.footer p{font-size:.8rem;color:var(--text3)}
-.footer a{color:var(--accent)}
-.footer .footer-links{
-  display:flex;justify-content:center;gap:1.5rem;margin-top:.6rem;flex-wrap:wrap;
-}
-
-/* ── SCROLL TOP ── */
-.scroll-top{
-  position:fixed;bottom:1.5rem;right:1.5rem;
-  background:var(--glass);border:1px solid var(--glass-border);
-  backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);
-  color:var(--text2);border-radius:50%;
-  width:44px;height:44px;cursor:pointer;
-  display:flex;align-items:center;justify-content:center;
-  box-shadow:var(--shadow);
-  opacity:0;transform:translateY(10px);
-  transition:var(--transition);z-index:99;
-}
-.scroll-top.visible{opacity:1;transform:translateY(0)}
-.scroll-top:hover{background:var(--surface3);color:#fff;border-color:var(--accent)}
-
-/* ── RESPONSIVE ── */
 @media(max-width:600px){
-  .hero{padding:2.5rem 1rem 2rem}
-  .hero h1{font-size:1.7rem}
-  .hero .stats-row{gap:1.2rem}
-  .hero .stat-num{font-size:1.4rem}
-  .search-section,.filters,.faq-list{padding:0 1rem}
-  .search-container input{padding:.85rem 2.5rem .85rem 2.8rem;font-size:.9rem}
-  .faq-q{font-size:.87rem;padding-right:2.2rem}
-  .filter-btn{font-size:.72rem;padding:.3rem .6rem}
-  .search-hint{display:none}
+  .hero h1{font-size:1.6rem}
+  .grid{grid-template-columns:1fr}
 }
-
-/* ── ANIMATIONS ── */
-@keyframes fadeInUp{
-  from{opacity:0;transform:translateY(12px)}
-  to{opacity:1;transform:translateY(0)}
-}
-.faq-item{animation:fadeInUp .35s ease-out both}
 </style>
 </head>
 <body>
 
-<!-- HERO -->
 <div class="hero">
-  <div class="hero-badge"><span class="dot"></span> Busca semântica TF-IDF &middot; 100% offline</div>
-  <h1>100 FAQs<br>Desenho e Análise de Experimentos</h1>
-  <p>Guia interativo para pesquisa experimental em Ciências Sociais Aplicadas</p>
-  <div class="author">Prof. Dr. Leonardo Vils</div>
-  <div class="stats-row">
-    <div class="stat"><div class="stat-num">100</div><div class="stat-label">Questões</div></div>
-    <div class="stat"><div class="stat-num">10</div><div class="stat-label">Categorias</div></div>
-    <div class="stat"><div class="stat-num">150+</div><div class="stat-label">Referências</div></div>
-  </div>
+  <div class="hero-badge">2026/1 &middot; PPGA</div>
+  <h1>Fundamentos de <span>Estudos Experimentais</span> I</h1>
+  <p>Material did&aacute;tico completo &mdash; slides, widgets interativos, quiz, exerc&iacute;cio e FAQ</p>
 </div>
 
-<!-- SEARCH -->
-<div class="search-section">
-  <div class="search-container">
-    <span class="search-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></span>
-    <input type="text" id="searchInput" placeholder="Digite sua dúvida sobre experimentos..." autocomplete="off" spellcheck="false">
-    <button class="clear-btn" id="clearBtn">&times;</button>
+<div class="container">
+
+  <!-- MATERIAIS PRINCIPAIS -->
+  <div class="section-title">Materiais da Disciplina</div>
+  <div class="grid">
+
+    <a class="card" href="Experimentos_2026 Aulas 1 e 2.pdf" target="_blank">
+      <div class="card-stripe" style="background:linear-gradient(90deg,var(--blue),var(--purple))"></div>
+      <div class="card-top">
+        <div class="card-icon" style="background:rgba(52,152,219,.15);color:var(--blue)">&#128218;</div>
+        <div class="card-label" style="color:var(--blue)">Slides</div>
+      </div>
+      <div class="card-title">Aulas 1 e 2 &mdash; PDF</div>
+      <div class="card-desc">Apresenta&ccedil;&atilde;o completa: causalidade, tipos de desenho, randomiza&ccedil;&atilde;o, validade, ANOVA e tamanho de efeito.</div>
+      <div class="card-tag" style="background:rgba(52,152,219,.12);color:var(--blue)">PDF</div>
+    </a>
+
+    <a class="card" href="FAQ_Experimentos.html">
+      <div class="card-stripe" style="background:linear-gradient(90deg,var(--purple),var(--pink))"></div>
+      <div class="card-top">
+        <div class="card-icon" style="background:rgba(155,89,182,.15);color:var(--purple)">&#128172;</div>
+        <div class="card-label" style="color:var(--purple)">FAQ</div>
+      </div>
+      <div class="card-title">100 Perguntas e Respostas</div>
+      <div class="card-desc">Busca sem&acirc;ntica TF-IDF cobrindo fundamentos, causalidade, ANOVA, efeito, poder, an&aacute;lises avan&ccedil;adas e reporting.</div>
+      <div class="card-tag" style="background:rgba(155,89,182,.12);color:var(--purple)">Busca inteligente</div>
+    </a>
+
+    <a class="card" href="Quiz_Aula1.html">
+      <div class="card-stripe" style="background:linear-gradient(90deg,var(--pink),var(--red))"></div>
+      <div class="card-top">
+        <div class="card-icon" style="background:rgba(233,30,143,.12);color:var(--pink)">&#127919;</div>
+        <div class="card-label" style="color:var(--pink)">Quiz</div>
+      </div>
+      <div class="card-title">Quiz Aula 1 &mdash; 25 quest&otilde;es</div>
+      <div class="card-desc">M&uacute;ltipla escolha com feedback imediato. Cobre causalidade, vari&aacute;veis, tipos de desenho, randomiza&ccedil;&atilde;o e validade.</div>
+      <div class="card-tag" style="background:rgba(233,30,143,.1);color:var(--pink)">Autoavalia&ccedil;&atilde;o</div>
+    </a>
+
+    <a class="card" href="Exercicio_Planejamento_Experimental.html">
+      <div class="card-stripe" style="background:linear-gradient(90deg,var(--gold),var(--orange))"></div>
+      <div class="card-top">
+        <div class="card-icon" style="background:rgba(244,208,63,.12);color:var(--gold)">&#128221;</div>
+        <div class="card-label" style="color:var(--gold)">Exerc&iacute;cio</div>
+      </div>
+      <div class="card-title">Planejamento Experimental</div>
+      <div class="card-desc">Roteiro de 6 se&ccedil;&otilde;es com checklist clic&aacute;vel, rubrica de avalia&ccedil;&atilde;o e exemplos de temas.</div>
+      <div class="card-tag" style="background:rgba(244,208,63,.1);color:var(--gold)">Interativo</div>
+    </a>
+
+    <a class="card" href="Simulador_Experimentos_OdinDinho.html">
+      <div class="card-stripe" style="background:linear-gradient(90deg,var(--green),var(--accent))"></div>
+      <div class="card-top">
+        <div class="card-icon" style="background:rgba(46,204,113,.12);color:var(--green)">&#128300;</div>
+        <div class="card-label" style="color:var(--green)">Simulador</div>
+      </div>
+      <div class="card-title">Simulador de Experimentos</div>
+      <div class="card-desc">Simula&ccedil;&atilde;o interativa de desenhos experimentais com visualiza&ccedil;&atilde;o de resultados.</div>
+      <div class="card-tag" style="background:rgba(46,204,113,.1);color:var(--green)">Interativo</div>
+    </a>
+
+    <a class="card" href="Ementa_Experimentos_2026-1_PPGA.docx">
+      <div class="card-stripe" style="background:linear-gradient(90deg,var(--text3),var(--text2))"></div>
+      <div class="card-top">
+        <div class="card-icon" style="background:rgba(127,140,141,.12);color:var(--text2)">&#128196;</div>
+        <div class="card-label" style="color:var(--text2)">Documento</div>
+      </div>
+      <div class="card-title">Ementa 2026/1</div>
+      <div class="card-desc">Programa oficial da disciplina &mdash; objetivos, conte&uacute;do program&aacute;tico, bibliografia e avalia&ccedil;&atilde;o.</div>
+      <div class="card-tag" style="background:rgba(127,140,141,.1);color:var(--text2)">.docx</div>
+    </a>
+
+    <a class="card" href="Exercicio_Planejamento_Experimental.docx">
+      <div class="card-stripe" style="background:linear-gradient(90deg,var(--orange),var(--gold))"></div>
+      <div class="card-top">
+        <div class="card-icon" style="background:rgba(230,126,34,.12);color:var(--orange)">&#128195;</div>
+        <div class="card-label" style="color:var(--orange)">Documento</div>
+      </div>
+      <div class="card-title">Exerc&iacute;cio &mdash; Word</div>
+      <div class="card-desc">Vers&atilde;o .docx do exerc&iacute;cio de planejamento para o aluno preencher e entregar.</div>
+      <div class="card-tag" style="background:rgba(230,126,34,.1);color:var(--orange)">.docx</div>
+    </a>
+
   </div>
-  <div class="search-hint">
-    <span><span class="kbd">/</span> para buscar</span>
-    <span><span class="kbd">Esc</span> para limpar</span>
+
+  <!-- WIDGETS -->
+  <div class="section-title">Widgets Interativos</div>
+  <div class="grid">
+
+    <a class="card" href="Widget_Randomizacao.html">
+      <div class="card-stripe" style="background:var(--accent)"></div>
+      <div class="card-top">
+        <div class="card-icon" style="background:rgba(26,188,156,.15);color:var(--accent)">&#127922;</div>
+        <div class="card-label" style="color:var(--accent)">Widget</div>
+      </div>
+      <div class="card-title">Randomiza&ccedil;&atilde;o</div>
+      <div class="card-desc">Simula atribui&ccedil;&atilde;o aleat&oacute;ria, compara confounders entre grupos. Modo auto-repeat 50x.</div>
+    </a>
+
+    <a class="card" href="Widget_Effect_Size.html">
+      <div class="card-stripe" style="background:var(--blue)"></div>
+      <div class="card-top">
+        <div class="card-icon" style="background:rgba(52,152,219,.15);color:var(--blue)">&#128200;</div>
+        <div class="card-label" style="color:var(--blue)">Widget</div>
+      </div>
+      <div class="card-title">Tamanho de Efeito</div>
+      <div class="card-desc">Duas curvas normais com Cohen's d ajust&aacute;vel. Mostra overlap, U&#8323;, probabilidade de superioridade e NNT.</div>
+    </a>
+
+    <a class="card" href="Widget_Power.html">
+      <div class="card-stripe" style="background:var(--gold)"></div>
+      <div class="card-top">
+        <div class="card-icon" style="background:rgba(244,208,63,.12);color:var(--gold)">&#9889;</div>
+        <div class="card-label" style="color:var(--gold)">Widget</div>
+      </div>
+      <div class="card-title">Poder Estat&iacute;stico</div>
+      <div class="card-desc">Calculadora de N, d, &alpha; e poder. Curva de poder interativa e tabela de refer&ecirc;ncia.</div>
+    </a>
+
+    <a class="card" href="Widget_LatinSquare.html">
+      <div class="card-stripe" style="background:var(--purple)"></div>
+      <div class="card-top">
+        <div class="card-icon" style="background:rgba(155,89,182,.15);color:var(--purple)">&#9638;</div>
+        <div class="card-label" style="color:var(--purple)">Widget</div>
+      </div>
+      <div class="card-title">Latin Square</div>
+      <div class="card-desc">Quadrados latinos, Williams Design, construtor interativo com valida&ccedil;&atilde;o e simulador de efeitos de ordem.</div>
+    </a>
+
+    <a class="card" href="Widget_Ameacas_Validade.html">
+      <div class="card-stripe" style="background:var(--orange)"></div>
+      <div class="card-top">
+        <div class="card-icon" style="background:rgba(230,126,34,.12);color:var(--orange)">&#128737;</div>
+        <div class="card-label" style="color:var(--orange)">Widget</div>
+      </div>
+      <div class="card-title">Amea&ccedil;as &agrave; Validade</div>
+      <div class="card-desc">10 cen&aacute;rios realistas de administra&ccedil;&atilde;o. Identifique 12 tipos de amea&ccedil;a &agrave; validade interna.</div>
+    </a>
+
+    <a class="card" href="Widget_Danca_Pvalues.html">
+      <div class="card-stripe" style="background:var(--red)"></div>
+      <div class="card-top">
+        <div class="card-icon" style="background:rgba(231,76,60,.12);color:var(--red)">&#128131;</div>
+        <div class="card-label" style="color:var(--red)">Widget</div>
+      </div>
+      <div class="card-title">Dan&ccedil;a dos P-values</div>
+      <div class="card-desc">100 replica&ccedil;&otilde;es do mesmo experimento. Histograma de p-values e instabilidade (Cumming, 2012).</div>
+    </a>
+
+    <a class="card" href="Widget_ANOVA_Decompositor.html">
+      <div class="card-stripe" style="background:var(--green)"></div>
+      <div class="card-top">
+        <div class="card-icon" style="background:rgba(46,204,113,.12);color:var(--green)">&#128202;</div>
+        <div class="card-label" style="color:var(--green)">Widget</div>
+      </div>
+      <div class="card-title">ANOVA Decompositor</div>
+      <div class="card-desc">Decomposi&ccedil;&atilde;o visual de SS Total = SS Between + SS Within. Dotplot, barras proporcionais e teste F.</div>
+    </a>
+
   </div>
-  <div class="search-meta" id="searchMeta"></div>
+
 </div>
 
-<!-- FILTERS -->
-<div class="filters" id="filters"></div>
-
-<!-- FAQ LIST -->
-<div class="faq-list" id="faqList"></div>
-
-<div class="no-results" id="noResults">
-  <div class="emoji">🔭</div>
-  <p>Nenhuma pergunta encontrada para esta busca.</p>
-  <p style="margin-top:.4rem;font-size:.85rem;color:var(--text3)">Tente termos diferentes ou remova o filtro de categoria.</p>
-</div>
-
-<!-- SCROLL TOP -->
-<button class="scroll-top" id="scrollTop">
-  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="18 15 12 9 6 15"/></svg>
-</button>
-
-<!-- FOOTER -->
 <div class="footer">
-  <p>Programa de Pós-Graduação em Administração &middot; Desenho e Análise de Experimentos I e II</p>
-  <div class="footer-links">
-    <a href="https://github.com" target="_blank">GitHub</a>
-    <span style="color:var(--text3)">&middot;</span>
-    <span style="color:var(--text3)">Feito com finalidade didática &middot; 2026</span>
-  </div>
+  <strong>Prof. Dr. Leonardo Vils</strong> &middot; Programa de P&oacute;s-Gradua&ccedil;&atilde;o em Administra&ccedil;&atilde;o<br>
+  Fundamentos de Estudos Experimentais I &middot; 2026/1<br><br>
+  <a href="https://creativecommons.org/licenses/by-nc/4.0/deed.pt-br" target="_blank">CC BY-NC 4.0</a>
 </div>
 
-<script>
-// ============================================================
-// DATA
-// ============================================================
-const categories = [{"id":"fundamentos","label":"Fundamentos","icon":"<svg width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><path d=\"M2 20h20\"/><path d=\"M5 20V8l7-5 7 5v12\"/><path d=\"M9 20v-6h6v6\"/></svg>"},{"id":"causalidade","label":"Causalidade","icon":"<svg width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><path d=\"M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71\"/><path d=\"M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71\"/></svg>"},{"id":"variaveis","label":"Variáveis","icon":"<svg width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><circle cx=\"12\" cy=\"12\" r=\"3\"/><path d=\"M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z\"/></svg>"},{"id":"desenho","label":"Desenhos","icon":"<svg width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><rect x=\"3\" y=\"3\" width=\"7\" height=\"7\"/><rect x=\"14\" y=\"3\" width=\"7\" height=\"7\"/><rect x=\"14\" y=\"14\" width=\"7\" height=\"7\"/><rect x=\"3\" y=\"14\" width=\"7\" height=\"7\"/></svg>"},{"id":"randomizacao","label":"Randomização","icon":"<svg width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><polyline points=\"16 3 21 3 21 8\"/><line x1=\"4\" y1=\"20\" x2=\"21\" y2=\"3\"/><polyline points=\"21 16 21 21 16 21\"/><line x1=\"15\" y1=\"15\" x2=\"21\" y2=\"21\"/><line x1=\"4\" y1=\"4\" x2=\"9\" y2=\"9\"/></svg>"},{"id":"validade","label":"Validade","icon":"<svg width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><path d=\"M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z\"/></svg>"},{"id":"anova","label":"ANOVA","icon":"<svg width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><line x1=\"18\" y1=\"20\" x2=\"18\" y2=\"10\"/><line x1=\"12\" y1=\"20\" x2=\"12\" y2=\"4\"/><line x1=\"6\" y1=\"20\" x2=\"6\" y2=\"14\"/></svg>"},{"id":"efeito","label":"Efeito e Poder","icon":"<svg width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><polygon points=\"13 2 3 14 12 14 11 22 21 10 12 10 13 2\"/></svg>"},{"id":"avancado","label":"Avançado","icon":"<svg width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><circle cx=\"12\" cy=\"12\" r=\"10\"/><line x1=\"12\" y1=\"16\" x2=\"12\" y2=\"12\"/><line x1=\"12\" y1=\"8\" x2=\"12.01\" y2=\"8\"/></svg>"},{"id":"reporting","label":"Reporting","icon":"<svg width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><path d=\"M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z\"/><polyline points=\"14 2 14 8 20 8\"/><line x1=\"16\" y1=\"13\" x2=\"8\" y2=\"13\"/><line x1=\"16\" y1=\"17\" x2=\"8\" y2=\"17\"/></svg>"}];
-const catColors = {"fundamentos":{"from":"#6366F1","to":"#8B5CF6"},"causalidade":{"from":"#EC4899","to":"#F43F5E"},"variaveis":{"from":"#14B8A6","to":"#06B6D4"},"desenho":{"from":"#F59E0B","to":"#EF4444"},"randomizacao":{"from":"#8B5CF6","to":"#6366F1"},"validade":{"from":"#10B981","to":"#059669"},"anova":{"from":"#3B82F6","to":"#2563EB"},"efeito":{"from":"#F97316","to":"#F59E0B"},"avancado":{"from":"#EC4899","to":"#8B5CF6"},"reporting":{"from":"#06B6D4","to":"#3B82F6"}};
-const faqs = [{"cat":"fundamentos","q":"O que é um experimento e por que ele é considerado o 'padrão ouro' para inferência causal?","a":"Um experimento é um estudo no qual o pesquisador manipula deliberadamente uma ou mais variáveis independentes (VIs), mantém constantes as variáveis estranhas e observa o efeito sobre uma variável dependente (VD). É considerado padrão ouro porque a manipulação ativa combinada com randomização permite atribuir diferenças observadas à causa manipulada — e não a fatores confundidores. Nenhum outro desenho de pesquisa oferece esse nível de controle sobre explicações alternativas.","refs":"Shadish, Cook & Campbell (2002). Experimental and Quasi-Experimental Designs for Generalized Causal Inference. Cap. 1.","id":1},{"cat":"fundamentos","q":"Qual a diferença entre um experimento verdadeiro, um quasi-experimento e um pré-experimento?","a":"No experimento verdadeiro há manipulação da VI e randomização dos participantes às condições. No quasi-experimento há manipulação, mas sem randomização — os grupos são pré-existentes (ex.: turmas, departamentos). No pré-experimento falta randomização e, frequentemente, grupo controle, tornando as inferências causais muito frágeis. A hierarquia de validade interna segue essa mesma ordem: experimento verdadeiro > quasi > pré-experimento.","refs":"Campbell & Stanley (1963). Experimental and Quasi-Experimental Designs for Research. Cap. 2–5.","id":2},{"cat":"fundamentos","q":"Quais são os três requisitos fundamentais para inferir causalidade?","a":"São três: (1) covariação — a causa e o efeito devem variar juntos; (2) precedência temporal — a causa deve ocorrer antes do efeito; e (3) eliminação de explicações alternativas — é preciso descartar que uma terceira variável explique a relação. O experimento satisfaz os três simultaneamente: a manipulação garante precedência, a mensuração documenta covariação, e a randomização + controle eliminam rivais.","refs":"Shadish, Cook & Campbell (2002), Cap. 1; Mill (1843). A System of Logic.","id":3},{"cat":"fundamentos","q":"O que são condição experimental e condição controle?","a":"A condição experimental é aquela em que os participantes recebem o tratamento de interesse — a manipulação da VI. A condição controle serve como linha de base: os participantes não recebem o tratamento (ou recebem um placebo/tratamento padrão). A comparação entre as duas permite isolar o efeito da manipulação. Sem controle, qualquer mudança observada pode ser devida à passagem do tempo, maturação, efeito placebo ou regressão à média.","refs":"Kirk (2013). Experimental Design: Procedures for the Behavioral Sciences. 4ª ed., Cap. 1.","id":4},{"cat":"fundamentos","q":"O que significa 'manipulação' da variável independente em ciências sociais aplicadas?","a":"Manipular significa que o pesquisador cria deliberadamente as condições que os participantes vivenciarão. Em administração, isso pode ser apresentar diferentes versões de um anúncio (preço cheio vs. desconto), diferentes estilos de liderança em vídeo, ou diferentes interfaces de um aplicativo. A manipulação pode ser por instrução (cenários escritos), por estímulo (imagens, vídeos) ou por situação (mudar o ambiente real). A chave é que o pesquisador decide quem recebe o quê — não o participante.","refs":"Aronson, Ellsworth, Carlsmith & Gonzales (1990). Methods of Research in Social Psychology. Cap. 4.","id":5},{"cat":"fundamentos","q":"O que é um cenário (vignette) experimental e quando usá-lo?","a":"Uma vinheta é uma descrição textual (ou audiovisual) de uma situação hipotética que serve como estímulo experimental. O pesquisador varia sistematicamente elementos da vinheta entre condições. Exemplo: descrever uma empresa com alta vs. baixa responsabilidade social e medir a intenção de compra. Vinhetas são úteis quando a manipulação real seria antiética, cara ou logisticamente inviável. O risco é a falta de realismo — o participante sabe que é fictício, e isso pode afetar a validade externa.","refs":"Aguinis & Bradley (2014). Best practice recommendations for designing and implementing experimental vignette methodology studies. Organizational Research Methods, 17(4).","id":6},{"cat":"fundamentos","q":"Qual a diferença entre experimento de laboratório, de campo e online?","a":"No laboratório, o pesquisador controla o ambiente físico, minimizando ruídos — alta validade interna, mas ambiente artificial. No campo, a manipulação ocorre no ambiente natural (loja, escritório, escola) — maior realismo, mas menor controle. Online, o experimento é conduzido via plataformas digitais (Qualtrics, Prolific, MTurk) — escala e diversidade amostral amplas, mas desafios de atenção e ambiente. Cada modalidade envolve um trade-off entre controle e generalização.","refs":"Shadish, Cook & Campbell (2002), Cap. 14; Buhrmester, Kwang & Gosling (2011). Amazon's Mechanical Turk. Perspectives on Psychological Science, 6(1).","id":7},{"cat":"fundamentos","q":"O que é o contrafactual e por que é central em experimentos?","a":"O contrafactual é a resposta à pergunta 'o que teria acontecido se o participante NÃO tivesse recebido o tratamento?'. Como é impossível observar o mesmo indivíduo simultaneamente com e sem tratamento (problema fundamental da inferência causal), o grupo controle serve como estimativa do contrafactual. A randomização garante que, em expectativa, os grupos são equivalentes antes do tratamento — portanto a diferença pós-tratamento reflete o efeito causal.","refs":"Rubin (1974). Estimating causal effects of treatments in randomized and nonrandomized studies. Journal of Educational Psychology, 66(5); Holland (1986). Statistics and causal inference. JASA, 81(396).","id":8},{"cat":"fundamentos","q":"O que é demand characteristics e como minimizá-las?","a":"São pistas no ambiente experimental que levam o participante a inferir a hipótese do pesquisador e a ajustar seu comportamento — consciente ou inconscientemente. Minimização: (1) usar cover story plausível para disfarçar o objetivo real; (2) medir a VD de forma indireta ou implícita; (3) incluir manipulation check apenas no final; (4) usar desenho between-subjects (cada participante vê só uma condição); (5) aplicar debriefing e perguntar se suspeitaram da hipótese.","refs":"Orne (1962). On the social psychology of the psychological experiment. American Psychologist, 17(11); Zizzo (2010). Experimenter demand effects in economic experiments. Experimental Economics, 13.","id":9},{"cat":"fundamentos","q":"O que é um manipulation check e ele é sempre necessário?","a":"É uma medida incluída no instrumento para verificar se a manipulação da VI funcionou como planejado — se os participantes realmente perceberam a diferença entre condições. Exemplo: após ler um cenário de 'alta confiança na marca', perguntar 'quão confiável é esta marca?'. É recomendado na maioria dos casos, especialmente com manipulações sutis. Porém, pode gerar demand characteristics se colocado antes da VD. A recomendação atual é posicioná-lo após a VD ou usar um estudo piloto separado.","refs":"Hauser, Ellsworth & Gonzales (2018). Are manipulation checks necessary? Frontiers in Psychology, 9; Sigall & Mills (1998). Measures of independent variables and mediators are useful. PSPB, 24(9).","id":10},{"cat":"causalidade","q":"O que é validade interna e por que ela é a prioridade número um em experimentos?","a":"Validade interna é o grau em que podemos afirmar que a VI causou a mudança na VD, descartando explicações alternativas. É prioritária porque sem ela o experimento perde sua razão de ser — se não sabemos se X causou Y, o resultado não tem interpretação. Ameaças à validade interna (história, maturação, seleção, mortalidade experimental, etc.) devem ser controladas antes de se preocupar com generalização.","refs":"Shadish, Cook & Campbell (2002), Cap. 2; Campbell & Stanley (1963), Cap. 1.","id":11},{"cat":"causalidade","q":"Qual a diferença entre mediação e moderação em contexto experimental?","a":"Mediação responde 'por qual mecanismo X afeta Y?' — o efeito de X passa por uma variável intermediária M (ex.: treinamento → autoeficácia → desempenho). Moderação responde 'quando ou para quem o efeito de X sobre Y muda?' — uma variável W altera a força ou direção do efeito (ex.: o efeito do desconto sobre compra é mais forte para consumidores de baixa renda). Em experimentos, a VI é manipulada, o moderador geralmente é medido (ou manipulado num fatorial), e o mediador é medido.","refs":"Baron & Kenny (1986). The moderator-mediator variable distinction. Journal of Personality and Social Psychology, 51(6); Hayes (2022). Introduction to Mediation, Moderation, and Conditional Process Analysis. 3ª ed.","id":12},{"cat":"causalidade","q":"O que é a falácia post hoc ergo propter hoc e como o experimento a evita?","a":"A falácia consiste em assumir que, porque B ocorreu depois de A, então A causou B. Correlações temporais não garantem causalidade — pode haver uma terceira variável ou coincidência. O experimento evita essa falácia porque: (1) o pesquisador controla quando e como a causa (VI) é introduzida; (2) o grupo controle mostra o que aconteceria sem a causa; (3) a randomização equilibra variáveis confundidoras. Assim, a sequência temporal é planejada, não apenas observada.","refs":"Shadish, Cook & Campbell (2002), Cap. 1; Pearl (2009). Causality: Models, Reasoning, and Inference. 2ª ed.","id":13},{"cat":"causalidade","q":"O que é a lógica de Mill e como se aplica a experimentos?","a":"John Stuart Mill propôs métodos de inferência causal. O mais relevante é o Método da Diferença: se dois casos são iguais em tudo exceto na presença de um fator, e o resultado difere, esse fator é a causa. O experimento operacionaliza essa lógica: grupo experimental e controle são tornados equivalentes pela randomização, diferindo apenas na exposição à VI. Qualquer diferença no resultado é atribuída à manipulação.","refs":"Mill (1843). A System of Logic, Livro III, Cap. 8; Shadish, Cook & Campbell (2002), Cap. 1.","id":14},{"cat":"causalidade","q":"O que é confounding (confusão) e como distinguir de mediação?","a":"Uma variável confundidora (C) causa tanto X quanto Y, criando uma associação espúria entre eles. Remover C elimina a relação X→Y. Já um mediador (M) é causado por X e transmite o efeito para Y — remover M reduz o efeito, mas X ainda é a causa original. Graficamente: confusão = X←C→Y; mediação = X→M→Y. Em experimentos, a randomização elimina confundidores (eles se distribuem igualmente entre grupos), mas mediadores são preservados porque fazem parte do mecanismo causal.","refs":"Pearl (2009), Cap. 3; VanderWeele (2015). Explanation in Causal Inference. Oxford University Press, Cap. 1–2.","id":15},{"cat":"causalidade","q":"O que são variáveis instrumentais e quando são úteis em quasi-experimentos?","a":"Uma variável instrumental (Z) afeta a VI (X), mas só influencia a VD (Y) através de X — sem efeito direto sobre Y e sem relação com confundidores. É útil em quasi-experimentos onde não houve randomização: Z simula parcialmente a 'atribuição aleatória'. Exemplo: a distância até uma universidade como instrumento para educação sobre renda. Em ciências sociais aplicadas, instrumentos válidos são raros e difíceis de defender, mas quando disponíveis, permitem estimativas causais mesmo sem experimento.","refs":"Angrist & Pischke (2009). Mostly Harmless Econometrics. Princeton University Press, Cap. 4; Wooldridge (2010). Econometric Analysis of Cross Section and Panel Data. 2ª ed.","id":16},{"cat":"causalidade","q":"O que é o SUTVA (Stable Unit Treatment Value Assumption)?","a":"SUTVA é a premissa de que o resultado potencial de um participante depende apenas do tratamento que ele recebeu, e não do tratamento atribuído a outros participantes. Violações ocorrem quando há interferência entre unidades — por exemplo, alunos de uma mesma turma que compartilham informações entre condições (spillover), ou quando o tratamento 'vaza' do grupo experimental para o controle. Em experimentos organizacionais, onde pessoas trabalham juntas, SUTVA é frequentemente ameaçado.","refs":"Rubin (1980). Comment on 'Randomization analysis of experimental data: The Fisher randomization test'. JASA, 75; Imbens & Rubin (2015). Causal Inference for Statistics, Social, and Biomedical Sciences. Cap. 1.","id":17},{"cat":"causalidade","q":"O que é regressão à média e por que ameaça experimentos com grupos extremos?","a":"Regressão à média é a tendência estatística de que escores extremos em uma medição se aproximem da média na medição seguinte — simplesmente por flutuação aleatória, sem qualquer intervenção. Se você seleciona participantes com escores muito baixos (ex.: pior desempenho) e aplica um treinamento, a melhora observada pode ser parcialmente ou totalmente devida à regressão, não ao treinamento. Solução: usar grupo controle randomizado e evitar selecionar participantes com base em escores extremos.","refs":"Campbell & Kenny (1999). A Primer on Regression Artifacts. Guilford Press; Barnett, van der Pols & Dobson (2005). Regression to the mean. International Journal of Epidemiology, 34(1).","id":18},{"cat":"causalidade","q":"O que é o efeito Hawthorne e como controlá-lo?","a":"É a tendência dos participantes de alterar seu comportamento simplesmente por saberem que estão sendo observados ou que participam de um estudo — independentemente da manipulação. Controles: (1) usar grupo controle que também sabe que participa do estudo (igualar a atenção); (2) medidas comportamentais não-obstrusivas; (3) desenho duplo-cego quando possível; (4) habituar os participantes ao ambiente antes da coleta. O nome vem dos estudos na fábrica de Hawthorne nos anos 1920-30.","refs":"Adair (1984). The Hawthorne effect: A reconsideration. Journal of Applied Psychology, 69(2); Levitt & List (2011). Was there really a Hawthorne effect? American Economic Journal: Applied Economics, 3(1).","id":19},{"cat":"causalidade","q":"O que é endogeneidade e por que é o maior problema de pesquisas não-experimentais?","a":"Endogeneidade ocorre quando a VI está correlacionada com o termo de erro da equação — ou seja, há fatores omitidos que afetam tanto X quanto Y. Isso torna os coeficientes de regressão enviesados e inconsistentes, impedindo inferência causal. Causas: variáveis omitidas, simultaneidade (Y também causa X) e erro de mensuração. O experimento com randomização é a solução mais direta, pois a atribuição aleatória torna X independente do erro por construção.","refs":"Wooldridge (2010), Cap. 4; Antonakis, Bendahan, Jacquart & Lalive (2010). On making causal claims: A review and recommendations. The Leadership Quarterly, 21(6).","id":20},{"cat":"variaveis","q":"O que são variáveis dependentes, independentes e de controle?","a":"A variável independente (VI) é o fator manipulado pelo pesquisador — a suposta causa. A variável dependente (VD) é o resultado medido — o suposto efeito. Variáveis de controle são fatores que poderiam influenciar a VD e que o pesquisador mantém constantes ou mede para neutralizar seu efeito. Em um experimento sobre tipo de embalagem (VI) e intenção de compra (VD), controlar gênero e renda dos participantes evita que essas variáveis contaminem o resultado.","refs":"Kirk (2013), Cap. 1; Creswell & Creswell (2018). Research Design. 5ª ed., Cap. 8.","id":21},{"cat":"variaveis","q":"O que é operacionalização e por que é crítica em experimentos?","a":"Operacionalizar é traduzir um construto abstrato (ex.: 'confiança na marca') em procedimentos concretos e mensuráveis — como exatamente você vai manipulá-lo e como vai medi-lo. Uma operacionalização fraca ameaça a validade de construto: você pode estar manipulando ou medindo algo diferente do que pretende. Boas operacionalizações são baseadas em definições teóricas claras, escalas validadas e pré-testes com manipulation checks.","refs":"Shadish, Cook & Campbell (2002), Cap. 3; Podsakoff, MacKenzie, Lee & Podsakoff (2003). Common method biases. Journal of Applied Psychology, 88(5).","id":22},{"cat":"variaveis","q":"O que são fatores between-subjects e within-subjects?","a":"Um fator between-subjects (entre-sujeitos) compara grupos diferentes — cada participante é exposto a apenas uma condição. Um fator within-subjects (intra-sujeitos) compara as mesmas pessoas em condições diferentes — cada participante passa por todas as condições. Between é mais simples e evita efeitos de ordem, mas exige mais participantes. Within tem mais poder estatístico (cada pessoa é seu próprio controle) mas sofre com efeitos de prática, fadiga e carryover.","refs":"Kirk (2013), Cap. 8 (within) e Cap. 2–4 (between); Maxwell, Delaney & Kelley (2018). Designing Experiments and Analyzing Data. 3ª ed.","id":23},{"cat":"variaveis","q":"O que é counterbalancing e quando é necessário?","a":"Counterbalancing é a técnica de variar a ordem de apresentação das condições em desenhos within-subjects para neutralizar efeitos de ordem (prática, fadiga, carryover). No balanceamento completo, todas as ordens possíveis são usadas (com k condições, k! ordens). No quadrado latino, cada condição aparece em cada posição uma vez. É necessário sempre que houver medidas repetidas e risco de que a ordem afete as respostas.","refs":"Kirk (2013), Cap. 8; Keppel & Wickens (2004). Design and Analysis: A Researcher's Handbook. 4ª ed., Cap. 18.","id":24},{"cat":"variaveis","q":"O que é confounding parcial e como surgem variáveis confundidoras em experimentos?","a":"Mesmo em experimentos, confounders podem surgir se: (1) a randomização falha (amostras pequenas com desbalanceamento por azar); (2) há mortalidade experimental diferencial (participantes abandonam mais uma condição); (3) o pesquisador inadvertidamente varia outro fator junto com a VI (ex.: cenários de preço alto sempre com marca premium). Confounding parcial ocorre quando a variável estranha está parcialmente — mas não perfeitamente — correlacionada com a VI, enviesando parcialmente os resultados.","refs":"Shadish, Cook & Campbell (2002), Cap. 2; Rosenthal & Rosnow (2008). Essentials of Behavioral Research. 3ª ed.","id":25},{"cat":"variaveis","q":"O que é common method variance (CMV) e ela afeta experimentos?","a":"CMV é a variância espúria introduzida quando VI e VD são medidas pelo mesmo método (ex.: mesmo questionário, mesmo momento, mesmo respondente). Em experimentos, a VI é manipulada (não medida por questionário), o que elimina boa parte do problema. Porém, se o mediador e a VD são medidos no mesmo instrumento, CMV ainda pode inflar a relação mediador→VD. Soluções: separar temporalmente as medidas, usar fontes diferentes, aplicar o marcador de Lindell & Whitney ou o teste de Harman (limitado).","refs":"Podsakoff, MacKenzie, Lee & Podsakoff (2003). Common method biases. Journal of Applied Psychology, 88(5); Podsakoff, MacKenzie & Podsakoff (2012). Sources of method bias. Annual Review of Psychology, 63.","id":26},{"cat":"variaveis","q":"O que são covariáveis e quando incluí-las na análise?","a":"Covariáveis são variáveis medidas (não manipuladas) que se relacionam com a VD e que são incluídas na análise para reduzir a variância de erro e aumentar o poder estatístico. Exemplo: incluir 'experiência prévia' como covariável em um experimento sobre método de treinamento. Em ANCOVA, a covariável é controlada estatisticamente. Requisitos: a covariável deve ser medida antes da manipulação (para não ser afetada por ela) e a relação covariável-VD deve ser linear e homogênea entre grupos.","refs":"Maxwell, Delaney & Kelley (2018), Cap. 9 (ANCOVA); Tabachnick & Fidell (2019). Using Multivariate Statistics. 7ª ed., Cap. 8.","id":27},{"cat":"variaveis","q":"O que é um fator fixo vs. aleatório em ANOVA?","a":"Um fator é fixo quando os níveis usados no estudo são os únicos de interesse (ex.: três tipos específicos de embalagem). Um fator é aleatório quando os níveis são uma amostra de uma população maior de possíveis níveis (ex.: os vendedores selecionados representam todos os vendedores). A distinção importa para a ANOVA: com fatores fixos, generalizamos apenas para os níveis testados; com fatores aleatórios, generalizamos para a população de níveis. Os termos de erro e os testes F mudam conforme a classificação.","refs":"Kirk (2013), Cap. 9 (modelos mistos); Maxwell, Delaney & Kelley (2018), Cap. 11.","id":28},{"cat":"variaveis","q":"O que é manipulação 'forte' vs. 'fraca' e como isso afeta os resultados?","a":"Uma manipulação forte cria uma diferença grande e inequívoca entre condições (ex.: desconto de 50% vs. preço cheio). Uma manipulação fraca cria diferenças sutis (ex.: desconto de 5% vs. preço cheio). Manipulações fortes aumentam o tamanho de efeito e facilitam a detecção, mas podem ser artificiais e reduzir a validade externa. Manipulações fracas são mais realistas, mas exigem amostras maiores e podem não produzir efeitos significativos. A recomendação é calibrar via pré-testes e pilotos.","refs":"Aronson, Ellsworth, Carlsmith & Gonzales (1990), Cap. 4; Perdue & Summers (1986). Checking the success of manipulations in marketing experiments. Journal of Marketing Research, 23(4).","id":29},{"cat":"variaveis","q":"O que é ceiling/floor effect e como prejudica experimentos?","a":"Ceiling effect (teto) ocorre quando a escala da VD não permite captar valores acima de um certo ponto — os escores se aglomeram no topo. Floor effect (piso) é o oposto — escores se aglomeram no fundo. Ambos reduzem a variabilidade e comprimem diferenças entre condições, diminuindo o poder estatístico. Soluções: usar escalas com amplitude suficiente, pré-testar para verificar a distribuição, evitar tarefas muito fáceis ou muito difíceis, considerar medidas de tempo de reação em vez de acurácia quando acurácia é alta.","refs":"Cramer & Howitt (2004). The SAGE Dictionary of Statistics, verbetes 'ceiling effect' e 'floor effect'; Uttl (2005). Measurement of individual differences. Psychological Science, 16(6).","id":30},{"cat":"desenho","q":"O que é um desenho between-subjects e quais suas vantagens e desvantagens?","a":"No desenho between-subjects, cada participante é alocado a apenas uma condição experimental. Vantagens: não há efeitos de ordem, fadiga ou carryover; cada resposta é independente; a análise é direta (t-test, ANOVA one-way). Desvantagens: requer mais participantes (toda a variância individual entra no erro); diferenças individuais podem mascarar o efeito do tratamento; a randomização precisa funcionar bem para equilibrar os grupos.","refs":"Kirk (2013), Cap. 2–4; Charness, Gneezy & Kuhn (2012). Experimental methods: Between-subject and within-subject design. Journal of Economic Behavior & Organization, 81(1).","id":31},{"cat":"desenho","q":"O que é um desenho within-subjects (medidas repetidas) e quando preferi-lo?","a":"No desenho within-subjects, cada participante passa por todas as condições experimentais. Vantagens: cada pessoa serve como seu próprio controle, eliminando a variância entre sujeitos — isso aumenta dramaticamente o poder estatístico (pode reduzir o N necessário em 50% ou mais). Desvantagens: efeitos de ordem (prática, fadiga), carryover (o efeito de uma condição contamina a seguinte), demand characteristics (participante percebe as variações). Prefira quando os efeitos de ordem são gerenciáveis e a manipulação não é 'reveladora'.","refs":"Keppel & Wickens (2004), Cap. 17–18; Greenwald (1976). Within-subjects designs: To use or not to use? Psychological Bulletin, 83(2).","id":32},{"cat":"desenho","q":"O que é um desenho fatorial e por que é tão popular?","a":"Um desenho fatorial cruza dois ou mais fatores (VIs), testando todas as combinações de níveis. Exemplo: 2 (tipo de desconto: fixo vs. percentual) × 3 (nível de preço: baixo, médio, alto) = 6 condições. É popular porque: (1) testa múltiplos efeitos principais em um único estudo; (2) permite detectar interações — o efeito de um fator depende do nível de outro; (3) é mais eficiente que experimentos separados para cada fator. A notação indica os níveis: 2×3 = dois fatores com 2 e 3 níveis.","refs":"Kirk (2013), Cap. 5–7; Maxwell, Delaney & Kelley (2018), Cap. 7–8.","id":33},{"cat":"desenho","q":"O que é um desenho misto (mixed design)?","a":"Combina pelo menos um fator between-subjects e um fator within-subjects no mesmo estudo. Exemplo: grupo (treinamento A vs. B — between) × tempo (pré-teste, pós-teste, follow-up — within). É muito usado em ciências sociais quando se quer comparar grupos ao longo do tempo. A análise usa ANOVA mista (split-plot). Atenção à esfericidade no fator within e à homogeneidade de variâncias-covariâncias entre grupos.","refs":"Maxwell, Delaney & Kelley (2018), Cap. 12; Kirk (2013), Cap. 10.","id":34},{"cat":"desenho","q":"O que é o desenho de Solomon four-group?","a":"Combina dois grupos com pré-teste + pós-teste e dois grupos apenas com pós-teste, com e sem tratamento (total: 4 grupos). O objetivo é separar o efeito do tratamento do efeito de sensibilização pelo pré-teste (testing effect). Se o pré-teste em si altera o resultado (ex.: responder um questionário de atitude muda a atitude), o desenho de Solomon detecta isso. É considerado o mais robusto, mas exige o dobro de participantes.","refs":"Solomon (1949). An extension of control group design. Psychological Bulletin, 46(2); Braver & Braver (1988). Statistical treatment of the Solomon four-group design. Psychological Bulletin, 104(1).","id":35},{"cat":"desenho","q":"O que é o desenho pré-teste/pós-teste com grupo controle?","a":"É o desenho clássico: (1) medir a VD antes do tratamento (pré-teste), (2) aplicar o tratamento ao grupo experimental (controle não recebe), (3) medir novamente (pós-teste). A diferença entre grupos no pós-teste (controlando pelo pré-teste via ANCOVA ou diferença de ganhos) indica o efeito do tratamento. Vantagens: documenta a mudança; permite verificar equivalência inicial. Desvantagens: efeito de testing, maturação, regressão à média se selecionou grupos extremos.","refs":"Campbell & Stanley (1963), Cap. 3; Shadish, Cook & Campbell (2002), Cap. 4.","id":36},{"cat":"desenho","q":"O que é um desenho crossover e quando é adequado?","a":"No crossover, cada participante recebe todos os tratamentos em sequência, com um período de washout entre eles. É um tipo de within-subjects com controle temporal. Muito usado em pesquisas de marketing (consumidor avalia produto A, pausa, depois produto B). Adequado quando: o efeito do tratamento é temporário e reversível, há washout suficiente para eliminar carryover, e poucos tratamentos (geralmente 2). A análise pode incluir período e sequência como fatores.","refs":"Jones & Kenward (2015). Design and Analysis of Cross-Over Trials. 3ª ed.; Senn (2002). Cross-over Trials in Clinical Research. 2ª ed.","id":37},{"cat":"desenho","q":"O que é um quasi-experimento de grupos não-equivalentes?","a":"É o quasi-experimento mais comum: dois grupos pré-existentes (ex.: duas turmas, duas filiais) recebem tratamentos diferentes. Não há randomização, então diferenças pré-existentes entre os grupos (seleção) são uma ameaça séria. Controles: usar pré-teste e ANCOVA, comparar as trajetórias (diferença-em-diferenças), argumentar teoricamente pela equivalência, usar propensity score matching. É inevitável em muitos contextos organizacionais onde não se pode randomizar pessoas a cargos ou setores.","refs":"Shadish, Cook & Campbell (2002), Cap. 6; Cook & Campbell (1979). Quasi-Experimentation. Cap. 3–4.","id":38},{"cat":"desenho","q":"O que é diferença-em-diferenças (DiD) e quando usá-la?","a":"DiD compara a mudança (antes→depois) entre um grupo tratado e um grupo controle. A lógica: se o grupo controle mudou +5 e o tratado mudou +12, o efeito do tratamento é +7. O pressuposto-chave é 'tendências paralelas' — sem o tratamento, ambos os grupos teriam evoluído de forma semelhante. DiD é poderosa em quasi-experimentos com dados em painel (múltiplos períodos) e quando a randomização é impossível. Muito usada em políticas públicas e intervenções organizacionais.","refs":"Angrist & Pischke (2009), Cap. 5; Wing, Simon & Bello-Gomez (2018). Designing difference in difference studies. Annual Review of Public Health, 39.","id":39},{"cat":"desenho","q":"O que é Regression Discontinuity Design (RDD)?","a":"RDD explora um ponto de corte (cutoff) em uma variável contínua para criar uma comparação quasi-experimental. Participantes logo abaixo e logo acima do corte são semelhantes em tudo, exceto no tratamento recebido. Exemplo: bolsa de estudos concedida a quem tem nota ≥ 7,0 — comparar quem tirou 6,9 com quem tirou 7,1. A validade é alta próximo ao corte, mas a generalização é limitada. Requer amostra grande próxima ao cutoff e assume que não há manipulação do score.","refs":"Lee & Lemieux (2010). Regression discontinuity designs in economics. Journal of Economic Literature, 48(2); Shadish, Cook & Campbell (2002), Cap. 7.","id":40},{"cat":"desenho","q":"O que é um experimento natural e como ele difere de um quasi-experimento?","a":"Um experimento natural ocorre quando um evento externo (mudança de lei, desastre, política organizacional) cria variação 'aleatória' na exposição ao tratamento sem intervenção do pesquisador. O pesquisador apenas observa. Difere do quasi-experimento porque neste o pesquisador manipula algo (mesmo sem randomizar). O experimento natural é mais observacional — a 'aleatoriedade' é uma característica do evento, não do desenho. A credibilidade depende de quão convincente é o argumento de que a atribuição foi efetivamente aleatória.","refs":"Dunning (2012). Natural Experiments in the Social Sciences. Cambridge University Press; Angrist & Pischke (2009), Cap. 2.","id":41},{"cat":"desenho","q":"O que é um desenho adaptativo e quando faz sentido usá-lo?","a":"Desenhos adaptativos permitem modificar aspectos do estudo durante sua condução com base em resultados intermediários — por exemplo, realocando mais participantes para condições promissoras ou interrompendo condições ineficazes. São comuns em ensaios clínicos e começam a aparecer em marketing (bandits para otimização de anúncios). Vantagens: eficiência e ética (menos pessoas expostas a tratamentos ineficazes). Desvantagens: complexidade analítica, risco de viés se as regras de adaptação não forem pré-especificadas.","refs":"Chow & Chang (2008). Adaptive Design Methods in Clinical Trials. 2ª ed.; Scott (2010). A modern Bayesian look at the multi-armed bandit. Applied Stochastic Models in Business and Industry, 26(6).","id":42},{"cat":"randomizacao","q":"Por que a randomização é tão importante e o que exatamente ela garante?","a":"A randomização garante que, em expectativa, os grupos experimentais são equivalentes em todas as variáveis — medidas e não-medidas — antes do tratamento. Isso elimina o viés de seleção e permite que diferenças pós-tratamento sejam atribuídas à VI. Ela não garante equivalência perfeita em amostras pequenas (por isso pode-se usar randomização estratificada), mas garante que qualquer desequilíbrio é devido ao acaso e pode ser modelado probabilisticamente. É o pilar que transforma um estudo observacional em experimental.","refs":"Fisher (1935). The Design of Experiments; Shadish, Cook & Campbell (2002), Cap. 8.","id":43},{"cat":"randomizacao","q":"Qual a diferença entre randomização simples, em blocos e estratificada?","a":"Randomização simples: cada participante é alocado aleatoriamente a uma condição (como jogar uma moeda). Problemas: em amostras pequenas pode gerar grupos desiguais. Em blocos: participantes são agrupados em blocos (ex.: blocos de 4) e dentro de cada bloco a alocação é balanceada — garante tamanhos iguais. Estratificada: primeiro divide-se a amostra por uma variável relevante (ex.: gênero, experiência) e randomiza-se dentro de cada estrato — garante equilíbrio na variável estratificadora.","refs":"Kirk (2013), Cap. 6 (blocos); Suresh (2011). An overview of randomization techniques. Journal of Human Reproductive Sciences, 4(1).","id":44},{"cat":"randomizacao","q":"O que é randomização por cluster e quando é necessária?","a":"Na randomização por cluster, unidades inteiras (turmas, lojas, equipes) são randomizadas às condições, e não indivíduos. É necessária quando a intervenção é aplicada ao nível do grupo (ex.: novo layout de loja) ou quando randomizar indivíduos dentro de um grupo causaria contaminação (spillover). A análise deve considerar a correlação intraclasse (ICC) — observações dentro do mesmo cluster não são independentes. O N efetivo é menor que o número de indivíduos, o que exige mais clusters para poder adequado.","refs":"Donner & Klar (2000). Design and Analysis of Cluster Randomization Trials. Oxford University Press; Campbell, Walters, et al. (2012). Consort 2010 statement: extension to cluster randomised trials. BMJ, 345.","id":45},{"cat":"randomizacao","q":"O que é amostragem por conveniência e por que é tão comum (e problemática)?","a":"Amostragem por conveniência seleciona participantes pela facilidade de acesso — alunos de graduação, contatos do pesquisador, respondentes de MTurk. É a norma em pesquisa experimental em administração e psicologia. O problema não é para a validade interna (a randomização aos grupos ainda funciona), mas para a validade externa: os resultados podem não generalizar para outras populações. A solução não é abandonar a conveniência, mas: (1) replicar com amostras diferentes; (2) relatar as limitações; (3) justificar por que o fenômeno deveria generalizar.","refs":"Peterson & Merunka (2014). Convenience samples of college students and research reproducibility. Journal of Business Research, 67(5); Highhouse & Gillespie (2009). Do samples really matter that much? In Lance & Vandenberg (Eds.), Statistical and Methodological Myths.","id":46},{"cat":"randomizacao","q":"Quantos participantes por condição são necessários?","a":"Depende de três fatores: (1) tamanho de efeito esperado — efeitos menores exigem mais participantes; (2) nível de significância (α, geralmente 0,05); (3) poder desejado (1−β, geralmente 0,80 ou 0,90). Regras de bolso para between-subjects com α=0,05 e poder=0,80: d grande (0,8) ≈ 26/grupo; d médio (0,5) ≈ 64/grupo; d pequeno (0,2) ≈ 393/grupo. Para desenhos within-subjects, divida por 2 aproximadamente. SEMPRE faça análise de poder a priori com G*Power, jamais confie em regras de bolso para decisões reais.","refs":"Cohen (1988). Statistical Power Analysis for the Behavioral Sciences. 2ª ed.; Faul, Erdfelder, Lang & Buchner (2007). G*Power 3. Behavior Research Methods, 39(2).","id":47},{"cat":"randomizacao","q":"O que é análise de poder (power analysis) e quando deve ser feita?","a":"Análise de poder calcula a probabilidade de detectar um efeito que realmente existe (1−β). Deve ser feita a priori — antes de coletar dados — para determinar o N mínimo necessário. Inputs: tamanho de efeito esperado (de meta-análises, pilotos ou teoria), α, e desenho do estudo. Uma análise post-hoc ('observed power') é praticamente inútil e circular — apenas reformula o p-value. Se o efeito é significativo, o poder é alto; se não é, o poder é baixo. Use a priori ou não use.","refs":"Cohen (1988); Cumming (2012). Understanding the New Statistics. Cap. 8; Hoenig & Heisey (2001). The abuse of power. The American Statistician, 55(1).","id":48},{"cat":"randomizacao","q":"O que é attrition (mortalidade experimental) e como ela ameaça o experimento?","a":"Attrition é a perda de participantes durante o estudo. É problemática quando é diferencial — mais participantes abandonam uma condição que outra. Isso destrói a equivalência criada pela randomização e introduz viés de seleção. Exemplo: um treinamento difícil perde os menos motivados, inflando a média do grupo. Soluções: monitorar as taxas de abandono por condição, comparar quem ficou vs. quem saiu em variáveis basais, usar intention-to-treat (ITT) analysis, e planejar N maior antecipando perdas.","refs":"Shadish, Cook & Campbell (2002), Cap. 2; Gupta (2011). Intention-to-treat concept: A review. Perspectives in Clinical Research, 2(3).","id":49},{"cat":"randomizacao","q":"O que é intention-to-treat (ITT) vs. per-protocol analysis?","a":"Na análise ITT, todos os participantes randomizados são analisados no grupo ao qual foram originalmente atribuídos — mesmo que não tenham completado o tratamento ou tenham trocado de grupo. Na per-protocol, analisa-se apenas quem completou o tratamento conforme planejado. ITT preserva o benefício da randomização e evita viés de seleção (é conservadora). Per-protocol pode superestimar o efeito real (porque exclui quem não aderiu, que tende a ter piores resultados). A recomendação é reportar ambas.","refs":"Gupta (2011). Intention-to-treat concept. Perspectives in Clinical Research, 2(3); Shadish, Cook & Campbell (2002), Cap. 8.","id":50},{"cat":"validade","q":"Quais são os quatro tipos de validade segundo Shadish, Cook e Campbell?","a":"(1) Validade interna: a relação causal entre VI e VD é real? (2) Validade externa: os resultados generalizam para outras pessoas, contextos e épocas? (3) Validade de construto: as operacionalizações realmente representam os construtos teóricos pretendidos? (4) Validade estatística de conclusão: as análises estatísticas permitem inferências corretas sobre covariação? As quatro são igualmente importantes, mas prioriza-se validade interna em experimentos (sem ela, as outras não têm base).","refs":"Shadish, Cook & Campbell (2002), Cap. 2–3; Cook & Campbell (1979), Cap. 2.","id":51},{"cat":"validade","q":"Quais são as principais ameaças à validade interna?","a":"As clássicas de Campbell & Stanley: (1) história — eventos externos entre pré e pós-teste; (2) maturação — mudanças naturais nos participantes; (3) testing — efeito de sensibilização pelo pré-teste; (4) instrumentação — mudança no instrumento de medida; (5) regressão à média — seleção por escores extremos; (6) seleção — grupos não-equivalentes; (7) mortalidade — perda diferencial de participantes; (8) interação seleção × maturação. A randomização com grupo controle neutraliza a maioria dessas ameaças.","refs":"Campbell & Stanley (1963); Shadish, Cook & Campbell (2002), Cap. 2.","id":52},{"cat":"validade","q":"O que é validade externa e como avaliá-la?","a":"É o grau em que os resultados generalizam para: (1) outras populações (quem?); (2) outros contextos (onde?); (3) outros tempos (quando?); (4) outras operacionalizações (como?). Não pode ser 'provada' em um único estudo — requer replicações sistemáticas variando amostras, contextos e operacionalizações. A tensão com validade interna é inevitável: mais controle = mais artificial. A solução é um programa de pesquisa, não um estudo único.","refs":"Shadish, Cook & Campbell (2002), Cap. 3 e 14; Lucas (2003). Theory-testing, generalization, and the problem of external validity. Sociological Theory, 21(3).","id":53},{"cat":"validade","q":"O que é validade de construto e por que muitos experimentos falham nela?","a":"É o grau em que a manipulação e a medida realmente captam os construtos teóricos pretendidos. Falhas comuns: (1) manipulação confundida — a manipulação ativa dois construtos simultaneamente (ex.: cenário com 'preço alto' também implica 'marca premium'); (2) medida inadequada — escala não validada ou VD proxy fraca; (3) mono-operation bias — usar apenas uma operacionalização do construto; (4) mono-method bias — medir tudo com o mesmo método. Pré-testes, manipulation checks e múltiplas operacionalizações mitigam esses problemas.","refs":"Shadish, Cook & Campbell (2002), Cap. 3; Cook & Campbell (1979), Cap. 2.","id":54},{"cat":"validade","q":"O que é o efeito de difusão do tratamento e como preveni-lo?","a":"Ocorre quando participantes do grupo controle obtêm acesso ao tratamento — por contato com o grupo experimental, compartilhamento de informações ou imitação. Isso reduz a diferença entre grupos e subestima o efeito real. Também chamado de 'contaminação'. Prevenção: separar fisicamente os grupos, usar clusters (randomizar turmas inteiras), usar deception (participantes não sabem que há outro grupo), e monitorar a integridade do tratamento.","refs":"Shadish, Cook & Campbell (2002), Cap. 2; Cook & Campbell (1979), Cap. 2.","id":55},{"cat":"validade","q":"O que é esfericidade e por que importa em medidas repetidas?","a":"Esfericidade é a suposição de que as variâncias das diferenças entre todos os pares de condições within-subjects são iguais. Quando violada, o teste F da ANOVA de medidas repetidas se torna liberal (rejeita H₀ demais). O teste de Mauchly verifica esfericidade. Correções: epsilon de Greenhouse-Geisser (conservador) ou Huynh-Feldt (menos conservador) ajustam os graus de liberdade. Alternativa: usar MANOVA (não assume esfericidade) ou modelos lineares mistos (mais flexíveis).","refs":"Maxwell, Delaney & Kelley (2018), Cap. 12; Girden (1992). ANOVA: Repeated Measures. Sage, Cap. 3.","id":56},{"cat":"validade","q":"O que é homogeneidade de variâncias e quando ela é violada?","a":"É a suposição de que a variância da VD é igual em todos os grupos experimentais (homocedasticidade). Testada com o teste de Levene. Quando violada com grupos de tamanhos desiguais, o teste F da ANOVA pode ser liberal ou conservador dependendo de qual grupo tem maior variância. Soluções: usar Welch ANOVA (não assume homogeneidade), transformar a VD, usar testes robustos (bootstrap), ou garantir tamanhos de grupo iguais (o que torna a ANOVA robusta a violações moderadas).","refs":"Kirk (2013), Cap. 3; Maxwell, Delaney & Kelley (2018), Cap. 3.","id":57},{"cat":"validade","q":"O que é viés do experimentador e como minimizá-lo?","a":"O experimentador pode, inconscientemente, influenciar os resultados: sorrindo mais para o grupo experimental, dando instruções ligeiramente diferentes, ou codificando respostas de forma enviesada. Rosenthal demonstrou que expectativas do experimentador afetam o comportamento dos participantes. Minimização: (1) protocolo padronizado de instruções; (2) duplo-cego quando possível (experimentador não sabe a condição); (3) automação da coleta (questionários online); (4) codificação cega por juízes independentes.","refs":"Rosenthal (1966). Experimenter Effects in Behavioral Research; Rosenthal & Rubin (1978). Interpersonal expectancy effects. Behavioral and Brain Sciences, 1(3).","id":58},{"cat":"validade","q":"O que são compliance e fidelity em intervenções experimentais?","a":"Compliance (adesão) é o grau em que os participantes seguiram o tratamento conforme planejado. Fidelity (fidelidade de implementação) é o grau em que o tratamento foi aplicado como delineado pelo pesquisador. Ambos afetam a validade interna: se o tratamento não foi implementado corretamente ou se os participantes não aderiram, o efeito observado subestima o efeito real. Monitorar com checklists de implementação, registros de presença/dose, e perguntas de verificação.","refs":"Breitenstein, Gross, Garvey, Hill, Fogg & Resnick (2010). Implementation fidelity in community-based interventions. Research in Nursing & Health, 33(2); Shadish, Cook & Campbell (2002), Cap. 8.","id":59},{"cat":"validade","q":"O que é o problema de múltiplas comparações e como lidar com ele?","a":"Quando se realizam múltiplos testes estatísticos, a probabilidade de pelo menos um falso positivo (erro Tipo I) cresce rapidamente: com 20 testes a α=0,05, espera-se 1 significativo por acaso. Correções: Bonferroni (divide α pelo número de testes — conservador), Holm-Bonferroni (menos conservador, mais poderoso), FDR de Benjamini-Hochberg (controla a proporção esperada de falsos positivos entre os significativos), e Tukey HSD (para comparações post-hoc em ANOVA). Pré-registrar hipóteses ajuda a definir quais testes são confirmatórios vs. exploratórios.","refs":"Shaffer (1995). Multiple hypothesis testing. Annual Review of Psychology, 46; Benjamini & Hochberg (1995). Controlling the false discovery rate. JRSS-B, 57(1).","id":60},{"cat":"anova","q":"O que a ANOVA realmente testa e o que ela NÃO diz?","a":"A ANOVA testa se pelo menos uma média de grupo difere significativamente das demais — o teste F compara a variância entre grupos com a variância dentro dos grupos. O que ela NÃO diz: (1) quais grupos diferem entre si (precisa de post-hoc); (2) quanto diferem (precisa de tamanho de efeito); (3) se a diferença é praticamente relevante. Um F significativo com η² = 0,01 pode ser estatisticamente significativo mas trivial na prática.","refs":"Kirk (2013), Cap. 2; Maxwell, Delaney & Kelley (2018), Cap. 3–4.","id":61},{"cat":"anova","q":"Quando usar teste t e quando usar ANOVA?","a":"O teste t compara duas médias (duas condições). A ANOVA compara três ou mais médias simultaneamente. Se você tem apenas dois grupos, ambos dão o mesmo resultado (F = t²). A vantagem da ANOVA com 3+ grupos é que ela mantém o erro Tipo I em α — se fizesse múltiplos testes t, a taxa de erro inflaria. Portanto: 2 grupos → t ou ANOVA (equivalentes); 3+ grupos → ANOVA seguida de post-hoc.","refs":"Kirk (2013), Cap. 2; Cohen (1988), Cap. 8.","id":62},{"cat":"anova","q":"O que são testes post-hoc e qual escolher?","a":"Post-hoc são comparações par-a-par realizadas após um F significativo na ANOVA. Opções principais: Tukey HSD — controla o family-wise error rate, é o mais usado e equilibra poder com controle de erro; Bonferroni — mais conservador, melhor para poucas comparações planejadas; Scheffé — o mais conservador, mas permite comparações complexas (contrastes); Games-Howell — não assume homogeneidade de variâncias. Para comparações planejadas a priori, prefira contrastes ortogonais (mais poder que post-hoc).","refs":"Kirk (2013), Cap. 4; Maxwell, Delaney & Kelley (2018), Cap. 5.","id":63},{"cat":"anova","q":"O que são contrastes planejados e por que são preferíveis a post-hoc?","a":"Contrastes são comparações específicas entre grupos definidas a priori pela teoria — antes de ver os dados. Exemplo: em 3 condições (controle, tratamento leve, tratamento forte), um contraste testa controle vs. média dos tratamentos; outro testa leve vs. forte. Contrastes ortogonais são independentes entre si e mais poderosos que post-hoc porque: (1) testam hipóteses específicas (não todas as combinações); (2) não penalizam por múltiplas comparações desnecessárias. Use quando a teoria sugere comparações específicas.","refs":"Rosenthal, Rosnow & Rubin (2000). Contrasts and Effect Sizes in Behavioral Research; Kirk (2013), Cap. 4.","id":64},{"cat":"anova","q":"O que é ANOVA fatorial e como interpretar uma interação?","a":"A ANOVA fatorial testa simultaneamente efeitos principais de cada fator e a interação entre eles. Uma interação significativa significa que o efeito de um fator depende do nível do outro. Interpretação: (1) faça o gráfico de interação (médias em linhas e colunas); (2) se as linhas são paralelas, não há interação; (3) se divergem, interação ordinal (efeito muda de magnitude); (4) se se cruzam, interação disordinal (efeito inverte a direção). Quando há interação significativa, os efeitos principais isolados podem ser enganosos — decomponha em simple effects.","refs":"Kirk (2013), Cap. 5; Maxwell, Delaney & Kelley (2018), Cap. 7.","id":65},{"cat":"anova","q":"O que são simple effects e quando analisá-los?","a":"Simple effects são os efeitos de um fator fixando o nível de outro fator. Exemplo: em um fatorial 2×2, o simple effect de A em B₁ testa se A faz diferença quando B está no nível 1. Analise-os quando a interação é significativa — nesse caso, os efeitos principais são médias de efeitos que diferem entre si e podem ser enganosos. Use correção para múltiplas comparações (Bonferroni ou Holm) ao testar múltiplos simple effects.","refs":"Kirk (2013), Cap. 5; Maxwell, Delaney & Kelley (2018), Cap. 7.","id":66},{"cat":"anova","q":"O que é ANCOVA e quando usá-la?","a":"ANCOVA (Analysis of Covariance) combina ANOVA com regressão: testa diferenças entre grupos na VD após controlar estatisticamente uma ou mais covariáveis contínuas. Usos: (1) aumentar o poder estatístico removendo variância explicada pela covariável; (2) ajustar por diferenças pré-existentes entre grupos (especialmente em quasi-experimentos). Premissas: homogeneidade das inclinações (relação covariável-VD igual em todos os grupos), linearidade, covariável medida antes do tratamento e sem erro. ANCOVA não 'conserta' falta de randomização — apenas ajusta por variáveis observadas.","refs":"Maxwell, Delaney & Kelley (2018), Cap. 9; Miller & Chapman (2001). Misunderstanding analysis of covariance. Journal of Abnormal Psychology, 110(1).","id":67},{"cat":"anova","q":"O que é MANOVA e quando ela é necessária?","a":"MANOVA (Multivariate ANOVA) testa o efeito da VI sobre múltiplas VDs simultaneamente. É necessária quando: (1) o construto de interesse é multidimensional (ex.: satisfação = cognitiva + afetiva); (2) VDs estão correlacionadas e testar separadamente inflaria o erro Tipo I; (3) quer-se detectar padrões multivariados que ANOVAs separadas não captam. Estatísticas: Wilks' Lambda, Pillai's Trace (mais robusto), Hotelling's Trace, Roy's Largest Root. Se MANOVA é significativa, procede-se com ANOVAs separadas (com correção) ou análise discriminante.","refs":"Tabachnick & Fidell (2019), Cap. 7; Huberty & Olejnik (2006). Applied MANOVA and Discriminant Analysis. 2ª ed.","id":68},{"cat":"anova","q":"O que é ANOVA de medidas repetidas e quais suas premissas específicas?","a":"Testa diferenças entre condições quando os mesmos participantes são medidos em todas elas. Premissas adicionais em relação à ANOVA between: (1) esfericidade — as variâncias das diferenças entre pares de condições devem ser iguais (teste de Mauchly); (2) normalidade multivariada. Se esfericidade é violada, use correção Greenhouse-Geisser ou Huynh-Feldt, ou prefira MANOVA (que não assume esfericidade). Modelos lineares mistos (lme4, nlme) são alternativas mais flexíveis que lidam com dados faltantes e estruturas de covariância complexas.","refs":"Maxwell, Delaney & Kelley (2018), Cap. 12; Girden (1992). ANOVA: Repeated Measures. Sage.","id":69},{"cat":"anova","q":"O que é a ANOVA mista (split-plot) e como reportá-la?","a":"Combina pelo menos um fator between e um within no mesmo modelo. Exemplo: grupo (A vs. B — between) × tempo (pré, pós, follow-up — within). A interação grupo×tempo é geralmente o teste mais interessante: indica se a trajetória temporal difere entre grupos. Reporte: F(gl_efeito, gl_erro), p, η²_p para cada efeito principal e interação. Se esfericidade é violada no fator within, aplique correção ε. Use gráficos de perfil (spaghetti plots ou médias com CI) para visualizar as trajetórias.","refs":"Kirk (2013), Cap. 10; Maxwell, Delaney & Kelley (2018), Cap. 12–13.","id":70},{"cat":"anova","q":"Quando usar testes não-paramétricos em vez de ANOVA?","a":"Prefira não-paramétricos quando: (1) a VD é ordinal (rankings, Likert com poucos pontos); (2) a distribuição é fortemente assimétrica com amostras pequenas; (3) há outliers extremos que distorcem as médias; (4) as premissas de normalidade e homogeneidade são gravemente violadas. Equivalentes: Kruskal-Wallis (para ANOVA one-way), Friedman (para medidas repetidas), Mann-Whitney U (para t independente), Wilcoxon (para t pareado). Porém, a ANOVA é robusta a violações moderadas de normalidade com n ≥ 30 por grupo. Não-paramétricos têm menos poder quando as premissas paramétricas são satisfeitas.","refs":"Siegel & Castellan (1988). Nonparametric Statistics for the Behavioral Sciences. 2ª ed.; Field (2018). Discovering Statistics Using IBM SPSS. 5ª ed., Cap. 6–7.","id":71},{"cat":"anova","q":"O que são modelos lineares mistos (mixed-effects models) e por que estão substituindo a ANOVA?","a":"Modelos mistos incluem efeitos fixos (fatores experimentais) e aleatórios (variabilidade entre participantes, itens, clusters). Vantagens sobre a ANOVA: (1) lidam naturalmente com dados faltantes (sem excluir participantes inteiros); (2) modelam estruturas de dependência complexas (medidas repetidas, clusters); (3) não exigem esfericidade; (4) permitem preditores contínuos e categóricos simultaneamente. Em R: lmer() do pacote lme4; em SPSS: MIXED. Estão se tornando padrão em psicologia e administração experimental.","refs":"Bates, Mächler, Bolker & Walker (2015). Fitting linear mixed-effects models using lme4. Journal of Statistical Software, 67(1); Judd, Westfall & Kenny (2012). Treating stimuli as a random factor. Journal of Personality and Social Psychology, 103(1).","id":72},{"cat":"efeito","q":"O que é tamanho de efeito e por que reportá-lo além do p-value?","a":"Tamanho de efeito quantifica a magnitude da diferença ou relação encontrada — quanto grande é o efeito, não apenas se ele é diferente de zero. O p-value mistura magnitude e tamanho amostral: com N enorme, até efeitos triviais são 'significativos'. Tipos: Cohen's d (diferença de médias em desvios-padrão), η² e η²_p (proporção de variância explicada), r (correlação). Reportar ES permite comparar resultados entre estudos, alimentar meta-análises e avaliar relevância prática.","refs":"Cohen (1988); Cumming (2012). Understanding the New Statistics. Cap. 5–6.","id":73},{"cat":"efeito","q":"Qual a diferença entre η², η²_parcial e ω²?","a":"η² (eta-quadrado) = SS_efeito / SS_total — proporção da variância total explicada pelo fator. η²_parcial = SS_efeito / (SS_efeito + SS_erro) — proporção da variância não explicada por outros fatores que é explicada por este fator. Em designs com múltiplos fatores, η²_p é inflado (os parciais somam mais de 1). ω² (ômega-quadrado) é uma estimativa menos enviesada que η², especialmente em amostras pequenas. Recomendação: reporte η²_p (mais comum) junto com a interpretação qualitativa (pequeno ≈ 0,01; médio ≈ 0,06; grande ≈ 0,14 para η²_p).","refs":"Lakens (2013). Calculating and reporting effect sizes. Frontiers in Psychology, 4; Richardson (2011). Eta squared and partial eta squared as measures of effect size. Educational Research Review, 6(2).","id":74},{"cat":"efeito","q":"O que é Cohen's d e como interpretá-lo?","a":"Cohen's d é a diferença entre duas médias dividida pelo desvio-padrão agrupado: d = (M₁ − M₂) / SD_pooled. Benchmarks de Cohen: d = 0,2 (pequeno), 0,5 (médio), 0,8 (grande). Porém, esses benchmarks são genéricos — um d = 0,3 pode ser enorme em um contexto (ex.: intervenção barata que melhora vendas) e trivial em outro. Sempre interprete o ES no contexto do domínio. Para medidas repetidas, use d_z (dividindo pela SD das diferenças) ou Hedges' g (correção para amostras pequenas).","refs":"Cohen (1988), Cap. 2; Lakens (2013). Calculating and reporting effect sizes. Frontiers in Psychology, 4.","id":75},{"cat":"efeito","q":"O que é Hedges' g e quando preferi-lo a Cohen's d?","a":"Hedges' g aplica uma correção ao Cohen's d para remover o viés positivo em amostras pequenas: g = d × (1 − 3/(4(n₁+n₂)−9)). Em amostras grandes (n > 50), d e g são praticamente idênticos. Prefira g quando: (1) a amostra é pequena (n < 20 por grupo); (2) está fazendo meta-análise (g é o padrão); (3) quer precisão máxima. Em meta-análises, g com variância amostral é a unidade universal de efeito.","refs":"Hedges (1981). Distribution theory for Glass's estimator of effect size. JASA, 76(366); Borenstein, Hedges, Higgins & Rothstein (2009). Introduction to Meta-Analysis. Cap. 4.","id":76},{"cat":"efeito","q":"O que é poder estatístico e por que 80% é o mínimo convencional?","a":"Poder (1−β) é a probabilidade de rejeitar H₀ quando ela é realmente falsa — ou seja, de detectar um efeito que existe. 80% foi proposto por Cohen como um compromisso pragmático: aceitar 20% de chance de falso negativo equilibra o custo amostral com a proteção contra erro Tipo II. Entretanto, 90% é cada vez mais recomendado, especialmente para estudos caros de replicar. Fatores que aumentam o poder: maior N, maior tamanho de efeito, menor variância de erro, α mais liberal, e desenho within-subjects.","refs":"Cohen (1988), Cap. 1; Cumming (2012), Cap. 8.","id":77},{"cat":"efeito","q":"Como fazer uma análise de poder a priori com G*Power?","a":"Passos: (1) escolha o teste (ex.: t independente, ANOVA, regressão); (2) selecione 'A priori' como tipo de análise; (3) insira o tamanho de efeito esperado (de meta-análises, pilotos ou teoria — em último caso, use benchmarks de Cohen, mas com cautela); (4) defina α (tipicamente 0,05) e poder (tipicamente 0,80 ou 0,90); (5) especifique o número de grupos/preditores; (6) clique 'Calculate'. O output é o N total necessário. Dica: faça uma análise de sensibilidade — calcule o menor efeito detectável com o N disponível. Isso é mais informativo que usar benchmarks genéricos.","refs":"Faul, Erdfelder, Lang & Buchner (2007). G*Power 3. Behavior Research Methods, 39(2); Perugini, Gallucci & Costantini (2014). Safeguard power as a protection against imprecise power estimates. Perspectives on Psychological Science, 9(3).","id":78},{"cat":"efeito","q":"O que é precision for planning e como difere da análise de poder tradicional?","a":"Precision for planning (Cumming, 2012) define o N necessário para obter um intervalo de confiança com margem de erro alvo — em vez de buscar p < 0,05. Exemplo: 'quero que o CI de 95% de Cohen's d tenha margem ±0,15'. Isso foca na precisão da estimativa, não na decisão dicotômica. Vantagens: (1) independe de H₀; (2) produz resultados interpretáveis mesmo com efeitos nulos; (3) encoraja pensamento estimativo em vez de dicotômico. Ferramenta: ESCI (Excel) ou funções em R.","refs":"Cumming (2012). Understanding the New Statistics. Cap. 9; Maxwell, Kelley & Rausch (2008). Sample size planning for statistical power and accuracy. Annual Review of Psychology, 59.","id":79},{"cat":"efeito","q":"O que é a 'dança dos p-values' e por que ela importa?","a":"É a demonstração de Cumming (2012) de que, ao repetir exatamente o mesmo experimento, os p-values variam dramaticamente de replicação para replicação — muito mais do que a maioria dos pesquisadores imagina. Um estudo pode dar p = 0,03 e a replicação exata dar p = 0,21. Isso mostra que o p-value é instável e que conclusões binárias (significativo/não-significativo) baseadas em um único estudo são frágeis. A solução: focar em intervalos de confiança e tamanhos de efeito, que são mais estáveis e informativos.","refs":"Cumming (2012), Cap. 5; Cumming (2008). Replication and p intervals. Perspectives on Psychological Science, 3(4).","id":80},{"cat":"efeito","q":"O que é o erro Tipo I, erro Tipo II e qual a relação com α e β?","a":"Erro Tipo I (falso positivo): rejeitar H₀ quando ela é verdadeira — concluir que há efeito quando não há. Probabilidade = α (geralmente 0,05). Erro Tipo II (falso negativo): não rejeitar H₀ quando ela é falsa — perder um efeito real. Probabilidade = β. Poder = 1 − β. Os dois erros são inversamente relacionados para um dado N: reduzir α (ser mais conservador) aumenta β (mais falsos negativos). O N é a variável que permite reduzir ambos simultaneamente.","refs":"Cohen (1988), Cap. 1; Neyman & Pearson (1933). On the problem of the most efficient tests of statistical hypotheses. Philosophical Transactions of the Royal Society A, 231.","id":81},{"cat":"efeito","q":"O que significa um resultado 'não-significativo' — ausência de evidência ou evidência de ausência?","a":"Não-significativo (p > α) significa que os dados são compatíveis com H₀, mas NÃO prova que o efeito é zero. 'Ausência de evidência não é evidência de ausência.' O estudo pode ter poder insuficiente para detectar um efeito real. Para afirmar positivamente que um efeito é negligível, use: (1) equivalence testing (TOST — Two One-Sided Tests); (2) análise Bayesiana (Bayes Factor a favor de H₀); (3) verifique o intervalo de confiança — se inclui zero mas também inclui efeitos relevantes, o estudo é inconclusivo.","refs":"Lakens, Scheel & Isager (2018). Equivalence testing for psychological research. Advances in Methods and Practices in Psychological Science, 1(2); Dienes (2014). Using Bayes to get the most out of non-significant results. Frontiers in Psychology, 5.","id":82},{"cat":"avancado","q":"Como testar mediação em experimentos (abordagem moderna)?","a":"A abordagem clássica de Baron & Kenny (4 passos com regressões) é considerada ultrapassada. A abordagem moderna: (1) use bootstrap para estimar o efeito indireto (a×b) e seu intervalo de confiança — se o CI não inclui zero, a mediação é significativa; (2) não exija que o efeito total (c) seja significativo — mediações competitivas podem cancelar o efeito total; (3) use o PROCESS macro de Hayes (Modelo 4) ou lavaan em R. Em experimentos, manipule X, meça M e Y, e garanta que M foi medido antes de Y.","refs":"Hayes (2022). Introduction to Mediation, Moderation, and Conditional Process Analysis. 3ª ed.; Zhao, Lynch & Chen (2010). Reconsidering Baron and Kenny. Journal of Consumer Research, 37(2).","id":83},{"cat":"avancado","q":"Como testar moderação em um desenho fatorial?","a":"Se o moderador é categórico: inclua-o como segundo fator no desenho fatorial (ex.: 2×2 com tipo de incentivo × nível de experiência). A interação significativa é a evidência de moderação. Se o moderador é contínuo: use regressão com interação (X×W) ou o PROCESS macro (Modelo 1). Em ANOVA, faça um median-split do moderador contínuo para criar grupos — mas isso perde informação e poder. Melhor: manter o moderador contínuo na regressão e usar Johnson-Neyman para identificar a região de significância.","refs":"Hayes (2022), Cap. 7–9; Spiller, Fitzsimons, Lynch & McClelland (2013). Spotlights, floodlights, and the magic number zero. Journal of Marketing Research, 50(2).","id":84},{"cat":"avancado","q":"O que é mediação moderada (moderated mediation) e como testá-la?","a":"Ocorre quando a força do efeito indireto (X→M→Y) varia conforme o nível de um moderador (W). Exemplo: treinamento → autoeficácia → desempenho, mas esse caminho é mais forte para iniciantes do que para experientes. Teste com PROCESS Modelo 7 (moderação no caminho a), Modelo 14 (moderação no caminho b), ou Modelo 8/15 (moderação em ambos). Reporte o index of moderated mediation e os efeitos indiretos condicionais em níveis do moderador (ex.: −1SD, M, +1SD).","refs":"Hayes (2022), Cap. 11–12; Preacher, Rucker & Hayes (2007). Addressing moderated mediation hypotheses. Multivariate Behavioral Research, 42(1).","id":85},{"cat":"avancado","q":"O que é Structural Equation Modeling (SEM) e quando usá-lo com dados experimentais?","a":"SEM combina análise fatorial (mensuração) e path analysis (relações estruturais) em um modelo integrado. Com dados experimentais, a VI manipulada entra como variável observada (dummy-coded) e os construtos medidos (mediadores, VDs latentes) são modelados como variáveis latentes — o que corrige erro de mensuração e melhora as estimativas dos caminhos. Use quando: múltiplos mediadores, mediação serial, variáveis latentes com múltiplos indicadores. Software: lavaan (R), Mplus, AMOS.","refs":"Kline (2016). Principles and Practice of Structural Equation Modeling. 4ª ed.; Iacobucci, Saldanha & Deng (2007). A meditation on mediation. Journal of Consumer Psychology, 17(2).","id":86},{"cat":"avancado","q":"O que é Bayesian ANOVA e quando preferir a abordagem Bayesiana?","a":"A ANOVA Bayesiana substitui o p-value pelo Bayes Factor (BF) — a razão de verossimilhança dos dados sob H₁ vs. H₀. BF₁₀ > 3 indica evidência moderada a favor de H₁; BF₁₀ < 1/3 indica evidência a favor de H₀; entre 1/3 e 3 é inconclusivo. Vantagens: (1) quantifica evidência a favor de H₀ (algo que p-values não fazem); (2) não depende da intenção de parada (pode-se coletar dados até evidência suficiente); (3) interpretação direta ('os dados são X vezes mais prováveis sob H₁'). Software: JASP (gratuito), BayesFactor (R).","refs":"Wagenmakers, Marsman, et al. (2018). Bayesian inference for psychology. Psychonomic Bulletin & Review, 25(1); Rouder, Morey, Speckman & Province (2012). Default Bayes factors for ANOVA designs. Journal of Mathematical Psychology, 56(5).","id":87},{"cat":"avancado","q":"O que é equivalence testing (TOST) e como implementá-lo?","a":"TOST (Two One-Sided Tests) testa se o efeito está dentro de uma faixa considerada 'equivalente a zero' — os limites de equivalência (SESOI: Smallest Effect Size Of Interest). Procedimento: defina Δ (ex.: d = ±0,3); teste H₁: μ₁−μ₂ > −Δ (one-sided) e H₂: μ₁−μ₂ < +Δ (one-sided). Se ambos são significativos, conclui-se equivalência. Use para: demonstrar que uma diferença é trivial, não-inferioridade, ou que um efeito nulo é informativo. Pacote R: TOSTER (Lakens).","refs":"Lakens, Scheel & Isager (2018). Equivalence testing for psychological research. AMPPS, 1(2); Schuirmann (1987). A comparison of the two one-sided tests procedure. Journal of Pharmacokinetics and Biopharmaceutics, 15(6).","id":88},{"cat":"avancado","q":"O que é análise de sensibilidade e por que incluí-la?","a":"Análise de sensibilidade verifica se as conclusões mudam quando premissas ou decisões analíticas variam. Tipos: (1) incluir/excluir outliers — o resultado persiste?; (2) com/sem covariáveis — o efeito muda?; (3) diferentes operacionalizações da VD — convergem?; (4) exclusão de participantes que falharam no manipulation check — altera o padrão?; (5) multiverse analysis — testar todas as combinações razoáveis de decisões analíticas. Uma conclusão robusta sobrevive a variações razoáveis.","refs":"Steegen, Tuerlinckx, Gelman & Vanpaemel (2016). Increasing transparency through a multiverse analysis. Perspectives on Psychological Science, 11(5); Simonsohn, Simmons & Nelson (2020). Specification curve analysis. Nature Human Behaviour, 4(11).","id":89},{"cat":"avancado","q":"O que é propensity score matching e quando usá-lo em quasi-experimentos?","a":"PSM estima a probabilidade (propensity score) de cada participante receber o tratamento, com base em covariáveis observadas. Participantes tratados e controle com propensity scores similares são emparelhados, criando grupos 'balanceados' nas covariáveis incluídas. Útil em quasi-experimentos onde a randomização não é possível. Limitações sérias: (1) só controla variáveis observadas — confundidores não-medidos permanecem; (2) requer overlap suficiente entre os grupos; (3) a seleção de covariáveis afeta o resultado. Não substitui randomização, mas pode reduzir viés.","refs":"Rosenbaum & Rubin (1983). The central role of the propensity score. Biometrika, 70(1); King & Nielsen (2019). Why propensity scores should not be used for matching. Political Analysis, 27(4).","id":90},{"cat":"avancado","q":"O que é HLM (Hierarchical Linear Modeling) e quando é necessário em experimentos?","a":"HLM (ou modelos multinível) são necessários quando os dados têm estrutura hierárquica: alunos aninhados em turmas, consumidores em lojas, funcionários em equipes. Ignorar o aninhamento viola a premissa de independência e infla o erro Tipo I. Em experimentos com randomização por cluster, HLM é obrigatório. O modelo inclui interceptos e/ou inclinações aleatórias no nível do cluster. Software: lme4 (R), HLM, Mplus. A correlação intraclasse (ICC) indica quanta variância está no nível do cluster.","refs":"Raudenbush & Bryk (2002). Hierarchical Linear Models. 2ª ed.; Snijders & Bosker (2012). Multilevel Analysis. 2ª ed.","id":91},{"cat":"avancado","q":"O que é conjoint analysis e como se relaciona com desenho experimental?","a":"Conjoint analysis apresenta aos participantes combinações de atributos de um produto/serviço (cenários fatoriais) e pede avaliações ou escolhas. É um experimento: os perfis são construídos por design (fatorial fracionado) e randomizados. Permite estimar a importância relativa de cada atributo e as utilidades parciais (part-worths) de cada nível. Tipos: Choice-Based Conjoint (CBC) — mais realista, baseado em escolhas; Rating-Based — avalia cada perfil. Muito usado em marketing para precificação, design de produto e segmentação.","refs":"Green, Krieger & Wind (2001). Thirty years of conjoint analysis. Interfaces, 31(3); Rao (2014). Applied Conjoint Analysis. Springer.","id":92},{"cat":"reporting","q":"Como reportar resultados de um experimento no formato APA?","a":"Estrutura: (1) Método: participantes (N, demografia, alocação), desenho (between/within, fatores e níveis), materiais e manipulação, procedimento, medidas; (2) Resultados: manipulation check, estatística descritiva (M, SD por condição), teste inferencial com ES e CI. Formato padrão: 'F(1, 98) = 7.42, p = .008, η²_p = .07, 90% CI [.01, .16]' ou 't(48) = 2.31, p = .025, d = 0.65, 95% CI [0.08, 1.21]'. Sempre reporte o tamanho de efeito e intervalo de confiança, não apenas o p-value.","refs":"American Psychological Association (2020). Publication Manual of the APA. 7ª ed.; Appelbaum et al. (2018). Journal article reporting standards for quantitative research. American Psychologist, 73(1).","id":93},{"cat":"reporting","q":"O que é pré-registro e por que é cada vez mais exigido?","a":"Pré-registro é o ato de documentar publicamente o plano do estudo (hipóteses, desenho, amostra planejada, análises) antes de coletar dados. Plataformas: OSF (osf.io), AsPredicted. Objetivos: (1) distinguir hipóteses confirmatórias (pré-registradas) de exploratórias (não previstas); (2) prevenir HARKing (formular hipóteses depois de ver os dados); (3) reduzir p-hacking (tentar múltiplas análises até achar significância). Registered Reports vão além: o periódico aceita o estudo antes dos resultados, eliminando publication bias.","refs":"Nosek, Ebersole, DeHaven & Mellor (2018). The preregistration revolution. PNAS, 115(11); Wagenmakers, Wetzels, Borsboom, van der Maas & Kievit (2012). An agenda for purely confirmatory research. Perspectives on Psychological Science, 7(6).","id":94},{"cat":"reporting","q":"O que são práticas questionáveis de pesquisa (QRPs) mais comuns em experimentos?","a":"QRPs inflam artificialmente a taxa de resultados significativos: (1) p-hacking — testar múltiplas análises e reportar só a significativa; (2) HARKing — apresentar hipóteses post hoc como se fossem a priori; (3) selective reporting — reportar apenas VDs que deram significativas; (4) optional stopping — coletar dados até p < 0,05; (5) outlier exclusion — remover dados para obter significância; (6) undisclosed flexibility — não reportar covariáveis testadas, condições eliminadas ou transformações de dados. Simmons, Nelson & Simonsohn (2011) mostraram que essas práticas inflam o erro Tipo I de 5% para até 60%.","refs":"Simmons, Nelson & Simonsohn (2011). False-positive psychology. Psychological Science, 22(11); John, Loewenstein & Prelec (2012). Measuring the prevalence of questionable research practices. Psychological Science, 23(5).","id":95},{"cat":"reporting","q":"Como lidar com dados faltantes (missing data) em experimentos?","a":"Tipos: MCAR (faltante completamente ao acaso), MAR (faltante ao acaso condicional em variáveis observadas), MNAR (faltante não ao acaso — o pior caso). Métodos: (1) listwise deletion — simples mas perde poder e pode enviesar se não MCAR; (2) imputação múltipla (MI) — cria múltiplos datasets completos e combina resultados — padrão ouro para MAR; (3) maximum likelihood (FIML) — estima diretamente com dados incompletos. NUNCA use substituição pela média (distorce variâncias e correlações). Sempre reporte a quantidade e padrão de missing.","refs":"Enders (2010). Applied Missing Data Analysis. Guilford Press; Little & Rubin (2019). Statistical Analysis with Missing Data. 3ª ed.","id":96},{"cat":"reporting","q":"O que é transparência e dados abertos (Open Science) em pesquisa experimental?","a":"Open Science inclui: (1) pré-registro — plano do estudo público antes da coleta; (2) dados abertos — compartilhar o dataset anonimizado; (3) materiais abertos — manipulações, escalas, scripts de análise; (4) código aberto — scripts R/Python reprodutíveis; (5) Registered Reports — aceitação pré-resultados. Benefícios: replicabilidade, detecção de erros, meta-análises com dados individuais (IPD), confiança pública na ciência. Implementação: OSF badges, repositórios como figshare/Zenodo, TOP Guidelines dos periódicos.","refs":"Nosek et al. (2015). Promoting an open research culture. Science, 348(6242); Munafo et al. (2017). A manifesto for reproducible science. Nature Human Behaviour, 1.","id":97},{"cat":"reporting","q":"O que é a crise de replicação e como ela afeta pesquisa experimental em administração?","a":"A crise de replicação refere-se à constatação de que muitos achados publicados não se reproduzem quando replicados com métodos e amostras adequados. O projeto de replicação da Open Science Collaboration (2015) encontrou que apenas 36% de 100 estudos em psicologia se replicaram. Em administração, o problema é agravado por: amostras de conveniência, pressão por publicação, QRPs, e poucos incentivos para replicação. Respostas: pré-registro, dados abertos, tamanhos amostrais maiores, foco em ES e CI em vez de p < 0,05, replicações diretas e conceituais.","refs":"Open Science Collaboration (2015). Estimating the reproducibility of psychological science. Science, 349(6251); Aguinis, Cascio & Ramani (2017). Science's reproducibility and replicability crisis. Journal of Management, 43(5).","id":98},{"cat":"reporting","q":"Quais são as considerações éticas específicas de experimentos em ciências sociais?","a":"(1) Consentimento informado — participantes devem saber que estão em um estudo e poder desistir (TCLE); (2) Deception — manipulações com engano são comuns em experimentos sociais, mas exigem debriefing completo e aprovação pelo CEP/IRB; (3) Risco mínimo — o estudo não deve causar dano psicológico, social ou físico além do encontrado na vida cotidiana; (4) Confidencialidade — dados anonimizados ou pseudonimizados; (5) Vulnerabilidade — cuidado especial com subordinados, estudantes (pressão para participar), minorias; (6) Incentivos — compensação justa sem coerção. No Brasil: Resolução 466/2012 e 510/2016 do CONEP.","refs":"American Psychological Association (2017). Ethical Principles of Psychologists. Standard 8; Brasil, CONEP (2012). Resolução 466/2012; Sieber (1992). Planning Ethically Responsible Research. Sage.","id":99},{"cat":"reporting","q":"Como interpretar e reportar intervalos de confiança em resultados experimentais?","a":"Um intervalo de confiança de 95% para uma média ou diferença de médias é uma faixa de valores plausíveis para o parâmetro populacional, dados os dados observados. Interpretação correta: 'se repetíssemos o estudo muitas vezes, 95% dos CIs construídos conteriam o valor real'. NÃO significa: 'há 95% de chance de o valor estar nesta faixa' (o valor é fixo, o CI é que varia). Reporte: M = 4.3, 95% CI [3.8, 4.8]. Use CIs para avaliar a precisão (CIs estreitos = estimativa precisa) e a relevância prática (se o CI exclui valores triviais e valores relevantes).","refs":"Cumming (2012), Cap. 3–4; Cumming & Finch (2005). Inference by eye: Confidence intervals and how to read pictures of data. American Psychologist, 60(2).","id":100}];
-
-const CHEVRON_SVG = '<svg class="faq-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>';
-
-// ============================================================
-// TF-IDF SEARCH ENGINE
-// ============================================================
-const STOPWORDS = new Set("a ao aos as até com como da das de del do dos e é ela elas ele eles em entre era essa essas esse esses esta estas este estes eu foi for foram ha isso isto já lhe lhes lo mais mas me menos meu minha na nas não no nos nós num numa o os ou para pela pelas pelo pelos por qual quando que quem são se sem ser será seu seus só sobre sua suas também te tem têm ter tu tua tuas um uma uns você vocês".split(" "));
-
-function tokenize(text) {
-  return text.toLowerCase()
-    .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
-    .replace(/[^a-z0-9\s]/g, " ")
-    .split(/\s+/)
-    .filter(t => t.length > 2 && !STOPWORDS.has(t));
-}
-
-const docs = faqs.map(f => {
-  const tokens = tokenize(f.q + " " + f.a);
-  const tf = {};
-  tokens.forEach(t => { tf[t] = (tf[t]||0) + 1; });
-  const maxTf = Math.max(...Object.values(tf), 1);
-  Object.keys(tf).forEach(t => { tf[t] = 0.5 + 0.5 * tf[t] / maxTf; });
-  return { id: f.id, tf, tokens, len: tokens.length };
-});
-
-const N = docs.length;
-const df = {};
-docs.forEach(d => { new Set(Object.keys(d.tf)).forEach(t => { df[t] = (df[t]||0) + 1; }); });
-const idf = {};
-Object.keys(df).forEach(t => { idf[t] = Math.log(N / df[t]); });
-
-docs.forEach(d => {
-  d.tfidf = {};
-  let norm = 0;
-  Object.keys(d.tf).forEach(t => {
-    const v = d.tf[t] * (idf[t]||0);
-    d.tfidf[t] = v; norm += v * v;
-  });
-  d.norm = Math.sqrt(norm);
-});
-
-function search(query) {
-  const qTokens = tokenize(query);
-  if (qTokens.length === 0) return faqs.map(f => ({...f, score: 0}));
-  const qTf = {};
-  qTokens.forEach(t => { qTf[t] = (qTf[t]||0) + 1; });
-  const maxQTf = Math.max(...Object.values(qTf), 1);
-  const qVec = {}; let qNorm = 0;
-  Object.keys(qTf).forEach(t => {
-    const v = (0.5 + 0.5 * qTf[t] / maxQTf) * (idf[t] || 0);
-    qVec[t] = v; qNorm += v * v;
-  });
-  qNorm = Math.sqrt(qNorm);
-  if (qNorm === 0) return faqs.map(f => ({...f, score: 0}));
-  return docs.map((d, i) => {
-    let dot = 0;
-    Object.keys(qVec).forEach(t => { if (d.tfidf[t]) dot += qVec[t] * d.tfidf[t]; });
-    return { ...faqs[i], score: d.norm > 0 ? dot / (qNorm * d.norm) : 0 };
-  }).sort((a, b) => b.score - a.score);
-}
-
-// ============================================================
-// UI
-// ============================================================
-const faqList = document.getElementById("faqList");
-const searchInput = document.getElementById("searchInput");
-const clearBtn = document.getElementById("clearBtn");
-const searchMeta = document.getElementById("searchMeta");
-const filtersEl = document.getElementById("filters");
-const noResults = document.getElementById("noResults");
-const scrollTopBtn = document.getElementById("scrollTop");
-
-let activeCategory = null;
-let currentQuery = "";
-
-// Build filters
-const allBtn = document.createElement("button");
-allBtn.className = "filter-btn active";
-allBtn.innerHTML = 'Todas <span class="filter-count">100</span>';
-allBtn.onclick = () => setCategory(null);
-filtersEl.appendChild(allBtn);
-
-categories.forEach(c => {
-  const count = faqs.filter(f => f.cat === c.id).length;
-  const btn = document.createElement("button");
-  btn.className = "filter-btn";
-  btn.innerHTML = c.icon + ' ' + c.label + ' <span class="filter-count">' + count + '</span>';
-  btn.dataset.cat = c.id;
-  btn.onclick = () => setCategory(c.id);
-  filtersEl.appendChild(btn);
-});
-
-function setCategory(cat) {
-  activeCategory = cat;
-  document.querySelectorAll(".filter-btn").forEach(b => {
-    b.classList.toggle("active", cat === null ? !b.dataset.cat : b.dataset.cat === cat);
-  });
-  render();
-}
-
-function getCatLabel(catId) {
-  const c = categories.find(x => x.id === catId);
-  return c ? c.label : catId;
-}
-
-function highlightText(text, query) {
-  if (!query) return text;
-  const terms = tokenize(query);
-  if (terms.length === 0) return text;
-  const pattern = terms.map(t => t.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join("|");
-  return text.replace(new RegExp("(" + pattern + ")", "gi"), "<mark>$1</mark>");
-}
-
-function toggleFaq(el) {
-  const wasOpen = el.classList.contains("open");
-  // Close others
-  document.querySelectorAll(".faq-item.open").forEach(item => {
-    if (item !== el) item.classList.remove("open");
-  });
-  el.classList.toggle("open", !wasOpen);
-}
-
-function render() {
-  const query = currentQuery.trim();
-  let items = query ? search(query) : faqs.map(f => ({...f, score: 0}));
-  if (activeCategory) items = items.filter(f => f.cat === activeCategory);
-  if (query) items = items.filter(f => f.score > 0.02);
-
-  faqList.innerHTML = "";
-  noResults.style.display = items.length === 0 ? "block" : "none";
-
-  searchMeta.textContent = query && items.length > 0
-    ? items.length + " resultado" + (items.length !== 1 ? "s" : "") + " por relevância"
-    : "";
-
-  items.forEach((f, idx) => {
-    const div = document.createElement("div");
-    div.className = "faq-item";
-    div.style.animationDelay = Math.min(idx * 0.03, 0.5) + "s";
-    div.innerHTML =
-      '<div class="faq-q" onclick="toggleFaq(this.parentElement)">' +
-        '<span class="faq-num">' + f.id + '</span>' +
-        '<span class="faq-q-text">' +
-          (query ? highlightText(f.q, query) : f.q) +
-          ' <span class="faq-cat-tag">' + getCatLabel(f.cat) + '</span>' +
-        '</span>' +
-        CHEVRON_SVG +
-      '</div>' +
-      '<div class="faq-a"><div class="faq-a-inner">' +
-        '<p>' + (query ? highlightText(f.a, query) : f.a) + '</p>' +
-        '<div class="ref"><div class="ref-label">Referências</div>' + f.refs + '</div>' +
-      '</div></div>';
-    faqList.appendChild(div);
-  });
-}
-
-// Search events
-let debounce;
-searchInput.addEventListener("input", () => {
-  clearBtn.style.display = searchInput.value ? "flex" : "none";
-  clearTimeout(debounce);
-  debounce = setTimeout(() => { currentQuery = searchInput.value; render(); }, 200);
-});
-
-clearBtn.addEventListener("click", () => {
-  searchInput.value = "";
-  clearBtn.style.display = "none";
-  currentQuery = "";
-  render();
-  searchInput.focus();
-});
-
-// Scroll
-window.addEventListener("scroll", () => {
-  scrollTopBtn.classList.toggle("visible", window.scrollY > 400);
-});
-scrollTopBtn.addEventListener("click", () => window.scrollTo({ top: 0, behavior: "smooth" }));
-
-// Keyboard
-document.addEventListener("keydown", (e) => {
-  if (e.key === "/" && document.activeElement !== searchInput) {
-    e.preventDefault(); searchInput.focus();
-  }
-  if (e.key === "Escape" && document.activeElement === searchInput) {
-    searchInput.blur();
-    if (searchInput.value) {
-      searchInput.value = ""; clearBtn.style.display = "none";
-      currentQuery = ""; render();
-    }
-  }
-});
-
-render();
-</script>
 </body>
 </html>

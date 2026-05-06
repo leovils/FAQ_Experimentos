@@ -16,7 +16,8 @@
 
 | Material | Descrição | Arquivo |
 |----------|-----------|--------|
-| **100 FAQs** | Perguntas e respostas com busca semântica TF-IDF | [Abrir →](index.html) |
+| **Portal** | Página inicial com acesso a todos os materiais | [Abrir →](index.html) |
+| **100 FAQs** | Perguntas e respostas com busca semântica TF-IDF | [Abrir →](FAQ_Experimentos.html) |
 | **Slides (PDF)** | Apresentação completa — Aulas 1 e 2 | [Abrir →](Experimentos_2026%20Aulas%201%20e%202.pdf) |
 | **Exercício Interativo** | Planejamento de experimento com checklist e rubrica | [Abrir →](Exercicio_Planejamento_Experimental.html) |
 | **Exercício (.docx)** | Versão Word para o aluno preencher e entregar | [Baixar →](Exercicio_Planejamento_Experimental.docx) |
@@ -113,7 +114,8 @@ Programa oficial da disciplina "Fundamentos de Estudos Experimentais I" — 2026
 3. Vá em **Settings → Pages → Source: Deploy from a branch → main → / (root)**
 4. Acesse `https://seu-usuario.github.io/nome-do-repo/`
 5. Compartilhe os links com os alunos:
-   - FAQ: `https://seu-usuario.github.io/nome-do-repo/`
+   - Portal: `https://seu-usuario.github.io/nome-do-repo/`
+   - FAQ: `https://seu-usuario.github.io/nome-do-repo/FAQ_Experimentos.html`
    - Exercício: `https://seu-usuario.github.io/nome-do-repo/Exercicio_Planejamento_Experimental.html`
    - Quiz: `https://seu-usuario.github.io/nome-do-repo/Quiz_Aula1.html`
    - Widgets: `https://seu-usuario.github.io/nome-do-repo/Widget_Randomizacao.html` (etc.)
@@ -127,7 +129,8 @@ Basta abrir os arquivos HTML em qualquer navegador. Funcionam 100% offline.
 ## Estrutura do repositório
 
 ```
-├── index.html                                  ← FAQ com 100 perguntas
+├── index.html                                  ← Portal (página inicial)
+├── FAQ_Experimentos.html                       ← FAQ com 100 perguntas
 ├── Experimentos_2026 Aulas 1 e 2.pdf           ← Slides (PDF)
 ├── Exercicio_Planejamento_Experimental.html    ← Exercício interativo
 ├── Exercicio_Planejamento_Experimental.docx    ← Exercício para entrega (Word)
