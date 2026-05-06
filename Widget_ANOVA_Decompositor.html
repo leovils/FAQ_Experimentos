@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Decompositor Visual de ANOVA — Fundamentos de Estudos Experimentais I</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#0a0a0f;--glass:rgba(255,255,255,.07);--border:rgba(255,255,255,.08);
+  --text:#ECF0F1;--text2:#95A5A6;
+  --accent:#1ABC9C;--gold:#F4D03F;--red:#E74C3C;--blue:#3498DB;--purple:#9B59B6;--green:#2ECC71;--orange:#E67E22;
+}
+body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+.hero{text-align:center;padding:2.5rem 1rem 1.5rem;background:linear-gradient(135deg,rgba(52,152,219,.12),rgba(26,188,156,.08))}
+.hero-badge{display:inline-block;background:var(--blue);color:#fff;font-size:.7rem;font-weight:700;padding:.25rem .8rem;border-radius:20px;text-transform:uppercase;letter-spacing:1px;margin-bottom:.8rem}
+.hero h1{font-family:Georgia,serif;font-size:2rem;font-weight:700;line-height:1.2;margin-bottom:.5rem}
+.hero p{color:var(--text2);font-size:.95rem;max-width:650px;margin:0 auto}
+.container{max-width:960px;margin:0 auto;padding:1.5rem 1rem}
+.card{background:var(--glass);border:1px solid var(--border);border-radius:12px;padding:1.5rem;margin-bottom:1.2rem}
+.card-title{font-family:Georgia,serif;font-size:1.1rem;font-weight:700;color:var(--blue);margin-bottom:.8rem}
+.controls{display:flex;flex-wrap:wrap;gap:1rem;align-items:flex-end;margin-bottom:1rem}
+.control-group{flex:1;min-width:160px}
+.control-group label{display:block;font-size:.78rem;color:var(--text2);margin-bottom:.4rem;font-weight:600;text-transform:uppercase;letter-spacing:.5px}
+.control-group .val{color:var(--blue);font-weight:700}
+input[type=range]{width:100%;height:6px;-webkit-appearance:none;background:rgba(255,255,255,.1);border-radius:3px;outline:none;margin-top:.3rem}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:18px;height:18px;background:var(--blue);border-radius:50%;cursor:pointer;border:2px solid var(--bg)}
+input[type=range]::-moz-range-thumb{width:18px;height:18px;background:var(--blue);border-radius:50%;cursor:pointer;border:2px solid var(--bg)}
+canvas{width:100%;border-radius:8px}
+.formula-bar{background:rgba(52,152,219,.08);border:1px solid rgba(52,152,219,.2);border-radius:10px;padding:1rem;text-align:center;font-family:Georgia,serif;font-size:1.1rem;margin:.8rem 0;line-height:2}
+.formula-bar .frac{display:inline-block;text-align:center;vertical-align:middle}
+.formula-bar .frac-num{display:block;border-bottom:2px solid var(--blue);padding:0 .5rem .2rem}
+.formula-bar .frac-den{display:block;padding:.2rem .5rem 0}
+.var-blocks{display:flex;gap:1rem;justify-content:center;margin:1rem 0;flex-wrap:wrap}
+.var-block{text-align:center;padding:.8rem 1.2rem;border-radius:10px;min-width:140px}
+.var-block .vb-val{font-size:1.8rem;font-weight:800;font-family:Georgia,serif;margin:.3rem 0}
+.var-block .vb-label{font-size:.72rem;text-transform:uppercase;letter-spacing:.5px}
+.var-block .vb-bar{height:8px;border-radius:4px;margin-top:.5rem;transition:all .3s}
+.stats-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:.6rem;margin-top:1rem}
+.stat{background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:8px;padding:.7rem;text-align:center}
+.stat .s-val{font-size:1.4rem;font-weight:800;font-family:Georgia,serif;margin:.2rem 0}
+.stat .s-label{font-size:.7rem;color:var(--text2);text-transform:uppercase;letter-spacing:.5px}
+.insight{background:rgba(52,152,219,.08);border-left:3px solid var(--blue);padding:1rem 1.2rem;border-radius:0 8px 8px 0;margin-top:1rem;font-size:.88rem;line-height:1.6;color:var(--text2)}
+.insight strong{color:var(--blue)}
+.insight em{color:var(--gold)}
+.legend{display:flex;gap:1.5rem;justify-content:center;margin:.6rem 0;font-size:.82rem;flex-wrap:wrap}
+.legend-item{display:flex;align-items:center;gap:.4rem}
+.legend-dot{width:14px;height:14px;border-radius:3px}
+.btn{background:linear-gradient(135deg,var(--blue),#2980B9);color:#fff;border:none;padding:.55rem 1.2rem;border-radius:8px;font-size:.85rem;font-weight:700;cursor:pointer;transition:all .2s}
+.btn:hover{transform:translateY(-1px);box-shadow:0 4px 15px rgba(52,152,219,.3)}
+.btn-row{display:flex;gap:.5rem;flex-wrap:wrap}
+.footer{text-align:center;padding:1.5rem;color:var(--text2);font-size:.8rem;border-top:1px solid var(--border);margin-top:2rem}
+@media(max-width:600px){.hero h1{font-size:1.5rem}.var-blocks{flex-direction:column;align-items:center}}
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <div class="hero-badge">Widget Interativo</div>
+  <h1>Decompositor<br>Visual de ANOVA</h1>
+  <p>Entenda como F separa a variância entre grupos da variância dentro dos grupos</p>
+</div>
+
+<div class="container">
+
+  <div class="card">
+    <div class="card-title">Configuração do Experimento</div>
+    <div class="controls">
+      <div class="control-group">
+        <label>Separação entre médias: <span class="val" id="sepVal">Média</span></label>
+        <input type="range" id="sliderSep" min="0" max="10" value="4" step="0.5" oninput="update()">
+      </div>
+      <div class="control-group">
+        <label>Dispersão dentro dos grupos: <span class="val" id="withinVal">Média</span></label>
+        <input type="range" id="sliderWithin" min="0.5" max="6" value="2" step="0.25" oninput="update()">
+      </div>
+      <div class="control-group">
+        <label>N por grupo: <span class="val" id="nVal">15</span></label>
+        <input type="range" id="sliderN" min="5" max="50" value="15" step="5" oninput="update()">
+      </div>
+    </div>
+    <div class="btn-row">
+      <button class="btn" onclick="newSample()">🔄 Nova amostra</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Dados dos 3 Grupos</div>
+    <div class="legend">
+      <div class="legend-item"><div class="legend-dot" style="background:rgba(26,188,156,.6)"></div> Grupo A</div>
+      <div class="legend-item"><div class="legend-dot" style="background:rgba(231,76,60,.6)"></div> Grupo B</div>
+      <div class="legend-item"><div class="legend-dot" style="background:rgba(52,152,219,.6)"></div> Grupo C</div>
+      <div class="legend-item"><div class="legend-dot" style="background:rgba(244,208,63,.4)"></div> Média geral</div>
+    </div>
+    <canvas id="dotplot" height="300"></canvas>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Decomposição da Variância</div>
+    <p style="color:var(--text2);font-size:.88rem;margin-bottom:.8rem">ANOVA decompõe a variância total em dois pedaços: a variância <strong style="color:var(--orange)">entre</strong> os grupos (devida ao tratamento) e a variância <strong style="color:var(--purple)">dentro</strong> dos grupos (erro/ruído).</p>
+
+    <div class="var-blocks">
+      <div class="var-block" style="background:rgba(244,208,63,.08);border:1px solid rgba(244,208,63,.2)">
+        <div class="vb-label" style="color:var(--gold)">SS Total</div>
+        <div class="vb-val" id="ssTotal" style="color:var(--gold)">—</div>
+        <div class="vb-bar" id="barTotal" style="background:var(--gold);width:100%"></div>
+      </div>
+      <div style="display:flex;align-items:center;font-size:1.5rem;color:var(--text2)">=</div>
+      <div class="var-block" style="background:rgba(230,126,34,.08);border:1px solid rgba(230,126,34,.2)">
+        <div class="vb-label" style="color:var(--orange)">SS Between</div>
+        <div class="vb-val" id="ssBetween" style="color:var(--orange)">—</div>
+        <div class="vb-bar" id="barBetween" style="background:var(--orange)"></div>
+      </div>
+      <div style="display:flex;align-items:center;font-size:1.5rem;color:var(--text2)">+</div>
+      <div class="var-block" style="background:rgba(155,89,182,.08);border:1px solid rgba(155,89,182,.2)">
+        <div class="vb-label" style="color:var(--purple)">SS Within</div>
+        <div class="vb-val" id="ssWithin" style="color:var(--purple)">—</div>
+        <div class="vb-bar" id="barWithin" style="background:var(--purple)"></div>
+      </div>
+    </div>
+
+    <canvas id="decomp" height="80"></canvas>
+  </div>
+
+  <div class="card">
+    <div class="card-title">A Razão F</div>
+    <div class="formula-bar">
+      F = <span class="frac"><span class="frac-num" style="color:var(--orange)">MS<sub>between</sub> (variância entre grupos)</span><span class="frac-den" style="color:var(--purple)">MS<sub>within</sub> (variância dentro dos grupos)</span></span>
+      = <span class="frac"><span class="frac-num" style="color:var(--orange)" id="msBet">—</span><span class="frac-den" style="color:var(--purple)" id="msWit">—</span></span>
+      = <strong id="fVal" style="font-size:1.4rem">—</strong>
+    </div>
+
+    <div class="stats-row">
+      <div class="stat">
+        <div class="s-label">F</div>
+        <div class="s-val" id="fStat" style="color:var(--blue)">—</div>
+      </div>
+      <div class="stat">
+        <div class="s-label">df₁, df₂</div>
+        <div class="s-val" id="dfVal" style="color:var(--text2)">—</div>
+      </div>
+      <div class="stat">
+        <div class="s-label">p-value</div>
+        <div class="s-val" id="pVal" style="color:var(--green)">—</div>
+      </div>
+      <div class="stat">
+        <div class="s-label">η² (eta²)</div>
+        <div class="s-val" id="etaSq" style="color:var(--gold)">—</div>
+      </div>
+      <div class="stat">
+        <div class="s-label">Decisão</div>
+        <div class="s-val" id="decision" style="font-size:1rem">—</div>
+      </div>
+    </div>
+
+    <div class="insight" id="insightBox"></div>
+  </div>
+
+  <div class="card">
+    <div class="card-title" style="color:var(--accent)">Intuição Visual</div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:.8rem">
+      <div style="background:rgba(230,126,34,.06);border-radius:8px;padding:.8rem">
+        <div style="font-weight:700;color:var(--orange);font-size:.85rem;margin-bottom:.3rem">↑ Separação entre médias</div>
+        <div style="color:var(--text2);font-size:.82rem;line-height:1.5">Aumenta SS<sub>between</sub> → F cresce → mais fácil rejeitar H₀. É o "sinal" que você quer detectar.</div>
+      </div>
+      <div style="background:rgba(155,89,182,.06);border-radius:8px;padding:.8rem">
+        <div style="font-weight:700;color:var(--purple);font-size:.85rem;margin-bottom:.3rem">↑ Dispersão dentro dos grupos</div>
+        <div style="color:var(--text2);font-size:.82rem;line-height:1.5">Aumenta SS<sub>within</sub> → F diminui → mais difícil detectar diferenças. É o "ruído" que atrapalha.</div>
+      </div>
+      <div style="background:rgba(52,152,219,.06);border-radius:8px;padding:.8rem">
+        <div style="font-weight:700;color:var(--blue);font-size:.85rem;margin-bottom:.3rem">↑ N por grupo</div>
+        <div style="color:var(--text2);font-size:.82rem;line-height:1.5">Mais dados → estimativas mais precisas → MS<sub>within</sub> se estabiliza → F fica mais confiável. Por isso N importa!</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div class="footer">
+  Prof. Dr. Leonardo Vils · Fundamentos de Estudos Experimentais I · 2026
+</div>
+
+<script>
+const $ = id => document.getElementById(id);
+const COLORS = [
+  {dot:"rgba(26,188,156,.7)",mean:"#1ABC9C"},
+  {dot:"rgba(231,76,60,.7)",mean:"#E74C3C"},
+  {dot:"rgba(52,152,219,.7)",mean:"#3498DB"}
+];
+
+let data = [[],[],[]];
+let groupMeans = [0,0,0];
+let grandMean = 0;
+
+function gaussRand(){let u=Math.random(),v=Math.random();return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v)}
+function mean(a){return a.reduce((s,x)=>s+x,0)/a.length}
+
+function generateData() {
+  const sep = +$("sliderSep").value;
+  const within = +$("sliderWithin").value;
+  const n = +$("sliderN").value;
+  const baseMeans = [10 - sep/2, 10, 10 + sep/2];
+  data = [[],[],[]];
+  for (let g = 0; g < 3; g++) {
+    for (let i = 0; i < n; i++) {
+      data[g].push(baseMeans[g] + gaussRand() * within);
+    }
+  }
+}
+
+function newSample() {
+  generateData();
+  compute();
+}
+
+function update() {
+  const sep = +$("sliderSep").value;
+  const within = +$("sliderWithin").value;
+  const n = +$("sliderN").value;
+  $("sepVal").textContent = sep <= 2 ? "Pequena" : sep <= 5 ? "Média" : "Grande";
+  $("withinVal").textContent = within <= 1.5 ? "Pequena" : within <= 3 ? "Média" : "Grande";
+  $("nVal").textContent = n;
+  generateData();
+  compute();
+}
+
+function compute() {
+  const n = data[0].length;
+  const k = 3;
+  const N = n * k;
+
+  groupMeans = data.map(g => mean(g));
+  const all = data.flat();
+  grandMean = mean(all);
+
+  // SS
+  let ssBetween = 0, ssWithin = 0, ssTotal = 0;
+  for (let g = 0; g < k; g++) {
+    ssBetween += n * (groupMeans[g] - grandMean) ** 2;
+    for (const x of data[g]) {
+      ssWithin += (x - groupMeans[g]) ** 2;
+      ssTotal += (x - grandMean) ** 2;
+    }
+  }
+
+  const dfB = k - 1;
+  const dfW = N - k;
+  const msBet = ssBetween / dfB;
+  const msWit = ssWithin / dfW;
+  const F = msWit > 0 ? msBet / msWit : 0;
+  const eta2 = ssTotal > 0 ? ssBetween / ssTotal : 0;
+  const pValue = 1 - fCDF(F, dfB, dfW);
+
+  // Update UI
+  $("ssTotal").textContent = ssTotal.toFixed(1);
+  $("ssBetween").textContent = ssBetween.toFixed(1);
+  $("ssWithin").textContent = ssWithin.toFixed(1);
+
+  const maxSS = ssTotal || 1;
+  $("barBetween").style.width = (ssBetween / maxSS * 100) + "%";
+  $("barWithin").style.width = (ssWithin / maxSS * 100) + "%";
+
+  $("msBet").textContent = msBet.toFixed(2);
+  $("msWit").textContent = msWit.toFixed(2);
+  $("fVal").textContent = F.toFixed(2);
+  $("fStat").textContent = F.toFixed(2);
+  $("dfVal").textContent = dfB + ", " + dfW;
+  $("pVal").textContent = pValue < 0.001 ? "< .001" : pValue.toFixed(3);
+  $("pVal").style.color = pValue < 0.05 ? "var(--red)" : "var(--green)";
+  $("etaSq").textContent = eta2.toFixed(3);
+  $("decision").textContent = pValue < 0.05 ? "Rejeita H₀" : "Não rejeita H₀";
+  $("decision").style.color = pValue < 0.05 ? "var(--red)" : "var(--green)";
+
+  drawDotplot();
+  drawDecomp(ssBetween, ssWithin, ssTotal);
+  updateInsight(F, pValue, eta2, ssBetween, ssWithin);
+}
+
+function drawDotplot() {
+  const canvas = $("dotplot");
+  const dpr = window.devicePixelRatio || 1;
+  const w = canvas.clientWidth, h = 300;
+  canvas.width = w * dpr; canvas.height = h * dpr;
+  const ctx = canvas.getContext("2d");
+  ctx.scale(dpr, dpr);
+
+  const pad = {top:20, bottom:40, left:50, right:20};
+  const plotW = w - pad.left - pad.right;
+  const plotH = h - pad.top - pad.bottom;
+
+  const all = data.flat();
+  const yMin = Math.min(...all) - 1;
+  const yMax = Math.max(...all) + 1;
+
+  function toY(v) { return pad.top + plotH - (v - yMin) / (yMax - yMin) * plotH; }
+
+  ctx.clearRect(0, 0, w, h);
+
+  // Grand mean line
+  ctx.strokeStyle = "rgba(244,208,63,.3)";
+  ctx.setLineDash([6,4]);
+  ctx.lineWidth = 1.5;
+  ctx.beginPath();
+  ctx.moveTo(pad.left, toY(grandMean));
+  ctx.lineTo(w - pad.right, toY(grandMean));
+  ctx.stroke();
+  ctx.setLineDash([]);
+
+  ctx.fillStyle = "rgba(244,208,63,.5)";
+  ctx.font = "10px sans-serif";
+  ctx.textAlign = "left";
+  ctx.fillText("Média geral = " + grandMean.toFixed(2), w - pad.right - 120, toY(grandMean) - 6);
+
+  // Groups
+  const groupW = plotW / 3;
+  for (let g = 0; g < 3; g++) {
+    const cx = pad.left + g * groupW + groupW / 2;
+
+    // Between arrow (group mean to grand mean)
+    if (Math.abs(groupMeans[g] - grandMean) > 0.1) {
+      ctx.fillStyle = "rgba(230,126,34,.15)";
+      const y1 = toY(grandMean), y2 = toY(groupMeans[g]);
+      ctx.fillRect(cx - 25, Math.min(y1,y2), 50, Math.abs(y2-y1));
+    }
+
+    // Group mean line
+    ctx.strokeStyle = COLORS[g].mean;
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(cx - groupW * 0.35, toY(groupMeans[g]));
+    ctx.lineTo(cx + groupW * 0.35, toY(groupMeans[g]));
+    ctx.stroke();
+
+    // Dots with jitter
+    for (const val of data[g]) {
+      const jitter = (Math.random() - 0.5) * groupW * 0.5;
+      ctx.beginPath();
+      ctx.arc(cx + jitter, toY(val), 4, 0, 2 * Math.PI);
+      ctx.fillStyle = COLORS[g].dot;
+      ctx.fill();
+    }
+
+    // Label
+    ctx.fillStyle = COLORS[g].mean;
+    ctx.font = "bold 12px sans-serif";
+    ctx.textAlign = "center";
+    ctx.fillText("Grupo " + "ABC"[g], cx, h - pad.bottom + 16);
+    ctx.font = "10px sans-serif";
+    ctx.fillStyle = "rgba(255,255,255,.4)";
+    ctx.fillText("M = " + groupMeans[g].toFixed(2), cx, h - pad.bottom + 30);
+  }
+
+  // Y axis
+  ctx.fillStyle = "rgba(255,255,255,.2)";
+  ctx.font = "10px sans-serif";
+  ctx.textAlign = "right";
+  const yStep = Math.max(1, Math.ceil((yMax - yMin) / 8));
+  for (let y = Math.ceil(yMin); y <= yMax; y += yStep) {
+    ctx.fillText(y.toFixed(0), pad.left - 8, toY(y) + 4);
+    ctx.strokeStyle = "rgba(255,255,255,.04)";
+    ctx.beginPath(); ctx.moveTo(pad.left, toY(y)); ctx.lineTo(w - pad.right, toY(y)); ctx.stroke();
+  }
+}
+
+function drawDecomp(ssB, ssW, ssT) {
+  const canvas = $("decomp");
+  const dpr = window.devicePixelRatio || 1;
+  const w = canvas.clientWidth, h = 80;
+  canvas.width = w * dpr; canvas.height = h * dpr;
+  const ctx = canvas.getContext("2d");
+  ctx.scale(dpr, dpr);
+
+  const pad = 15;
+  const barH = 30;
+  const barW = w - 2*pad;
+  const y = 25;
+
+  ctx.clearRect(0, 0, w, h);
+
+  if (ssT === 0) return;
+  const pctB = ssB / ssT;
+  const pctW = ssW / ssT;
+
+  // Total bar background
+  ctx.fillStyle = "rgba(255,255,255,.05)";
+  roundRect(ctx, pad, y, barW, barH, 6); ctx.fill();
+
+  // Between
+  ctx.fillStyle = "rgba(230,126,34,.4)";
+  roundRect(ctx, pad, y, barW * pctB, barH, pctB > 0.98 ? 6 : 0); ctx.fill();
+  if (pctB > 0.02) {
+    ctx.beginPath();
+    ctx.moveTo(pad, y); ctx.arcTo(pad, y+barH, pad+10, y+barH, 6);
+    ctx.lineTo(pad, y+6); ctx.arcTo(pad, y, pad+10, y, 6);
+    ctx.fill();
+  }
+
+  // Within
+  ctx.fillStyle = "rgba(155,89,182,.4)";
+  const wStart = pad + barW * pctB;
+  roundRect(ctx, wStart, y, barW * pctW, barH, 0); ctx.fill();
+  // Round right end
+  if (pctW > 0.02) {
+    const rEnd = pad + barW;
+    ctx.beginPath();
+    ctx.moveTo(rEnd - 6, y); ctx.arcTo(rEnd, y, rEnd, y+6, 6);
+    ctx.arcTo(rEnd, y+barH, rEnd-6, y+barH, 6);
+    ctx.lineTo(rEnd - 6, y+barH); ctx.lineTo(rEnd - 6, y);
+    ctx.fill();
+  }
+
+  // Labels
+  ctx.font = "bold 11px sans-serif";
+  ctx.textAlign = "center";
+  if (pctB > 0.08) {
+    ctx.fillStyle = "var(--orange)";
+    ctx.fillText((pctB*100).toFixed(0) + "% Between", pad + barW*pctB/2, y + barH/2 + 4);
+  }
+  if (pctW > 0.08) {
+    ctx.fillStyle = "var(--purple)";
+    ctx.fillText((pctW*100).toFixed(0) + "% Within", wStart + barW*pctW/2, y + barH/2 + 4);
+  }
+
+  // Top label
+  ctx.fillStyle = "rgba(255,255,255,.3)";
+  ctx.font = "10px sans-serif";
+  ctx.textAlign = "left";
+  ctx.fillText("SS Total = " + ssT.toFixed(1), pad, y - 6);
+}
+
+function roundRect(ctx,x,y,w,h,r){
+  if(w<=0)return;if(h<2*r)r=h/2;if(w<2*r)r=w/2;
+  ctx.beginPath();ctx.moveTo(x+r,y);ctx.arcTo(x+w,y,x+w,y+h,r);ctx.arcTo(x+w,y+h,x,y+h,r);
+  ctx.arcTo(x,y+h,x,y,r);ctx.arcTo(x,y,x+w,y,r);ctx.closePath();
+}
+
+function updateInsight(F, p, eta2, ssB, ssW) {
+  const box = $("insightBox");
+  const sep = +$("sliderSep").value;
+  const within = +$("sliderWithin").value;
+  const pctB = ssB / (ssB + ssW) * 100;
+
+  let txt = `<strong>F = ${F.toFixed(2)}</strong>, p = ${p < 0.001 ? '< .001' : p.toFixed(3)}, η² = ${eta2.toFixed(3)}.`;
+
+  if (p < 0.05) {
+    txt += ` O resultado é <em>significativo</em> — a variância entre grupos é ${F.toFixed(1)}× maior que a variância dentro dos grupos.`;
+    if (eta2 > 0.14) txt += ` O η² de ${eta2.toFixed(3)} indica um efeito grande (> .14 por Cohen).`;
+    else if (eta2 > 0.06) txt += ` O η² de ${eta2.toFixed(3)} indica efeito médio (.06–.14).`;
+    else txt += ` Apesar de significativo, η² = ${eta2.toFixed(3)} indica efeito pequeno — significância estatística não é significância prática.`;
+  } else {
+    txt += ` Não significativo — a variância entre grupos não é suficientemente maior que o ruído dentro dos grupos.`;
+    if (sep > 3 && within > 3) txt += ` As médias até estão separadas, mas a dispersão dentro dos grupos é muito alta — o ruído "engole" o sinal.`;
+    else if (sep < 2) txt += ` As médias estão muito próximas — não há muito "sinal" para detectar.`;
+  }
+
+  txt += `<br><br><strong>${pctB.toFixed(0)}%</strong> da variância total é explicada pelas diferenças entre grupos (between), e <strong>${(100-pctB).toFixed(0)}%</strong> é ruído dentro dos grupos (within).`;
+
+  box.innerHTML = txt;
+}
+
+// F-distribution CDF (using beta incomplete function)
+function fCDF(f, d1, d2) {
+  if (f <= 0) return 0;
+  const x = d1*f / (d1*f + d2);
+  return betaInc2(d1/2, d2/2, x);
+}
+
+function betaInc2(a, b, x) {
+  if (x === 0) return 0; if (x === 1) return 1;
+  const lnB = lgamma(a)+lgamma(b)-lgamma(a+b);
+  const front = Math.exp(Math.log(x)*a + Math.log(1-x)*b - lnB) / a;
+  let f=1,c=1,d=1-(a+1)*(a+b+1)*x/(a+2);
+  if(Math.abs(d)<1e-30)d=1e-30;d=1/d;f=d;
+  for(let i=1;i<=200;i++){
+    let num=i*(b-i)*x/((a+2*i-1)*(a+2*i));
+    d=1+num*d;if(Math.abs(d)<1e-30)d=1e-30;d=1/d;
+    c=1+num/c;if(Math.abs(c)<1e-30)c=1e-30;f*=d*c;
+    num=-(a+i)*(a+b+i)*x/((a+2*i)*(a+2*i+1));
+    d=1+num*d;if(Math.abs(d)<1e-30)d=1e-30;d=1/d;
+    c=1+num/c;if(Math.abs(c)<1e-30)c=1e-30;f*=d*c;
+    if(Math.abs(d*c-1)<1e-8)break;
+  }
+  return front*f;
+}
+
+function lgamma(x){
+  const c=[76.18009172947146,-86.50532032941677,24.01409824083091,-1.231739572450155,0.1208650973866179e-2,-0.5395239384953e-5];
+  let y=x,tmp=x+5.5;tmp-=(x+0.5)*Math.log(tmp);
+  let ser=1.000000000190015;
+  for(let j=0;j<6;j++)ser+=c[j]/++y;
+  return -tmp+Math.log(2.5066282746310005*ser/x);
+}
+
+update();
+window.addEventListener("resize", compute);
+</script>
+</body>
+</html>

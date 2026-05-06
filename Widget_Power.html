@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Calculadora de Poder — Fundamentos de Estudos Experimentais I</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#0a0a0f;--glass:rgba(255,255,255,.07);--border:rgba(255,255,255,.08);
+  --text:#ECF0F1;--text2:#95A5A6;
+  --accent:#1ABC9C;--gold:#F4D03F;--red:#E74C3C;--blue:#3498DB;--purple:#9B59B6;
+}
+body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+.hero{text-align:center;padding:2.5rem 1rem 1.5rem;background:linear-gradient(135deg,rgba(244,208,63,.1),rgba(231,76,60,.08))}
+.hero-badge{display:inline-block;background:var(--gold);color:#1a1a2e;font-size:.7rem;font-weight:700;padding:.25rem .8rem;border-radius:20px;text-transform:uppercase;letter-spacing:1px;margin-bottom:.8rem}
+.hero h1{font-family:Georgia,serif;font-size:2rem;font-weight:700;line-height:1.2;margin-bottom:.5rem}
+.hero p{color:var(--text2);font-size:.95rem;max-width:600px;margin:0 auto}
+.container{max-width:950px;margin:0 auto;padding:1.5rem 1rem}
+.card{background:var(--glass);border:1px solid var(--border);border-radius:12px;padding:1.5rem;margin-bottom:1.2rem;backdrop-filter:blur(12px)}
+.card-title{font-family:Georgia,serif;font-size:1.1rem;font-weight:700;color:var(--gold);margin-bottom:.8rem}
+.params{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1rem}
+.param{background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:10px;padding:1rem;position:relative;transition:all .2s}
+.param.solving{border-color:var(--gold);background:rgba(244,208,63,.06)}
+.param .p-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:.6rem}
+.param .p-name{font-size:.75rem;color:var(--text2);text-transform:uppercase;letter-spacing:.5px;font-weight:600}
+.param .p-solve{font-size:.65rem;background:rgba(244,208,63,.15);color:var(--gold);padding:.15rem .5rem;border-radius:10px;cursor:pointer;border:1px solid rgba(244,208,63,.3);transition:all .2s}
+.param .p-solve:hover{background:rgba(244,208,63,.25)}
+.param .p-solve.active{background:var(--gold);color:#1a1a2e;font-weight:700}
+.param .p-val{font-size:2rem;font-weight:800;font-family:Georgia,serif;text-align:center;margin:.3rem 0}
+.param input[type=range]{width:100%;height:6px;-webkit-appearance:none;background:rgba(255,255,255,.1);border-radius:3px;outline:none;margin-top:.3rem}
+.param input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:18px;height:18px;background:var(--accent);border-radius:50%;cursor:pointer;border:2px solid var(--bg)}
+.param input[type=range]::-moz-range-thumb{width:18px;height:18px;background:var(--accent);border-radius:50%;cursor:pointer;border:2px solid var(--bg)}
+.param input[type=range]:disabled{opacity:.4}
+.param input[type=range]:disabled::-webkit-slider-thumb{background:var(--gold)}
+.param input[type=range]:disabled::-moz-range-thumb{background:var(--gold)}
+.param .p-range{display:flex;justify-content:space-between;font-size:.7rem;color:rgba(255,255,255,.3);margin-top:.2rem}
+canvas{width:100%;border-radius:8px}
+.test-type{display:flex;gap:.5rem;flex-wrap:wrap;margin-bottom:1rem}
+.test-btn{background:rgba(255,255,255,.06);border:1px solid var(--border);color:var(--text2);padding:.4rem .9rem;border-radius:6px;font-size:.8rem;cursor:pointer;transition:all .2s}
+.test-btn:hover,.test-btn.active{background:rgba(244,208,63,.12);border-color:var(--gold);color:var(--gold)}
+.result{background:rgba(244,208,63,.08);border:1px solid rgba(244,208,63,.2);border-radius:10px;padding:1.2rem;margin-top:1rem;text-align:center}
+.result .r-label{font-size:.8rem;color:var(--text2);text-transform:uppercase;letter-spacing:.5px}
+.result .r-val{font-size:2.5rem;font-weight:800;font-family:Georgia,serif;margin:.3rem 0}
+.result .r-desc{font-size:.85rem;color:var(--text2);line-height:1.5}
+.insight{background:rgba(244,208,63,.06);border-left:3px solid var(--gold);padding:1rem 1.2rem;border-radius:0 8px 8px 0;margin-top:1rem;font-size:.9rem;line-height:1.6;color:var(--text2)}
+.insight strong{color:var(--gold)}
+.rec-table{width:100%;border-collapse:collapse;margin-top:.8rem;font-size:.85rem}
+.rec-table th{background:rgba(244,208,63,.1);color:var(--gold);padding:.5rem;text-align:center;font-size:.75rem;text-transform:uppercase;letter-spacing:.5px}
+.rec-table td{padding:.5rem;text-align:center;border-bottom:1px solid var(--border);color:var(--text2)}
+.rec-table tr:hover td{background:rgba(255,255,255,.03)}
+.footer{text-align:center;padding:1.5rem;color:var(--text2);font-size:.8rem;border-top:1px solid var(--border);margin-top:2rem}
+@media(max-width:600px){.hero h1{font-size:1.5rem}.params{grid-template-columns:1fr 1fr}}
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <div class="hero-badge">Widget Interativo</div>
+  <h1>Calculadora de<br>Poder Estatístico</h1>
+  <p>Explore a relação entre N, tamanho de efeito, alfa e poder — um G*Power simplificado</p>
+</div>
+
+<div class="container">
+
+  <div class="card">
+    <div class="card-title">Tipo de Teste</div>
+    <div class="test-type">
+      <button class="test-btn active" onclick="setTest('ind')" id="btn-ind">t independente (2 grupos)</button>
+      <button class="test-btn" onclick="setTest('paired')" id="btn-paired">t pareado</button>
+      <button class="test-btn" onclick="setTest('anova')" id="btn-anova">ANOVA one-way</button>
+    </div>
+    <div id="anovaExtra" style="display:none;margin-top:.5rem">
+      <label style="font-size:.8rem;color:var(--text2)">Número de grupos:
+        <select id="kGroups" style="background:rgba(255,255,255,.1);color:var(--text);border:1px solid var(--border);padding:.3rem .5rem;border-radius:4px;margin-left:.3rem" onchange="recalc()">
+          <option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option>
+        </select>
+      </label>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Parâmetros — clique em "Resolver" para calcular um deles</div>
+    <div class="params">
+      <div class="param" id="param-n">
+        <div class="p-header">
+          <span class="p-name">N por grupo</span>
+          <span class="p-solve" onclick="setSolve('n')">Resolver</span>
+        </div>
+        <div class="p-val" id="val-n" style="color:var(--blue)">30</div>
+        <input type="range" id="slider-n" min="5" max="500" value="30" step="5" oninput="onSlider('n')">
+        <div class="p-range"><span>5</span><span>500</span></div>
+      </div>
+      <div class="param" id="param-d">
+        <div class="p-header">
+          <span class="p-name">Tamanho de efeito (d)</span>
+          <span class="p-solve" onclick="setSolve('d')">Resolver</span>
+        </div>
+        <div class="p-val" id="val-d" style="color:var(--purple)">0.50</div>
+        <input type="range" id="slider-d" min="0.05" max="2" value="0.5" step="0.05" oninput="onSlider('d')">
+        <div class="p-range"><span>0.05</span><span>2.00</span></div>
+      </div>
+      <div class="param" id="param-a">
+        <div class="p-header">
+          <span class="p-name">Alfa (α)</span>
+          <span class="p-solve" onclick="setSolve('a')">Resolver</span>
+        </div>
+        <div class="p-val" id="val-a" style="color:var(--red)">0.05</div>
+        <input type="range" id="slider-a" min="0.001" max="0.10" value="0.05" step="0.001" oninput="onSlider('a')">
+        <div class="p-range"><span>.001</span><span>.100</span></div>
+      </div>
+      <div class="param solving" id="param-p">
+        <div class="p-header">
+          <span class="p-name">Poder (1 − β)</span>
+          <span class="p-solve active" onclick="setSolve('p')">Resolver</span>
+        </div>
+        <div class="p-val" id="val-p" style="color:var(--gold)">—</div>
+        <input type="range" id="slider-p" min="0.50" max="0.995" value="0.80" step="0.005" disabled oninput="onSlider('p')">
+        <div class="p-range"><span>50%</span><span>99.5%</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Curva de Poder</div>
+    <canvas id="chart" height="320"></canvas>
+    <div class="insight" id="insightBox"></div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Tabela de Referência Rápida</div>
+    <p style="color:var(--text2);font-size:.85rem;margin-bottom:.5rem">N por grupo necessário para poder = .80, α = .05 (teste t independente, bilateral)</p>
+    <table class="rec-table">
+      <thead><tr><th>Cohen's d</th><th>N/grupo</th><th>N total</th><th>Classificação</th></tr></thead>
+      <tbody>
+        <tr><td>0.20</td><td>394</td><td>788</td><td>Pequeno</td></tr>
+        <tr><td>0.30</td><td>176</td><td>352</td><td>Pequeno–Médio</td></tr>
+        <tr><td>0.40</td><td>100</td><td>200</td><td>Médio</td></tr>
+        <tr><td>0.50</td><td>64</td><td>128</td><td>Médio</td></tr>
+        <tr><td>0.60</td><td>45</td><td>90</td><td>Médio–Grande</td></tr>
+        <tr><td>0.80</td><td>26</td><td>52</td><td>Grande</td></tr>
+        <tr><td>1.00</td><td>17</td><td>34</td><td>Muito grande</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+</div>
+
+<div class="footer">
+  Prof. Dr. Leonardo Vils · Fundamentos de Estudos Experimentais I · 2026
+</div>
+
+<script>
+const $ = id => document.getElementById(id);
+let solveFor = "p"; // which param to compute
+let testType = "ind"; // ind, paired, anova
+
+const params = { n: 30, d: 0.5, a: 0.05, p: 0.80 };
+
+function normCDF(x) {
+  const a1=0.254829592,a2=-0.284496736,a3=1.421413741,a4=-1.453152027,a5=1.061405429,p=0.3275911;
+  const sign=x<0?-1:1; const ax=Math.abs(x)/Math.SQRT2;
+  const t=1/(1+p*ax);
+  const y=1-(((((a5*t+a4)*t)+a3)*t+a2)*t+a1)*t*Math.exp(-ax*ax);
+  return 0.5*(1+sign*y);
+}
+
+function normInv(p) {
+  if(p<=0)return-8;if(p>=1)return 8;if(p===.5)return 0;
+  const a=[-3.969683028665376e1,2.209460984245205e2,-2.759285104469687e2,1.383577518672690e2,-3.066479806614716e1,2.506628277459239e0];
+  const b=[-5.447609879822406e1,1.615858368580409e2,-1.556989798598866e2,6.680131188771972e1,-1.328068155288572e1];
+  const c=[-7.784894002430293e-3,-3.223964580411365e-1,-2.400758277161838e0,-2.549732539343734e0,4.374664141464968e0,2.938163982698783e0];
+  const dd=[7.784695709041462e-3,3.224671290700398e-1,2.445134137142996e0,3.754408661907416e0];
+  const pL=0.02425;
+  let q,r;
+  if(p<pL){q=Math.sqrt(-2*Math.log(p));return(((((c[0]*q+c[1])*q+c[2])*q+c[3])*q+c[4])*q+c[5])/((((dd[0]*q+dd[1])*q+dd[2])*q+dd[3])*q+1)}
+  if(p<=1-pL){q=p-.5;r=q*q;return(((((a[0]*r+a[1])*r+a[2])*r+a[3])*r+a[4])*r+a[5])*q/(((((b[0]*r+b[1])*r+b[2])*r+b[3])*r+b[4])*r+1)}
+  q=Math.sqrt(-2*Math.log(1-p));return-(((((c[0]*q+c[1])*q+c[2])*q+c[3])*q+c[4])*q+c[5])/((((dd[0]*q+dd[1])*q+dd[2])*q+dd[3])*q+1);
+}
+
+// Non-centrality parameter
+function ncp(n, d) {
+  if (testType === "paired") return d * Math.sqrt(n);
+  if (testType === "anova") {
+    const k = +($("kGroups").value);
+    // f = d/2 for ANOVA with equal spacing; ncp = n*k*f^2
+    const f = d / 2;
+    return Math.sqrt(n * k * f * f);
+  }
+  // independent t: ncp = d * sqrt(n/2)
+  return d * Math.sqrt(n / 2);
+}
+
+// Power calculation (normal approximation)
+function calcPower(n, d, a) {
+  if (testType === "anova") {
+    // Use chi-sq approximation for F-test
+    const k = +($("kGroups").value);
+    const f = d / 2;
+    const lambda = n * k * f * f;
+    const df1 = k - 1;
+    const crit = chiInv(1 - a, df1);
+    // Power ≈ P(chi²(df1, lambda) > crit)
+    // Use normal approximation of non-central chi²
+    const mu = df1 + lambda;
+    const sigma = Math.sqrt(2 * (df1 + 2 * lambda));
+    if (sigma === 0) return a;
+    return 1 - normCDF((crit - mu) / sigma);
+  }
+  const delta = ncp(n, d);
+  const za = normInv(1 - a/2); // two-tailed
+  return normCDF(delta - za) + normCDF(-delta - za);
+}
+
+function chiInv(p, df) {
+  // Wilson-Hilferty approximation
+  if (df <= 0) return 0;
+  const z = normInv(p);
+  const a = 1 - 2/(9*df);
+  const b = Math.sqrt(2/(9*df));
+  let x = a + z*b;
+  if (x < 0) x = 0.001;
+  return df * x * x * x;
+}
+
+// Solve for N given power
+function solveN(d, a, targetPower) {
+  let lo = 2, hi = 10000;
+  for (let i = 0; i < 100; i++) {
+    const mid = Math.round((lo + hi) / 2);
+    const pw = calcPower(mid, d, a);
+    if (pw < targetPower) lo = mid; else hi = mid;
+    if (hi - lo <= 1) break;
+  }
+  return hi;
+}
+
+// Solve for d given power
+function solveD(n, a, targetPower) {
+  let lo = 0.01, hi = 5;
+  for (let i = 0; i < 100; i++) {
+    const mid = (lo + hi) / 2;
+    const pw = calcPower(n, mid, a);
+    if (pw < targetPower) lo = mid; else hi = mid;
+    if (hi - lo < 0.001) break;
+  }
+  return (lo + hi) / 2;
+}
+
+// Solve for alpha given power
+function solveA(n, d, targetPower) {
+  let lo = 0.0001, hi = 0.5;
+  for (let i = 0; i < 100; i++) {
+    const mid = (lo + hi) / 2;
+    const pw = calcPower(n, d, mid);
+    if (pw > targetPower) lo = mid; else hi = mid;
+    if (hi - lo < 0.0001) break;
+  }
+  return (lo + hi) / 2;
+}
+
+function setSolve(which) {
+  solveFor = which;
+  ["n","d","a","p"].forEach(k => {
+    $("param-"+k).classList.toggle("solving", k === which);
+    $("slider-"+k).disabled = (k === which);
+    $("param-"+k).querySelector(".p-solve").classList.toggle("active", k === which);
+  });
+  recalc();
+}
+
+function onSlider(which) {
+  const v = +$("slider-"+which).value;
+  params[which] = v;
+  recalc();
+}
+
+function setTest(t) {
+  testType = t;
+  document.querySelectorAll(".test-btn").forEach(b => b.classList.remove("active"));
+  $("btn-"+t).classList.add("active");
+  $("anovaExtra").style.display = t === "anova" ? "block" : "none";
+  recalc();
+}
+
+function recalc() {
+  // Read current slider values (except the one being solved)
+  ["n","d","a","p"].forEach(k => {
+    if (k !== solveFor) params[k] = +$("slider-"+k).value;
+  });
+
+  // Solve
+  if (solveFor === "p") {
+    params.p = calcPower(params.n, params.d, params.a);
+  } else if (solveFor === "n") {
+    params.n = solveN(params.d, params.a, params.p);
+  } else if (solveFor === "d") {
+    params.d = solveD(params.n, params.a, params.p);
+  } else if (solveFor === "a") {
+    params.a = solveA(params.n, params.d, params.p);
+  }
+
+  // Update displays
+  $("val-n").textContent = Math.round(params.n);
+  $("val-d").textContent = params.d.toFixed(2);
+  $("val-a").textContent = params.a < 0.001 ? params.a.toExponential(1) : params.a.toFixed(3);
+  const pPct = (params.p * 100);
+  $("val-p").textContent = pPct.toFixed(1) + "%";
+  $("val-p").style.color = params.p >= 0.8 ? "#2ECC71" : params.p >= 0.5 ? "var(--gold)" : "var(--red)";
+
+  drawChart();
+  updateInsight();
+}
+
+function drawChart() {
+  const canvas = $("chart");
+  const dpr = window.devicePixelRatio || 1;
+  const w = canvas.clientWidth, h = 320;
+  canvas.width = w * dpr; canvas.height = h * dpr;
+  const ctx = canvas.getContext("2d");
+  ctx.scale(dpr, dpr);
+
+  const pad = { top: 30, bottom: 50, left: 55, right: 20 };
+  const plotW = w - pad.left - pad.right;
+  const plotH = h - pad.top - pad.bottom;
+
+  // X axis: N from 5 to max(500, params.n*1.5)
+  const xMax = Math.max(300, Math.round(params.n * 2));
+  const xMin = 5;
+  function toX(n) { return pad.left + (n - xMin) / (xMax - xMin) * plotW; }
+  function toY(p) { return pad.top + plotH - p * plotH; }
+
+  ctx.clearRect(0, 0, w, h);
+
+  // Grid
+  ctx.strokeStyle = "rgba(255,255,255,.05)";
+  ctx.lineWidth = 1;
+  for (let p = 0; p <= 1; p += 0.2) {
+    ctx.beginPath(); ctx.moveTo(pad.left, toY(p)); ctx.lineTo(w-pad.right, toY(p)); ctx.stroke();
+    ctx.fillStyle = "rgba(255,255,255,.25)";
+    ctx.font = "10px 'Segoe UI',sans-serif";
+    ctx.textAlign = "right";
+    ctx.fillText((p*100).toFixed(0)+"%", pad.left - 8, toY(p) + 4);
+  }
+
+  // Power = 0.80 line
+  ctx.strokeStyle = "rgba(244,208,63,.25)";
+  ctx.setLineDash([6,4]);
+  ctx.beginPath(); ctx.moveTo(pad.left, toY(0.8)); ctx.lineTo(w-pad.right, toY(0.8)); ctx.stroke();
+  ctx.setLineDash([]);
+  ctx.fillStyle = "rgba(244,208,63,.5)";
+  ctx.font = "10px 'Segoe UI',sans-serif";
+  ctx.textAlign = "left";
+  ctx.fillText("80%", w - pad.right + 4, toY(0.8) + 4);
+
+  // Alpha line
+  ctx.strokeStyle = "rgba(231,76,60,.2)";
+  ctx.setLineDash([3,3]);
+  ctx.beginPath(); ctx.moveTo(pad.left, toY(params.a)); ctx.lineTo(w-pad.right, toY(params.a)); ctx.stroke();
+  ctx.setLineDash([]);
+  ctx.fillStyle = "rgba(231,76,60,.5)";
+  ctx.font = "9px 'Segoe UI',sans-serif";
+  ctx.fillText("α=" + params.a.toFixed(3), w - pad.right + 4, toY(params.a) + 4);
+
+  // Power curve
+  ctx.beginPath();
+  const step = Math.max(1, Math.round((xMax - xMin) / 300));
+  for (let n = xMin; n <= xMax; n += step) {
+    const pw = calcPower(n, params.d, params.a);
+    const x = toX(n), y = toY(pw);
+    n === xMin ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+  }
+  ctx.strokeStyle = "var(--gold)";
+  ctx.lineWidth = 2.5;
+  ctx.stroke();
+
+  // Fill under curve
+  ctx.lineTo(toX(xMax), toY(0));
+  ctx.lineTo(toX(xMin), toY(0));
+  ctx.closePath();
+  ctx.fillStyle = "rgba(244,208,63,.06)";
+  ctx.fill();
+
+  // Current point
+  const curX = toX(params.n), curY = toY(params.p);
+  // Crosshairs
+  ctx.strokeStyle = "rgba(255,255,255,.15)";
+  ctx.setLineDash([4,4]);
+  ctx.lineWidth = 1;
+  ctx.beginPath(); ctx.moveTo(curX, toY(0)); ctx.lineTo(curX, curY); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(pad.left, curY); ctx.lineTo(curX, curY); ctx.stroke();
+  ctx.setLineDash([]);
+
+  // Dot
+  ctx.beginPath();
+  ctx.arc(curX, curY, 7, 0, 2*Math.PI);
+  ctx.fillStyle = params.p >= 0.8 ? "#2ECC71" : params.p >= 0.5 ? "var(--gold)" : "var(--red)";
+  ctx.fill();
+  ctx.strokeStyle = "var(--bg)";
+  ctx.lineWidth = 2;
+  ctx.stroke();
+
+  // Label on dot
+  ctx.fillStyle = "var(--text)";
+  ctx.font = "bold 11px 'Segoe UI',sans-serif";
+  ctx.textAlign = "center";
+  ctx.fillText("N=" + Math.round(params.n) + ", " + (params.p*100).toFixed(0) + "%", curX, curY - 14);
+
+  // X axis labels
+  ctx.fillStyle = "rgba(255,255,255,.3)";
+  ctx.font = "10px 'Segoe UI',sans-serif";
+  ctx.textAlign = "center";
+  const xStep = xMax <= 100 ? 20 : xMax <= 300 ? 50 : 100;
+  for (let n = 0; n <= xMax; n += xStep) {
+    if (n < xMin) continue;
+    ctx.fillText(n, toX(n), h - pad.bottom + 18);
+  }
+  ctx.fillText("N por grupo", pad.left + plotW/2, h - 5);
+
+  // Y axis label
+  ctx.save();
+  ctx.translate(12, pad.top + plotH/2);
+  ctx.rotate(-Math.PI/2);
+  ctx.fillStyle = "rgba(255,255,255,.3)";
+  ctx.font = "10px 'Segoe UI',sans-serif";
+  ctx.textAlign = "center";
+  ctx.fillText("Poder (1 − β)", 0, 0);
+  ctx.restore();
+}
+
+function updateInsight() {
+  const box = $("insightBox");
+  const nTotal = testType === "anova" ? params.n * (+$("kGroups").value) : params.n * 2;
+  const testName = testType === "ind" ? "teste t independente" : testType === "paired" ? "teste t pareado" : "ANOVA one-way";
+
+  if (solveFor === "p") {
+    if (params.p >= 0.8) {
+      box.innerHTML = `<strong>Poder = ${(params.p*100).toFixed(1)}%</strong> — adequado! Com <strong>N = ${Math.round(params.n)}</strong> por grupo (${nTotal} total), ${testName}, <strong>d = ${params.d.toFixed(2)}</strong> e <strong>α = ${params.a.toFixed(3)}</strong>, você tem boa chance de detectar o efeito se ele existir. Cohen recomendava poder ≥ .80.`;
+    } else {
+      const n80 = solveN(params.d, params.a, 0.8);
+      box.innerHTML = `<strong>Poder = ${(params.p*100).toFixed(1)}%</strong> — abaixo do recomendado (.80). Você precisaria de <strong>N = ${n80} por grupo</strong> (${testType==='anova'?n80*(+$("kGroups").value):n80*2} total) para atingir 80% de poder. Com o N atual, há ${((1-params.p)*100).toFixed(0)}% de chance de <em>não</em> detectar um efeito real — um Erro Tipo II.`;
+    }
+  } else if (solveFor === "n") {
+    box.innerHTML = `Para detectar um efeito de <strong>d = ${params.d.toFixed(2)}</strong> com <strong>${(params.p*100).toFixed(0)}%</strong> de poder e <strong>α = ${params.a.toFixed(3)}</strong>, você precisa de <strong>N = ${Math.round(params.n)} por grupo</strong> (${nTotal} total) usando ${testName}. ${params.n > 200 ? 'Esse N é alto — considere aumentar o efeito esperado ou aceitar um poder menor.' : 'Esse N parece viável para a maioria dos contextos em Ciências Sociais Aplicadas.'}`;
+  } else if (solveFor === "d") {
+    box.innerHTML = `Com <strong>N = ${Math.round(params.n)}</strong> por grupo e <strong>α = ${params.a.toFixed(3)}</strong>, o menor efeito detectável com ${(params.p*100).toFixed(0)}% de poder é <strong>d = ${params.d.toFixed(2)}</strong>. ${params.d > 0.8 ? 'Cuidado: só efeitos grandes serão detectados. Se o efeito real for menor, este estudo não terá poder suficiente.' : 'Esse é um bom ponto de partida para planejar sua coleta.'}`;
+  } else {
+    box.innerHTML = `Para um efeito de <strong>d = ${params.d.toFixed(2)}</strong> com <strong>N = ${Math.round(params.n)}</strong> por grupo e poder de ${(params.p*100).toFixed(0)}%, o alfa necessário seria <strong>${params.a.toFixed(4)}</strong>. ${params.a > 0.05 ? 'Note que isso é mais liberal que o convencional .05 — aumente o N ou aceite menos poder.' : 'Isso está dentro do padrão convencional.'}`;
+  }
+}
+
+// Init
+recalc();
+window.addEventListener("resize", drawChart);
+</script>
+</body>
+</html>

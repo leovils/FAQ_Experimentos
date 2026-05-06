@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dança dos P-values — Fundamentos de Estudos Experimentais I</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#0a0a0f;--glass:rgba(255,255,255,.07);--border:rgba(255,255,255,.08);
+  --text:#ECF0F1;--text2:#95A5A6;
+  --accent:#1ABC9C;--gold:#F4D03F;--red:#E74C3C;--blue:#3498DB;--purple:#9B59B6;--green:#2ECC71;
+}
+body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+.hero{text-align:center;padding:2.5rem 1rem 1.5rem;background:linear-gradient(135deg,rgba(155,89,182,.12),rgba(231,76,60,.08))}
+.hero-badge{display:inline-block;background:var(--purple);color:#fff;font-size:.7rem;font-weight:700;padding:.25rem .8rem;border-radius:20px;text-transform:uppercase;letter-spacing:1px;margin-bottom:.8rem}
+.hero h1{font-family:Georgia,serif;font-size:2rem;font-weight:700;line-height:1.2;margin-bottom:.5rem}
+.hero p{color:var(--text2);font-size:.95rem;max-width:650px;margin:0 auto}
+.container{max-width:960px;margin:0 auto;padding:1.5rem 1rem}
+.card{background:var(--glass);border:1px solid var(--border);border-radius:12px;padding:1.5rem;margin-bottom:1.2rem}
+.card-title{font-family:Georgia,serif;font-size:1.1rem;font-weight:700;color:var(--purple);margin-bottom:.8rem}
+.controls{display:flex;flex-wrap:wrap;gap:1rem;align-items:flex-end;margin-bottom:1rem}
+.control-group{flex:1;min-width:150px}
+.control-group label{display:block;font-size:.78rem;color:var(--text2);margin-bottom:.4rem;font-weight:600;text-transform:uppercase;letter-spacing:.5px}
+.control-group .val{color:var(--purple);font-weight:700}
+input[type=range]{width:100%;height:6px;-webkit-appearance:none;background:rgba(255,255,255,.1);border-radius:3px;outline:none;margin-top:.3rem}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:18px;height:18px;background:var(--purple);border-radius:50%;cursor:pointer;border:2px solid var(--bg)}
+input[type=range]::-moz-range-thumb{width:18px;height:18px;background:var(--purple);border-radius:50%;cursor:pointer;border:2px solid var(--bg)}
+select{background:rgba(255,255,255,.1);color:var(--text);border:1px solid var(--border);padding:.4rem .6rem;border-radius:6px;font-size:.85rem}
+select option{background:#1a1a2e}
+.btn{background:linear-gradient(135deg,var(--purple),#8E44AD);color:#fff;border:none;padding:.65rem 1.5rem;border-radius:8px;font-size:.9rem;font-weight:700;cursor:pointer;transition:all .2s}
+.btn:hover{transform:translateY(-1px);box-shadow:0 4px 15px rgba(155,89,182,.3)}
+.btn-row{display:flex;gap:.6rem;flex-wrap:wrap}
+.btn-outline{background:none;border:1px solid var(--border);color:var(--text2)}
+.btn-outline:hover{border-color:var(--purple);color:var(--purple);box-shadow:none}
+canvas{width:100%;border-radius:8px}
+.stats-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:.6rem;margin-top:1rem}
+.stat{background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:8px;padding:.7rem;text-align:center}
+.stat .s-val{font-size:1.6rem;font-weight:800;font-family:Georgia,serif;margin:.2rem 0}
+.stat .s-label{font-size:.7rem;color:var(--text2);text-transform:uppercase;letter-spacing:.5px}
+.pval-strip{display:flex;flex-wrap:wrap;gap:3px;margin:.8rem 0;max-height:200px;overflow-y:auto;padding:.3rem}
+.pval-dot{width:42px;height:26px;border-radius:5px;display:flex;align-items:center;justify-content:center;font-size:.68rem;font-weight:700;transition:all .2s}
+.pval-sig{background:rgba(231,76,60,.3);color:var(--red)}
+.pval-ns{background:rgba(46,204,113,.15);color:var(--green)}
+.pval-current{transform:scale(1.15);box-shadow:0 0 8px rgba(155,89,182,.5);border:1px solid var(--purple)}
+.insight{background:rgba(155,89,182,.08);border-left:3px solid var(--purple);padding:1rem 1.2rem;border-radius:0 8px 8px 0;margin-top:1rem;font-size:.88rem;line-height:1.6;color:var(--text2)}
+.insight strong{color:var(--purple)}
+.insight em{color:var(--gold)}
+.scenario-box{display:flex;gap:.5rem;flex-wrap:wrap;margin-bottom:.8rem}
+.scenario-btn{padding:.4rem .8rem;border-radius:6px;border:1px solid var(--border);background:rgba(255,255,255,.03);color:var(--text2);font-size:.82rem;cursor:pointer;transition:all .2s}
+.scenario-btn:hover{border-color:var(--purple);color:var(--purple)}
+.scenario-btn.active{background:rgba(155,89,182,.15);border-color:var(--purple);color:var(--purple);font-weight:600}
+.footer{text-align:center;padding:1.5rem;color:var(--text2);font-size:.8rem;border-top:1px solid var(--border);margin-top:2rem}
+@media(max-width:600px){.hero h1{font-size:1.5rem}}
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <div class="hero-badge">Widget Interativo</div>
+  <h1>A Dança dos<br>P-values</h1>
+  <p>O mesmo experimento, repetido 100 vezes — observe como p oscila loucamente entre réplicas</p>
+</div>
+
+<div class="container">
+
+  <div class="card">
+    <div class="card-title">Cenário do Experimento</div>
+    <div class="scenario-box">
+      <button class="scenario-btn active" onclick="setScenario('real')" id="sc-real">Efeito real (d=0.5)</button>
+      <button class="scenario-btn" onclick="setScenario('small')" id="sc-small">Efeito pequeno (d=0.2)</button>
+      <button class="scenario-btn" onclick="setScenario('null')" id="sc-null">Efeito zero (H₀ verdadeira)</button>
+    </div>
+    <div class="controls">
+      <div class="control-group">
+        <label>N por grupo: <span class="val" id="nVal">30</span></label>
+        <input type="range" id="sliderN" min="10" max="200" value="30" step="5" oninput="$('nVal').textContent=this.value">
+      </div>
+      <div class="control-group">
+        <label>Cohen's d real: <span class="val" id="dVal">0.50</span></label>
+        <input type="range" id="sliderD" min="0" max="1.5" value="0.5" step="0.05" oninput="$('dVal').textContent=(+this.value).toFixed(2)">
+      </div>
+      <div class="control-group">
+        <label>α (critério): <span class="val" id="aVal">0.05</span></label>
+        <select id="selAlpha" onchange="$('aVal').textContent=this.value">
+          <option value="0.10">0.10</option>
+          <option value="0.05" selected>0.05</option>
+          <option value="0.01">0.01</option>
+          <option value="0.005">0.005</option>
+        </select>
+      </div>
+    </div>
+    <div class="btn-row">
+      <button class="btn" onclick="runAll()">⚡ Rodar 100 Réplicas</button>
+      <button class="btn btn-outline" onclick="runAnimated()">▶ Animar uma a uma</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Distribuição dos 100 P-values</div>
+    <canvas id="histogram" height="280"></canvas>
+    <div class="stats-row">
+      <div class="stat">
+        <div class="s-label">Significativos (p &lt; α)</div>
+        <div class="s-val" id="nSig" style="color:var(--red)">—</div>
+      </div>
+      <div class="stat">
+        <div class="s-label">Não significativos</div>
+        <div class="s-val" id="nNS" style="color:var(--green)">—</div>
+      </div>
+      <div class="stat">
+        <div class="s-label">P-value mediano</div>
+        <div class="s-val" id="medP" style="color:var(--purple)">—</div>
+      </div>
+      <div class="stat">
+        <div class="s-label">Menor p-value</div>
+        <div class="s-val" id="minP" style="color:var(--gold)">—</div>
+      </div>
+      <div class="stat">
+        <div class="s-label">Maior p-value</div>
+        <div class="s-val" id="maxP" style="color:var(--text2)">—</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Cada Réplica Individual</div>
+    <p style="color:var(--text2);font-size:.85rem;margin-bottom:.5rem">Cada célula é uma réplica. <span style="color:var(--red)">Vermelho</span> = p &lt; α (significativo). <span style="color:var(--green)">Verde</span> = não significativo.</p>
+    <div class="pval-strip" id="pvalStrip"></div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">O que isso significa?</div>
+    <div class="insight" id="insightBox"></div>
+  </div>
+
+  <div class="card">
+    <div class="card-title" style="color:var(--gold)">Lições da Dança</div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:.8rem">
+      <div style="background:rgba(231,76,60,.06);border-radius:8px;padding:.8rem">
+        <div style="font-weight:700;color:var(--red);font-size:.85rem;margin-bottom:.3rem">1. P-value não é reprodutível</div>
+        <div style="color:var(--text2);font-size:.82rem;line-height:1.5">O mesmo experimento exato produz p-values radicalmente diferentes a cada replicação. Tratar p = 0.048 como "verdade" e p = 0.052 como "falha" é uma distinção sem sentido.</div>
+      </div>
+      <div style="background:rgba(155,89,182,.06);border-radius:8px;padding:.8rem">
+        <div style="font-weight:700;color:var(--purple);font-size:.85rem;margin-bottom:.3rem">2. Poder determina a dança</div>
+        <div style="color:var(--text2);font-size:.82rem;line-height:1.5">Com poder baixo (N pequeno, d pequeno), mesmo um efeito real produz muitos p > .05. Aumentar N estreita a distribuição dos p-values e aumenta a consistência.</div>
+      </div>
+      <div style="background:rgba(244,208,63,.06);border-radius:8px;padding:.8rem">
+        <div style="font-weight:700;color:var(--gold);font-size:.85rem;margin-bottom:.3rem">3. Reporte effect sizes e CIs</div>
+        <div style="color:var(--text2);font-size:.82rem;line-height:1.5">Em vez de dicotomizar em "significativo/não-significativo", reporte Cohen's d e o intervalo de confiança. Eles dançam menos e contam uma história mais honesta.</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div class="footer">
+  Prof. Dr. Leonardo Vils · Fundamentos de Estudos Experimentais I · 2026<br>
+  <span style="font-size:.72rem">Inspirado em Cumming (2012) — "The New Statistics" e geoff-cumming.shinyapps.io</span>
+</div>
+
+<script>
+const $ = id => document.getElementById(id);
+let pvalues = [];
+let animInterval = null;
+
+function setScenario(type) {
+  document.querySelectorAll(".scenario-btn").forEach(b => b.classList.remove("active"));
+  $("sc-"+type).classList.add("active");
+  if (type === "real") { $("sliderD").value = 0.5; $("dVal").textContent = "0.50"; $("sliderN").value = 30; $("nVal").textContent = "30"; }
+  else if (type === "small") { $("sliderD").value = 0.2; $("dVal").textContent = "0.20"; $("sliderN").value = 30; $("nVal").textContent = "30"; }
+  else { $("sliderD").value = 0; $("dVal").textContent = "0.00"; $("sliderN").value = 50; $("nVal").textContent = "50"; }
+}
+
+function gaussRand() {
+  let u = Math.random(), v = Math.random();
+  return Math.sqrt(-2*Math.log(u)) * Math.cos(2*Math.PI*v);
+}
+
+function runExperiment(n, d) {
+  // Generate two groups
+  const ctrl = [], treat = [];
+  for (let i = 0; i < n; i++) {
+    ctrl.push(gaussRand());
+    treat.push(d + gaussRand());
+  }
+  // Welch's t-test
+  const mc = mean(ctrl), mt = mean(treat);
+  const vc = variance(ctrl), vt = variance(treat);
+  const se = Math.sqrt(vc/n + vt/n);
+  if (se === 0) return 1;
+  const t = Math.abs(mt - mc) / se;
+  const df = Math.max(1, Math.round(((vc/n + vt/n)**2) / ((vc/n)**2/(n-1) + (vt/n)**2/(n-1))));
+  return 2 * (1 - tCDF(t, df));
+}
+
+function mean(a) { return a.reduce((s,x)=>s+x,0)/a.length; }
+function variance(a) { const m=mean(a); return a.reduce((s,x)=>s+(x-m)**2,0)/(a.length-1); }
+
+function tCDF(t, df) {
+  if (df >= 30) return normCDF(t);
+  const x = df / (df + t*t);
+  return 1 - 0.5 * betaInc(df/2, 0.5, x);
+}
+
+function normCDF(x) {
+  const a1=0.254829592,a2=-0.284496736,a3=1.421413741,a4=-1.453152027,a5=1.061405429,p=0.3275911;
+  const sign=x<0?-1:1;const ax=Math.abs(x)/Math.SQRT2;
+  const t=1/(1+p*ax);
+  const y=1-(((((a5*t+a4)*t)+a3)*t+a2)*t+a1)*t*Math.exp(-ax*ax);
+  return 0.5*(1+sign*y);
+}
+
+function betaInc(a, b, x) {
+  if (x===0||x===1) return x;
+  const lnB=lgamma(a)+lgamma(b)-lgamma(a+b);
+  const front=Math.exp(Math.log(x)*a+Math.log(1-x)*b-lnB)/a;
+  let f=1,c=1,d=1-(a+1)*(a+b+1)*x/(a+2);
+  if(Math.abs(d)<1e-30)d=1e-30;d=1/d;f=d;
+  for(let i=1;i<=100;i++){
+    let num=i*(b-i)*x/((a+2*i-1)*(a+2*i));
+    d=1+num*d;if(Math.abs(d)<1e-30)d=1e-30;d=1/d;
+    c=1+num/c;if(Math.abs(c)<1e-30)c=1e-30;f*=d*c;
+    num=-(a+i)*(a+b+i)*x/((a+2*i)*(a+2*i+1));
+    d=1+num*d;if(Math.abs(d)<1e-30)d=1e-30;d=1/d;
+    c=1+num/c;if(Math.abs(c)<1e-30)c=1e-30;f*=d*c;
+    if(Math.abs(d*c-1)<1e-8)break;
+  }
+  return 1-front*f;
+}
+
+function lgamma(x){
+  const c=[76.18009172947146,-86.50532032941677,24.01409824083091,-1.231739572450155,0.1208650973866179e-2,-0.5395239384953e-5];
+  let y=x,tmp=x+5.5;tmp-=(x+0.5)*Math.log(tmp);
+  let ser=1.000000000190015;
+  for(let j=0;j<6;j++)ser+=c[j]/++y;
+  return -tmp+Math.log(2.5066282746310005*ser/x);
+}
+
+function runAll() {
+  stopAnim();
+  const n = +$("sliderN").value;
+  const d = +$("sliderD").value;
+  pvalues = [];
+  for (let i = 0; i < 100; i++) pvalues.push(runExperiment(n, d));
+  render();
+}
+
+function runAnimated() {
+  stopAnim();
+  const n = +$("sliderN").value;
+  const d = +$("sliderD").value;
+  pvalues = [];
+  let count = 0;
+  animInterval = setInterval(() => {
+    pvalues.push(runExperiment(n, d));
+    count++;
+    render(count - 1);
+    if (count >= 100) stopAnim();
+  }, 80);
+}
+
+function stopAnim() {
+  if (animInterval) { clearInterval(animInterval); animInterval = null; }
+}
+
+function render(highlight) {
+  const alpha = +$("selAlpha").value;
+  drawHistogram(alpha);
+  drawStrip(alpha, highlight);
+  updateStats(alpha);
+  updateInsight(alpha);
+}
+
+function drawHistogram(alpha) {
+  const canvas = $("histogram");
+  const dpr = window.devicePixelRatio || 1;
+  const w = canvas.clientWidth, h = 280;
+  canvas.width = w*dpr; canvas.height = h*dpr;
+  const ctx = canvas.getContext("2d");
+  ctx.scale(dpr, dpr);
+
+  const pad = {top:25, bottom:45, left:50, right:20};
+  const plotW = w - pad.left - pad.right;
+  const plotH = h - pad.top - pad.bottom;
+
+  ctx.clearRect(0, 0, w, h);
+
+  // Bins from 0 to 1
+  const nBins = 20;
+  const bins = new Array(nBins).fill(0);
+  for (const p of pvalues) {
+    const b = Math.min(Math.floor(p * nBins), nBins - 1);
+    bins[b]++;
+  }
+  const maxBin = Math.max(...bins, 1);
+
+  // Alpha zone
+  const alphaX = pad.left + alpha * plotW;
+  ctx.fillStyle = "rgba(231,76,60,.06)";
+  ctx.fillRect(pad.left, pad.top, alphaX - pad.left, plotH);
+
+  // Alpha line
+  ctx.strokeStyle = "rgba(231,76,60,.5)";
+  ctx.setLineDash([6,4]);
+  ctx.lineWidth = 1.5;
+  ctx.beginPath();
+  ctx.moveTo(alphaX, pad.top);
+  ctx.lineTo(alphaX, pad.top + plotH);
+  ctx.stroke();
+  ctx.setLineDash([]);
+
+  // Alpha label
+  ctx.fillStyle = "var(--red)";
+  ctx.font = "bold 10px 'Segoe UI',sans-serif";
+  ctx.textAlign = "center";
+  ctx.fillText("α = " + alpha, alphaX, pad.top - 6);
+
+  // Bars
+  const barW = plotW / nBins - 2;
+  for (let i = 0; i < nBins; i++) {
+    const x = pad.left + i * (plotW / nBins) + 1;
+    const barH = (bins[i] / maxBin) * plotH;
+    const y = pad.top + plotH - barH;
+    const binCenter = (i + 0.5) / nBins;
+    const isSig = binCenter < alpha;
+
+    ctx.fillStyle = isSig ? "rgba(231,76,60,.5)" : "rgba(46,204,113,.3)";
+    roundRect(ctx, x, y, barW, barH, 3);
+    ctx.fill();
+
+    // Count label
+    if (bins[i] > 0) {
+      ctx.fillStyle = "rgba(255,255,255,.6)";
+      ctx.font = "bold 10px sans-serif";
+      ctx.textAlign = "center";
+      ctx.fillText(bins[i], x + barW/2, y - 5);
+    }
+  }
+
+  // X axis
+  ctx.strokeStyle = "rgba(255,255,255,.1)";
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.moveTo(pad.left, pad.top + plotH);
+  ctx.lineTo(w - pad.right, pad.top + plotH);
+  ctx.stroke();
+
+  // X labels
+  ctx.fillStyle = "rgba(255,255,255,.3)";
+  ctx.font = "10px sans-serif";
+  ctx.textAlign = "center";
+  for (let i = 0; i <= 10; i++) {
+    const v = i / 10;
+    const x = pad.left + v * plotW;
+    ctx.fillText(v.toFixed(1), x, h - pad.bottom + 16);
+  }
+  ctx.fillText("p-value", pad.left + plotW/2, h - 5);
+
+  // Y axis
+  ctx.textAlign = "right";
+  for (let i = 0; i <= maxBin; i += Math.max(1, Math.ceil(maxBin/5))) {
+    const y = pad.top + plotH - (i/maxBin)*plotH;
+    ctx.fillStyle = "rgba(255,255,255,.2)";
+    ctx.fillText(i, pad.left - 8, y + 4);
+    ctx.strokeStyle = "rgba(255,255,255,.04)";
+    ctx.beginPath(); ctx.moveTo(pad.left, y); ctx.lineTo(w-pad.right, y); ctx.stroke();
+  }
+
+  ctx.save();
+  ctx.translate(12, pad.top + plotH/2);
+  ctx.rotate(-Math.PI/2);
+  ctx.fillStyle = "rgba(255,255,255,.3)";
+  ctx.font = "10px sans-serif";
+  ctx.textAlign = "center";
+  ctx.fillText("Frequência", 0, 0);
+  ctx.restore();
+}
+
+function roundRect(ctx,x,y,w,h,r){
+  if(h<0){y+=h;h=-h}if(h<2*r)r=h/2;if(w<2*r)r=w/2;
+  ctx.beginPath();ctx.moveTo(x+r,y);ctx.arcTo(x+w,y,x+w,y+h,r);ctx.arcTo(x+w,y+h,x,y+h,0);
+  ctx.arcTo(x,y+h,x,y,0);ctx.arcTo(x,y,x+w,y,r);ctx.closePath();
+}
+
+function drawStrip(alpha, highlight) {
+  let html = "";
+  for (let i = 0; i < pvalues.length; i++) {
+    const p = pvalues[i];
+    const sig = p < alpha;
+    const cls = (sig ? "pval-sig" : "pval-ns") + (i === highlight ? " pval-current" : "");
+    html += `<div class="pval-dot ${cls}">${p < 0.001 ? '<.001' : p.toFixed(3)}</div>`;
+  }
+  $("pvalStrip").innerHTML = html;
+}
+
+function updateStats(alpha) {
+  if (pvalues.length === 0) return;
+  const sig = pvalues.filter(p => p < alpha).length;
+  const ns = pvalues.length - sig;
+  const sorted = [...pvalues].sort((a,b) => a-b);
+  const med = sorted[Math.floor(sorted.length/2)];
+
+  $("nSig").textContent = sig + " / " + pvalues.length;
+  $("nNS").textContent = ns + " / " + pvalues.length;
+  $("medP").textContent = med.toFixed(3);
+  $("minP").textContent = sorted[0] < 0.001 ? "< .001" : sorted[0].toFixed(3);
+  $("maxP").textContent = sorted[sorted.length-1].toFixed(3);
+}
+
+function updateInsight(alpha) {
+  const d = +$("sliderD").value;
+  const n = +$("sliderN").value;
+  const sig = pvalues.filter(p => p < alpha).length;
+  const pct = Math.round(sig / pvalues.length * 100);
+  const box = $("insightBox");
+
+  if (d === 0) {
+    box.innerHTML = `<strong>H₀ é verdadeira (d = 0) — não existe efeito real.</strong><br>
+      Mesmo assim, <strong style="color:var(--red)">${sig} de 100</strong> réplicas (${pct}%) deram p &lt; ${alpha} — são <em>falsos positivos</em> (Erro Tipo I).
+      Com α = ${alpha}, esperávamos ≈ ${Math.round(alpha*100)}% de falsos positivos, e obtivemos ${pct}%.
+      ${pct > alpha*100*1.5 ? 'Um pouco acima — mas é variação amostral, não conspiração.' : 'Bem próximo do esperado.'}
+      <br><br>Imagine ${sig} pesquisadores publicando "efeito significativo" quando o efeito não existe. Esse é o problema do p-hacking e do viés de publicação.`;
+  } else if (d <= 0.3) {
+    const power = sig; // empirical power
+    box.innerHTML = `<strong>Efeito pequeno (d = ${d.toFixed(2)}) com N = ${n} por grupo.</strong><br>
+      Apenas <strong style="color:var(--red)">${sig}%</strong> das réplicas detectaram o efeito (poder empírico ≈ ${pct}%).
+      Isso significa que se você fizesse este estudo uma vez, teria <strong>${100-pct}% de chance de concluir "não significativo"</strong> — mesmo o efeito sendo real!
+      <br><br>A dança é violenta: p-values variam de ${pvalues.length > 0 ? (Math.min(...pvalues)).toFixed(3) : '?'} a ${pvalues.length > 0 ? (Math.max(...pvalues)).toFixed(3) : '?'}. Um pesquisador com sorte publica; outro, com o mesmo efeito, engaveta.`;
+  } else {
+    box.innerHTML = `<strong>Efeito ${d >= 0.8 ? 'grande' : 'médio'} (d = ${d.toFixed(2)}) com N = ${n}.</strong><br>
+      <strong style="color:var(--red)">${pct}%</strong> das réplicas deram significativo — esse é o poder empírico do estudo.
+      ${pct >= 80 ? 'Poder adequado (≥ 80%)! A maioria das réplicas detecta o efeito.' : 'Poder abaixo de 80% — ' + (100-pct) + '% das vezes o efeito real passaria despercebido.'}
+      <br><br>Mesmo com ${pct}% de poder, observe a <em>amplitude da dança</em>: os p-values vão de ${(Math.min(...pvalues)).toFixed(3)} a ${(Math.max(...pvalues)).toFixed(3)}.
+      ${pct < 95 ? ' Alguns pesquisadores encontrariam p = 0.001 e outros p = 0.3 — para o MESMO efeito. Por isso, reporte d e CI, não apenas p.' : ' Com poder alto a dança se acalma, mas nunca para completamente.'}`;
+  }
+}
+
+// Init
+runAll();
+window.addEventListener("resize", () => { if (pvalues.length) render(); });
+</script>
+</body>
+</html>

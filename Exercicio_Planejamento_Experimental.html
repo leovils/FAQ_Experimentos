@@ -1,0 +1,652 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Exercício de Avaliação — Planejamento de Experimento</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,700;1,9..144,400&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#0F0B1E;--bg2:#150F2A;
+  --surface:rgba(255,255,255,0.04);--surface2:rgba(255,255,255,0.07);--surface3:rgba(255,255,255,0.10);
+  --glass:rgba(255,255,255,0.06);--glass-border:rgba(255,255,255,0.08);--glass-hover:rgba(255,255,255,0.10);
+  --text:#F1F0F5;--text2:#A8A3B8;--text3:#6B6580;
+  --accent:#818CF8;--accent2:#C084FC;--accent-glow:rgba(129,140,248,0.15);
+  --gradient:linear-gradient(135deg,#6366F1,#8B5CF6,#C084FC);
+  --green:#10B981;--green-glow:rgba(16,185,129,0.15);--green-bg:rgba(16,185,129,0.1);
+  --amber:#F59E0B;--amber-bg:rgba(245,158,11,0.1);
+  --red:#EF4444;--red-bg:rgba(239,68,68,0.1);
+  --radius:14px;--radius-sm:10px;
+  --font:'Inter',system-ui,sans-serif;--font-display:'Fraunces','Georgia',serif;
+  --shadow:0 4px 24px rgba(0,0,0,0.3);--transition:all 0.25s cubic-bezier(.4,0,.2,1);
+}
+html{scroll-behavior:smooth}
+body{
+  font-family:var(--font);background:var(--bg);color:var(--text);line-height:1.65;
+  background-image:
+    radial-gradient(ellipse 80% 60% at 50% 0%,rgba(99,102,241,0.12) 0%,transparent 70%),
+    radial-gradient(ellipse 60% 50% at 80% 100%,rgba(192,132,252,0.08) 0%,transparent 60%);
+  background-attachment:fixed;
+}
+::selection{background:rgba(129,140,248,0.3);color:#fff}
+a{color:var(--accent);text-decoration:none}
+
+.container{max-width:760px;margin:0 auto;padding:0 1.5rem}
+
+/* HERO */
+.hero{padding:3rem 1.5rem 2rem;text-align:center;position:relative}
+.hero::before{content:'';position:absolute;top:-40%;left:50%;transform:translateX(-50%);width:600px;height:400px;background:radial-gradient(circle,rgba(99,102,241,0.2),transparent 70%);pointer-events:none}
+.hero-badge{display:inline-flex;align-items:center;gap:.4rem;background:var(--surface2);border:1px solid var(--glass-border);border-radius:20px;padding:.35rem .9rem;font-size:.75rem;color:var(--accent);font-weight:600;margin-bottom:1rem;backdrop-filter:blur(12px)}
+.hero h1{font-family:var(--font-display);font-size:2.2rem;font-weight:700;line-height:1.2;margin-bottom:.5rem;background:var(--gradient);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.hero p{color:var(--text2);font-size:1rem;max-width:560px;margin:0 auto}
+.hero .sub{color:var(--text3);font-size:.85rem;margin-top:.5rem}
+
+/* TABS */
+.tabs{display:flex;gap:0;background:var(--glass);border:1px solid var(--glass-border);border-radius:var(--radius);padding:4px;margin:1.5rem auto 2rem;max-width:760px;backdrop-filter:blur(16px)}
+.tab{flex:1;padding:.65rem .5rem;text-align:center;font-size:.85rem;font-weight:600;color:var(--text3);cursor:pointer;border-radius:var(--radius-sm);transition:var(--transition);border:none;background:none;font-family:var(--font)}
+.tab:hover{color:var(--text2);background:var(--surface)}
+.tab.active{background:linear-gradient(135deg,rgba(99,102,241,0.3),rgba(139,92,246,0.2));color:#fff;box-shadow:0 2px 12px rgba(99,102,241,0.2)}
+.tab-content{display:none}
+.tab-content.active{display:block}
+
+/* SECTIONS */
+.section{margin-bottom:2rem}
+.section-header{display:flex;align-items:center;gap:.6rem;margin-bottom:1rem}
+.section-num{width:32px;height:32px;border-radius:50%;background:var(--gradient);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.85rem;color:#fff;flex-shrink:0}
+.section-title{font-family:var(--font-display);font-size:1.2rem;font-weight:700;color:var(--text)}
+.section-desc{color:var(--text2);font-size:.9rem;margin-bottom:1rem;line-height:1.7}
+
+/* CARDS */
+.card{background:var(--glass);border:1px solid var(--glass-border);border-radius:var(--radius);padding:1.2rem;margin-bottom:.8rem;backdrop-filter:blur(16px);transition:var(--transition)}
+.card:hover{background:var(--glass-hover);border-color:rgba(255,255,255,0.12)}
+.card-title{font-weight:700;font-size:.95rem;margin-bottom:.5rem;color:var(--text)}
+.card-body{font-size:.87rem;color:var(--text2);line-height:1.7}
+.card-body ul{margin:.5rem 0 .5rem 1.2rem;list-style:none}
+.card-body ul li{position:relative;padding-left:.1rem;margin-bottom:.3rem}
+.card-body ul li::before{content:"→";position:absolute;left:-1.1rem;color:var(--accent);font-weight:600}
+
+/* HIGHLIGHT BOX */
+.highlight{background:linear-gradient(135deg,rgba(99,102,241,0.1),rgba(139,92,246,0.08));border:1px solid rgba(129,140,248,0.2);border-radius:var(--radius);padding:1rem 1.2rem;margin:1rem 0}
+.highlight-title{font-size:.8rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--accent);margin-bottom:.4rem}
+.highlight-body{font-size:.87rem;color:var(--text2);line-height:1.7}
+
+/* WARN BOX */
+.warn{background:var(--amber-bg);border:1px solid rgba(245,158,11,0.2);border-radius:var(--radius);padding:1rem 1.2rem;margin:1rem 0}
+.warn-title{font-size:.8rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--amber);margin-bottom:.4rem}
+
+/* CHECKLIST */
+.checklist{margin:0}
+.check-group{margin-bottom:1.5rem}
+.check-group-title{font-weight:700;font-size:.9rem;color:var(--text);margin-bottom:.6rem;display:flex;align-items:center;gap:.5rem}
+.check-group-title .badge{font-size:.7rem;font-weight:600;padding:.15rem .5rem;border-radius:10px;background:var(--surface2);color:var(--text2)}
+.check-item{display:flex;align-items:flex-start;gap:.7rem;padding:.6rem .8rem;border-radius:var(--radius-sm);cursor:pointer;transition:var(--transition);margin-bottom:.3rem;user-select:none}
+.check-item:hover{background:var(--surface)}
+.check-box{width:22px;height:22px;border:2px solid var(--text3);border-radius:6px;flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:var(--transition);margin-top:.1rem}
+.check-item.checked .check-box{background:var(--green);border-color:var(--green)}
+.check-item.checked .check-box::after{content:"";width:6px;height:10px;border:solid #fff;border-width:0 2px 2px 0;transform:rotate(45deg);margin-top:-2px}
+.check-item.checked{opacity:.7}
+.check-item.checked .check-text{text-decoration:line-through;text-decoration-color:var(--text3)}
+.check-text{font-size:.87rem;color:var(--text2);line-height:1.5}
+.check-text strong{color:var(--text);font-weight:600}
+
+/* PROGRESS BAR */
+.progress-area{position:sticky;top:0;z-index:50;background:rgba(15,11,30,0.9);backdrop-filter:blur(16px);border-bottom:1px solid var(--glass-border);padding:.7rem 1.5rem;display:none}
+.progress-area.visible{display:block}
+.progress-row{display:flex;align-items:center;gap:.8rem;max-width:760px;margin:0 auto}
+.progress-bar{flex:1;height:6px;background:var(--surface2);border-radius:3px;overflow:hidden}
+.progress-fill{height:100%;background:var(--gradient);border-radius:3px;transition:width .4s ease}
+.progress-text{font-size:.78rem;font-weight:600;color:var(--accent);white-space:nowrap}
+
+/* RUBRIC TABLE */
+.rubric-table{width:100%;border-collapse:separate;border-spacing:0;font-size:.82rem}
+.rubric-table th{background:linear-gradient(135deg,rgba(99,102,241,0.15),rgba(139,92,246,0.1));color:var(--accent);font-weight:700;padding:.7rem .8rem;text-align:left;font-size:.75rem;text-transform:uppercase;letter-spacing:.05em}
+.rubric-table th:first-child{border-radius:var(--radius-sm) 0 0 0}
+.rubric-table th:last-child{border-radius:0 var(--radius-sm) 0 0;text-align:center}
+.rubric-table td{padding:.65rem .8rem;border-bottom:1px solid var(--glass-border);color:var(--text2);line-height:1.5;vertical-align:top}
+.rubric-table td:last-child{text-align:center;font-weight:700;color:var(--accent);white-space:nowrap}
+.rubric-table tr:last-child td{border-bottom:none}
+.rubric-table tr:last-child td:first-child{border-radius:0 0 0 var(--radius-sm)}
+.rubric-table tr:last-child td:last-child{border-radius:0 0 var(--radius-sm) 0}
+.rubric-table tbody tr{transition:background .2s}
+.rubric-table tbody tr:hover{background:var(--surface)}
+.rubric-total{margin-top:1rem;text-align:right;font-size:.9rem;color:var(--text)}
+.rubric-total strong{color:var(--accent);font-size:1.1rem}
+
+/* FOOTER */
+.footer{text-align:center;padding:2rem 1.5rem;border-top:1px solid var(--glass-border);margin-top:2rem}
+.footer p{font-size:.8rem;color:var(--text3)}
+
+/* PRINT */
+@media print{
+  body{background:#fff;color:#000}
+  .hero::before,.progress-area,.tabs{display:none}
+  .hero h1{-webkit-text-fill-color:#333;font-size:1.5rem}
+  .card,.check-item,.highlight,.warn{border:1px solid #ddd;background:#fff}
+  .tab-content{display:block!important}
+  .check-box{border-color:#666}
+  .rubric-table th{background:#f0f0f0;color:#333}
+  .rubric-table td{color:#333}
+}
+
+/* RESPONSIVE */
+@media(max-width:600px){
+  .hero h1{font-size:1.6rem}
+  .tabs{flex-wrap:wrap}
+  .tab{font-size:.78rem;padding:.5rem .3rem}
+  .container{padding:0 1rem}
+  .rubric-table{font-size:.75rem}
+  .rubric-table th,.rubric-table td{padding:.5rem .4rem}
+}
+
+/* SCROLL TOP */
+.scroll-top{position:fixed;bottom:1.5rem;right:1.5rem;background:var(--glass);border:1px solid var(--glass-border);backdrop-filter:blur(16px);color:var(--text2);border-radius:50%;width:44px;height:44px;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:var(--shadow);opacity:0;transform:translateY(10px);transition:var(--transition);z-index:99}
+.scroll-top.visible{opacity:1;transform:translateY(0)}
+.scroll-top:hover{background:var(--surface3);color:#fff;border-color:var(--accent)}
+</style>
+</head>
+<body>
+
+<!-- PROGRESS -->
+<div class="progress-area" id="progressArea">
+  <div class="progress-row">
+    <span style="font-size:.8rem;color:var(--text2)">Progresso do checklist</span>
+    <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+    <span class="progress-text" id="progressText">0 / 30</span>
+  </div>
+</div>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-badge">Avaliação da Disciplina</div>
+  <h1>Planejamento de um<br>Estudo Experimental</h1>
+  <p>Desenhe um experimento completo aplicado a um problema real de Ciências Sociais Aplicadas</p>
+  <div class="sub">Prof. Dr. Leonardo Vils &middot; Fundamentos de Estudos Experimentais I</div>
+</div>
+
+<!-- TABS -->
+<div class="container">
+  <div class="tabs">
+    <button class="tab active" onclick="switchTab('roteiro')">Roteiro</button>
+    <button class="tab" onclick="switchTab('checklist')">Checklist</button>
+    <button class="tab" onclick="switchTab('rubrica')">Rubrica</button>
+    <button class="tab" onclick="switchTab('exemplos')">Exemplos</button>
+  </div>
+</div>
+
+<!-- TAB 1: ROTEIRO -->
+<div class="tab-content active" id="tab-roteiro">
+<div class="container">
+
+  <div class="highlight">
+    <div class="highlight-title">Objetivo</div>
+    <div class="highlight-body">Elaborar o planejamento completo de um estudo experimental, desde a formulação do problema até a análise planejada, demonstrando domínio dos conceitos de desenho experimental, validade, tamanho de efeito e poder estatístico. <strong>Não é necessário coletar dados</strong> — o foco é a qualidade do planejamento.</div>
+  </div>
+
+  <div class="card" style="margin:1rem 0">
+    <div class="card-title">Modalidade e Entrega</div>
+    <div class="card-body">
+      <ul>
+        <li><strong>Individual ou em grupo</strong> (até 4 integrantes) — a critério do professor</li>
+        <li>Entrega: documento escrito (Word ou PDF), 8-15 páginas, formatação APA 7ª edição</li>
+        <li>Deve conter todas as 6 seções descritas abaixo</li>
+        <li>Em grupo: indicar a contribuição de cada membro no final do documento</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- SEÇÃO 1 -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-num">1</div>
+      <div class="section-title">Problema e Justificativa</div>
+    </div>
+    <div class="section-desc">Apresente o problema de pesquisa e justifique por que um experimento é o desenho adequado para investigá-lo. Não basta dizer que o tema é "importante" — demonstre que existe uma lacuna causal: sabemos que X e Y estão associados, mas não sabemos se X causa Y.</div>
+    <div class="card">
+      <div class="card-title">O que entregar</div>
+      <div class="card-body">
+        <ul>
+          <li>Contextualização do problema em Ciências Sociais Aplicadas (administração, marketing, gestão de pessoas, operações, etc.)</li>
+          <li>Breve revisão da literatura (5-10 referências-chave) mostrando o estado atual do conhecimento</li>
+          <li>Identificação da lacuna causal que justifica a abordagem experimental</li>
+          <li>Pergunta de pesquisa clara e específica</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- SEÇÃO 2 -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-num">2</div>
+      <div class="section-title">Hipóteses</div>
+    </div>
+    <div class="section-desc">Formule hipóteses direcionais derivadas da teoria, especificando exatamente o que você espera encontrar. Cada hipótese deve ser testável e falsificável.</div>
+    <div class="card">
+      <div class="card-title">O que entregar</div>
+      <div class="card-body">
+        <ul>
+          <li>Pelo menos 2 hipóteses (efeito principal + interação ou mediação)</li>
+          <li>Cada hipótese com fundamentação teórica explícita ("Segundo a Teoria X, esperamos que...")</li>
+          <li>Hipóteses escritas de forma precisa: H1: Participantes na condição A apresentarão maior [VD] do que participantes na condição B</li>
+          <li>Se aplicável: hipótese de moderação (H2) ou mediação (H3)</li>
+        </ul>
+      </div>
+    </div>
+    <div class="warn">
+      <div class="warn-title">Erro comum</div>
+      <div class="highlight-body">Hipóteses vagas como "O tipo de liderança influencia o desempenho" não são testáveis. Especifique a direção: "Liderança transformacional produzirá maior desempenho que liderança transacional."</div>
+    </div>
+  </div>
+
+  <!-- SEÇÃO 3 -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-num">3</div>
+      <div class="section-title">Desenho Experimental</div>
+    </div>
+    <div class="section-desc">Esta é a seção central do trabalho. Descreva o desenho com precisão suficiente para que outro pesquisador possa replicá-lo.</div>
+    <div class="card">
+      <div class="card-title">O que entregar</div>
+      <div class="card-body">
+        <ul>
+          <li><strong>Tipo de desenho:</strong> between-subjects, within-subjects, fatorial ou misto — com notação (ex.: 2×3 between-subjects)</li>
+          <li><strong>Variável(is) independente(s):</strong> definição conceitual e operacional, níveis/condições, como será manipulada (cenário, estímulo, instrução)</li>
+          <li><strong>Variável dependente:</strong> definição conceitual e operacional, escala/instrumento de medida, fonte (escala validada com referência)</li>
+          <li><strong>Variáveis de controle:</strong> quais e como serão controladas</li>
+          <li><strong>Procedimento:</strong> passo a passo detalhado que o participante experimentará — do recrutamento ao debriefing</li>
+          <li><strong>Randomização:</strong> método de alocação (simples, em blocos, estratificada)</li>
+          <li><strong>Manipulation check:</strong> o que será perguntado e quando</li>
+        </ul>
+      </div>
+    </div>
+    <div class="highlight">
+      <div class="highlight-title">Dica</div>
+      <div class="highlight-body">Inclua os estímulos experimentais como apêndice — as vinhetas, imagens, telas ou cenários que cada grupo verá. Isso demonstra maturidade metodológica e permite avaliação da qualidade da manipulação.</div>
+    </div>
+  </div>
+
+  <!-- SEÇÃO 4 -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-num">4</div>
+      <div class="section-title">Participantes e Amostragem</div>
+    </div>
+    <div class="section-desc">Justifique quem serão os participantes, quantos, e por que esse número é suficiente.</div>
+    <div class="card">
+      <div class="card-title">O que entregar</div>
+      <div class="card-body">
+        <ul>
+          <li><strong>População-alvo:</strong> para quem os resultados devem generalizar</li>
+          <li><strong>Amostra planejada:</strong> quem, como será recrutado, critérios de inclusão/exclusão</li>
+          <li><strong>Análise de poder a priori:</strong> usando G*Power ou equivalente — com captura de tela do output</li>
+          <li>Especificar: teste estatístico, tamanho de efeito esperado (com justificativa da fonte), &alpha; = 0,05, poder = 0,80 ou 0,90</li>
+          <li><strong>N total e N por condição</strong> resultantes</li>
+        </ul>
+      </div>
+    </div>
+    <div class="warn">
+      <div class="warn-title">Erro comum</div>
+      <div class="highlight-body">Usar benchmarks de Cohen (d = 0,5) sem justificativa é insuficiente. Busque meta-análises ou estudos similares para estimar o tamanho de efeito esperado. Se não existirem, argumente.</div>
+    </div>
+  </div>
+
+  <!-- SEÇÃO 5 -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-num">5</div>
+      <div class="section-title">Análise de Dados Planejada</div>
+    </div>
+    <div class="section-desc">Descreva exatamente como analisaria os dados se os tivesse coletado. A análise deve ser coerente com o desenho e as hipóteses.</div>
+    <div class="card">
+      <div class="card-title">O que entregar</div>
+      <div class="card-body">
+        <ul>
+          <li><strong>Teste principal:</strong> qual teste estatístico e por quê (ex.: ANOVA fatorial 2×3 porque temos dois fatores between-subjects)</li>
+          <li><strong>Premissas:</strong> como verificará normalidade, homogeneidade, esfericidade — e o que fará se violadas</li>
+          <li><strong>Post-hoc ou contrastes:</strong> quais comparações planejadas e método de correção</li>
+          <li><strong>Tamanho de efeito:</strong> qual medida reportará (Cohen's d, &eta;&sup2;<sub>p</sub>, Hedges' g) e por quê</li>
+          <li><strong>Análises complementares:</strong> mediação (PROCESS Modelo 4), moderação (Modelo 1), manipulation check (teste t ou &chi;&sup2;)</li>
+          <li><strong>Como reportar:</strong> exemplo do formato APA — ex.: F(2, 147) = X.XX, p = .XXX, &eta;&sup2;<sub>p</sub> = .XX, 90% CI [.XX, .XX]</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- SEÇÃO 6 -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-num">6</div>
+      <div class="section-title">Ameaças à Validade e Limitações</div>
+    </div>
+    <div class="section-desc">Demonstre consciência das fraquezas do seu desenho e como você as mitigaria.</div>
+    <div class="card">
+      <div class="card-title">O que entregar</div>
+      <div class="card-body">
+        <ul>
+          <li><strong>Validade interna:</strong> identifique pelo menos 2 ameaças específicas ao seu desenho e como as controla</li>
+          <li><strong>Validade externa:</strong> para quem/onde os resultados generalizam — e para quem não generalizam</li>
+          <li><strong>Validade de construto:</strong> riscos de confounding na manipulação, mono-operation bias, demand characteristics</li>
+          <li><strong>Limitações honestas:</strong> o que não é possível controlar e como isso afeta as conclusões</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+
+</div>
+</div>
+
+<!-- TAB 2: CHECKLIST -->
+<div class="tab-content" id="tab-checklist">
+<div class="container">
+
+  <div class="highlight">
+    <div class="highlight-title">Como usar este checklist</div>
+    <div class="highlight-body">Clique em cada item conforme for completando. O progresso é salvo nesta sessão do navegador. Use este checklist para se autoavaliar antes da entrega — se não conseguir marcar um item, volte e revise essa parte do trabalho.</div>
+  </div>
+
+  <div class="checklist" id="checklist">
+
+    <div class="check-group">
+      <div class="check-group-title">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2"><path d="M2 20h20"/><path d="M5 20V8l7-5 7 5v12"/></svg>
+        Problema e Justificativa
+        <span class="badge">0/4</span>
+      </div>
+      <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div><div class="check-text">O problema está <strong>contextualizado em Ciências Sociais Aplicadas</strong> com relevância clara</div></div>
+      <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div><div class="check-text">Há uma <strong>lacuna causal</strong> identificada na literatura (não apenas correlacional)</div></div>
+      <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div><div class="check-text">A <strong>revisão da literatura</strong> cita pelo menos 5 referências-chave</div></div>
+      <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div><div class="check-text">A <strong>pergunta de pesquisa</strong> é clara, específica e causal</div></div>
+    </div>
+
+    <div class="check-group">
+      <div class="check-group-title">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+        Hipóteses
+        <span class="badge">0/3</span>
+      </div>
+      <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div><div class="check-text">Pelo menos <strong>2 hipóteses</strong> formuladas (efeito principal + interação ou mediação)</div></div>
+      <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div><div class="check-text">Hipóteses são <strong>direcionais e testáveis</strong> ("A > B" e não "A influencia B")</div></div>
+      <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div><div class="check-text">Cada hipótese tem <strong>fundamentação teórica explícita</strong></div></div>
+    </div>
+
+    <div class="check-group">
+      <div class="check-group-title">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+        Desenho Experimental
+        <span class="badge">0/8</span>
+      </div>
+      <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div><div class="check-text"><strong>Tipo de desenho</strong> declarado com notação correta (ex.: 2&times;3 between-subjects)</div></div>
+      <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div><div class="check-text"><strong>VI definida</strong> conceitual e operacionalmente, com níveis/condições claros</div></div>
+      <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div><div class="check-text"><strong>Manipulação descrita</strong> em detalhe (cenário, estímulo ou instrução)</div></div>
+      <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div><div class="check-text"><strong>VD definida</strong> com escala/instrumento validado e referência da fonte</div></div>
+      <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div><div class="check-text"><strong>Variáveis de controle</strong> identificadas e método de controle descrito</div></div>
+      <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div><div class="check-text"><strong>Procedimento passo a passo</strong> — replicável por outro pesquisador</div></div>
+      <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div><div class="check-text"><strong>Método de randomização</strong> especificado (simples, blocos, estratificada)</div></div>
+      <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div><div class="check-text"><strong>Manipulation check</strong> descrito (o que, quando, como avaliar)</div></div>
+    </div>
+
+    <div class="check-group">
+      <div class="check-group-title">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        Participantes e Poder
+        <span class="badge">0/5</span>
+      </div>
+      <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div><div class="check-text"><strong>População-alvo</strong> definida e amostra planejada descrita</div></div>
+      <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div><div class="check-text"><strong>Recrutamento</strong> descrito com critérios de inclusão e exclusão</div></div>
+      <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div><div class="check-text"><strong>Power analysis a priori</strong> realizada com G*Power (captura de tela incluída)</div></div>
+      <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div><div class="check-text"><strong>Tamanho de efeito esperado justificado</strong> (meta-análise, estudo similar ou argumento teórico)</div></div>
+      <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div><div class="check-text"><strong>N total e N por condição</strong> calculados e reportados</div></div>
+    </div>
+
+    <div class="check-group">
+      <div class="check-group-title">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+        Análise Planejada
+        <span class="badge">0/5</span>
+      </div>
+      <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div><div class="check-text"><strong>Teste estatístico principal</strong> escolhido e justificado (coerente com o desenho)</div></div>
+      <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div><div class="check-text"><strong>Premissas</strong> listadas com plano de verificação e ação se violadas</div></div>
+      <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div><div class="check-text"><strong>Post-hoc ou contrastes</strong> planejados com método de correção</div></div>
+      <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div><div class="check-text"><strong>Tamanho de efeito</strong> que será reportado, com justificativa da métrica</div></div>
+      <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div><div class="check-text"><strong>Formato APA</strong> exemplificado para o resultado esperado</div></div>
+    </div>
+
+    <div class="check-group">
+      <div class="check-group-title">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        Validade e Limitações
+        <span class="badge">0/3</span>
+      </div>
+      <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div><div class="check-text">Pelo menos <strong>2 ameaças à validade interna</strong> identificadas com estratégia de controle</div></div>
+      <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div><div class="check-text"><strong>Validade externa e de construto</strong> discutidas honestamente</div></div>
+      <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div><div class="check-text"><strong>Limitações</strong> reconhecidas sem minimizar (e sem lista genérica)</div></div>
+    </div>
+
+    <div class="check-group">
+      <div class="check-group-title">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        Formatação
+        <span class="badge">0/1</span>
+      </div>
+      <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div><div class="check-text"><strong>Formatação APA 7ª edição</strong>, referências completas, 8-15 páginas</div></div>
+    </div>
+
+  </div>
+
+</div>
+</div>
+
+<!-- TAB 3: RUBRICA -->
+<div class="tab-content" id="tab-rubrica">
+<div class="container">
+
+  <div class="highlight">
+    <div class="highlight-title">Critérios de avaliação</div>
+    <div class="highlight-body">A nota será composta por 6 critérios. Cada critério é avaliado como <strong>Insuficiente (0-40%)</strong>, <strong>Adequado (41-70%)</strong> ou <strong>Excelente (71-100%)</strong> do peso atribuído. A rubrica abaixo detalha o que se espera em cada nível.</div>
+  </div>
+
+  <div class="card" style="overflow-x:auto">
+    <table class="rubric-table">
+      <thead>
+        <tr>
+          <th style="width:22%">Critério</th>
+          <th style="width:26%">Excelente</th>
+          <th style="width:26%">Adequado</th>
+          <th style="width:16%">Insuficiente</th>
+          <th style="width:10%">Peso</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Problema e Justificativa</strong></td>
+          <td>Lacuna causal clara, revisão bem articulada, pergunta de pesquisa precisa</td>
+          <td>Problema definido mas lacuna causal pouco explícita; revisão superficial</td>
+          <td>Problema vago, sem lacuna causal, revisão ausente ou desconectada</td>
+          <td>10%</td>
+        </tr>
+        <tr>
+          <td><strong>Hipóteses</strong></td>
+          <td>Direcionais, testáveis, com fundamentação teórica robusta; inclui interação ou mediação</td>
+          <td>Direcionais mas fundamentação fraca; apenas efeitos principais</td>
+          <td>Vagas, não-direcionais, sem base teórica</td>
+          <td>10%</td>
+        </tr>
+        <tr>
+          <td><strong>Desenho Experimental</strong></td>
+          <td>Desenho coerente e detalhado; manipulação criativa e realista; procedimento replicável; manipulation check adequado</td>
+          <td>Desenho correto mas pouco detalhado; manipulação genérica; procedimento incompleto</td>
+          <td>Desenho inadequado ou confuso; manipulação não descrita; procedimento ausente</td>
+          <td>25%</td>
+        </tr>
+        <tr>
+          <td><strong>Participantes e Poder</strong></td>
+          <td>Power analysis completa com justificativa do ES; N adequado; recrutamento detalhado</td>
+          <td>Power analysis feita mas ES sem justificativa; recrutamento vago</td>
+          <td>Sem power analysis; N arbitrário; sem critérios de inclusão</td>
+          <td>15%</td>
+        </tr>
+        <tr>
+          <td><strong>Análise Planejada</strong></td>
+          <td>Teste coerente com desenho; premissas discutidas; ES e CI planejados; formato APA exemplificado</td>
+          <td>Teste correto mas sem discussão de premissas; ES mencionado sem detalhe</td>
+          <td>Teste incorreto ou ausente; sem menção a ES ou premissas</td>
+          <td>20%</td>
+        </tr>
+        <tr>
+          <td><strong>Validade e Limitações</strong></td>
+          <td>Ameaças específicas ao desenho proposto com estratégias de controle; limitações honestas e não-genéricas</td>
+          <td>Ameaças genéricas (lista de livro-texto); limitações superficiais</td>
+          <td>Ausente ou copiado sem reflexão sobre o próprio desenho</td>
+          <td>10%</td>
+        </tr>
+        <tr>
+          <td><strong>Apresentação e Formatação</strong></td>
+          <td>Formatação APA impecável; referências completas e corretas; estímulos em apêndice; texto claro e bem organizado</td>
+          <td>Formatação com erros menores; referências incompletas; organização razoável</td>
+          <td>Formatação inadequada; sem referências; texto desorganizado</td>
+          <td>10%</td>
+        </tr>
+      </tbody>
+    </table>
+    <div class="rubric-total">Total: <strong>100%</strong></div>
+  </div>
+
+  <div class="warn">
+    <div class="warn-title">Critérios eliminatórios</div>
+    <div class="highlight-body">O trabalho receberá nota zero se: (1) for identificado plágio; (2) o desenho proposto não for experimental (for puramente correlacional ou descritivo); (3) não contiver análise de poder a priori.</div>
+  </div>
+
+</div>
+</div>
+
+<!-- TAB 4: EXEMPLOS -->
+<div class="tab-content" id="tab-exemplos">
+<div class="container">
+
+  <div class="highlight">
+    <div class="highlight-title">Exemplos para inspiração</div>
+    <div class="highlight-body">Estes são esboços de temas e desenhos possíveis — não são modelos a serem copiados. Use-os como ponto de partida para formular seu próprio problema de pesquisa.</div>
+  </div>
+
+  <div class="card">
+    <div class="card-title" style="color:var(--accent)">Exemplo 1 — Marketing</div>
+    <div class="card-body">
+      <strong>Tema:</strong> Efeito do tipo de prova social em intenção de compra online<br><br>
+      <strong>Desenho:</strong> 2 (prova social: expert vs. pares) &times; 2 (preço: alto vs. baixo) between-subjects<br><br>
+      <strong>Manipulação:</strong> Página fictícia de e-commerce com depoimento de um especialista (expert) ou de consumidores comuns (pares), com preço alto ou baixo<br><br>
+      <strong>VD:</strong> Intenção de compra (escala de Dodds, Monroe & Grewal, 1991)<br><br>
+      <strong>Hipótese de interação:</strong> Prova social de experts será mais eficaz para produtos caros, enquanto prova de pares será mais eficaz para produtos baratos<br><br>
+      <strong>Análise:</strong> ANOVA fatorial 2&times;2 com simple effects se interação significativa
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title" style="color:var(--accent2)">Exemplo 2 — Gestão de Pessoas</div>
+    <div class="card-body">
+      <strong>Tema:</strong> Efeito do estilo de feedback sobre motivação intrínseca<br><br>
+      <strong>Desenho:</strong> 3 condições between-subjects (feedback descritivo vs. avaliativo vs. controle sem feedback)<br><br>
+      <strong>Manipulação:</strong> Após realizar uma tarefa criativa, participantes recebem um dos três tipos de feedback por escrito<br><br>
+      <strong>VD:</strong> Motivação intrínseca (Intrinsic Motivation Inventory — Ryan, 1982)<br><br>
+      <strong>Mediação:</strong> Autonomia percebida (H2: feedback descritivo &rarr; maior autonomia &rarr; maior motivação)<br><br>
+      <strong>Análise:</strong> ANOVA one-way + contrastes planejados + mediação via PROCESS Modelo 4
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title" style="color:var(--green)">Exemplo 3 — Operações / Decisão</div>
+    <div class="card-body">
+      <strong>Tema:</strong> Efeito do formato de apresentação de risco na decisão de investimento<br><br>
+      <strong>Desenho:</strong> 2 (formato: frequência natural vs. percentual) &times; 2 (nível de risco: alto vs. baixo) misto — formato = between, nível de risco = within<br><br>
+      <strong>Manipulação:</strong> Cenários de investimento apresentados com probabilidade em frequência ("3 em cada 100") ou percentual ("3%")<br><br>
+      <strong>VD:</strong> Alocação de capital (% do orçamento investido) + percepção de risco (escala Likert 7 pontos)<br><br>
+      <strong>Moderação:</strong> Numeracia (Berlin Numeracy Test) como moderador — H2: o efeito do formato será maior para pessoas com baixa numeracia<br><br>
+      <strong>Análise:</strong> ANOVA mista 2&times;2 + Johnson-Neyman para moderação contínua
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title" style="color:var(--amber)">Exemplo 4 — Comportamento do Consumidor</div>
+    <div class="card-body">
+      <strong>Tema:</strong> Efeito da distância psicológica na avaliação de produtos sustentáveis<br><br>
+      <strong>Desenho:</strong> 2 (distância temporal: benefício próximo vs. distante) between-subjects<br><br>
+      <strong>Manipulação:</strong> Anúncio de produto sustentável enfatizando benefícios "para você hoje" (próximo) vs. "para as próximas gerações" (distante)<br><br>
+      <strong>VD:</strong> Willingness to pay (WTP) e atitude em relação ao produto<br><br>
+      <strong>Base teórica:</strong> Construal Level Theory (Trope & Liberman, 2010)<br><br>
+      <strong>Análise:</strong> Teste t independente + Cohen's d + mediação via construal level
+    </div>
+  </div>
+
+</div>
+</div>
+
+<!-- SCROLL TOP -->
+<button class="scroll-top" id="scrollTop">
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="18 15 12 9 6 15"/></svg>
+</button>
+
+<!-- FOOTER -->
+<div class="footer">
+  <p>Programa de Pós-Graduação em Administração &middot; Fundamentos de Estudos Experimentais I</p>
+  <p style="margin-top:.3rem">Prof. Dr. Leonardo Vils &middot; 2026</p>
+</div>
+
+<script>
+// ── TABS ──
+function switchTab(id) {
+  document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('tab-' + id).classList.add('active');
+  event.target.classList.add('active');
+  // Show progress bar only on checklist tab
+  document.getElementById('progressArea').classList.toggle('visible', id === 'checklist');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// ── CHECKLIST ──
+const TOTAL_CHECKS = 30;
+let checkedCount = 0;
+
+function toggleCheck(el) {
+  el.classList.toggle('checked');
+  updateProgress();
+}
+
+function updateProgress() {
+  const checked = document.querySelectorAll('.check-item.checked').length;
+  checkedCount = checked;
+  const pct = Math.round((checked / TOTAL_CHECKS) * 100);
+  document.getElementById('progressFill').style.width = pct + '%';
+  document.getElementById('progressText').textContent = checked + ' / ' + TOTAL_CHECKS;
+
+  // Update group badges
+  document.querySelectorAll('.check-group').forEach(group => {
+    const total = group.querySelectorAll('.check-item').length;
+    const done = group.querySelectorAll('.check-item.checked').length;
+    const badge = group.querySelector('.badge');
+    badge.textContent = done + '/' + total;
+    badge.style.background = done === total ? 'var(--green-bg)' : '';
+    badge.style.color = done === total ? 'var(--green)' : '';
+  });
+}
+
+// ── SCROLL TOP ──
+const scrollTopBtn = document.getElementById('scrollTop');
+window.addEventListener('scroll', () => {
+  scrollTopBtn.classList.toggle('visible', window.scrollY > 400);
+});
+scrollTopBtn.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+
+// ── PRINT SHORTCUT ──
+document.addEventListener('keydown', (e) => {
+  if (e.ctrlKey && e.key === 'p') {
+    // Show all tabs for printing
+    document.querySelectorAll('.tab-content').forEach(t => t.classList.add('active'));
+  }
+});
+</script>
+</body>
+</html>

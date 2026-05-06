@@ -1,0 +1,628 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Quiz — Aula 1: Fundamentos e Desenho Experimental</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#0a0a0f;--glass:rgba(255,255,255,.07);--border:rgba(255,255,255,.08);
+  --text:#ECF0F1;--text2:#95A5A6;
+  --accent:#1ABC9C;--gold:#F4D03F;--red:#E74C3C;--blue:#3498DB;--purple:#9B59B6;--green:#2ECC71;--orange:#E67E22;
+}
+body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+.hero{text-align:center;padding:2.5rem 1rem 1.5rem;background:linear-gradient(135deg,rgba(26,188,156,.12),rgba(244,208,63,.06))}
+.hero-badge{display:inline-block;background:var(--accent);color:#fff;font-size:.7rem;font-weight:700;padding:.25rem .8rem;border-radius:20px;text-transform:uppercase;letter-spacing:1px;margin-bottom:.8rem}
+.hero h1{font-family:Georgia,serif;font-size:2rem;font-weight:700;line-height:1.2;margin-bottom:.5rem}
+.hero p{color:var(--text2);font-size:.95rem;max-width:600px;margin:0 auto}
+.container{max-width:800px;margin:0 auto;padding:1.5rem 1rem}
+
+/* Progress */
+.progress-wrap{position:sticky;top:0;z-index:10;background:var(--bg);padding:.6rem 0;border-bottom:1px solid var(--border)}
+.progress-inner{max-width:800px;margin:0 auto;padding:0 1rem;display:flex;align-items:center;gap:.8rem}
+.progress-bar{flex:1;height:8px;background:rgba(255,255,255,.06);border-radius:4px;overflow:hidden}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--gold));border-radius:4px;transition:width .4s}
+.progress-text{font-size:.8rem;color:var(--text2);min-width:60px;text-align:right}
+
+/* Question */
+.q-card{background:var(--glass);border:1px solid var(--border);border-radius:12px;padding:1.5rem;margin-bottom:1.2rem;transition:all .3s}
+.q-card.answered-correct{border-color:rgba(46,204,113,.3)}
+.q-card.answered-wrong{border-color:rgba(231,76,60,.3)}
+.q-num{font-size:.72rem;color:var(--accent);text-transform:uppercase;letter-spacing:1px;font-weight:700;margin-bottom:.5rem}
+.q-category{display:inline-block;font-size:.65rem;background:rgba(255,255,255,.06);color:var(--text2);padding:.15rem .5rem;border-radius:10px;margin-left:.5rem;font-weight:400;letter-spacing:0;text-transform:none}
+.q-text{font-size:1rem;font-weight:600;line-height:1.6;margin-bottom:1rem}
+.q-text em{color:var(--gold);font-style:normal;font-weight:700}
+
+/* Options */
+.options{display:flex;flex-direction:column;gap:.4rem}
+.option{display:flex;align-items:flex-start;gap:.7rem;padding:.7rem .9rem;border-radius:8px;border:2px solid rgba(255,255,255,.06);cursor:pointer;transition:all .2s;background:rgba(255,255,255,.02)}
+.option:hover{border-color:rgba(255,255,255,.15);background:rgba(255,255,255,.04)}
+.option.selected{border-color:var(--accent);background:rgba(26,188,156,.08)}
+.option.correct{border-color:var(--green)!important;background:rgba(46,204,113,.1)!important}
+.option.wrong{border-color:var(--red)!important;background:rgba(231,76,60,.08)!important}
+.option.reveal{border-color:rgba(46,204,113,.4)!important;background:rgba(46,204,113,.06)!important}
+.option.disabled{pointer-events:none;opacity:.7}
+.opt-letter{width:28px;height:28px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.85rem;flex-shrink:0;background:rgba(255,255,255,.06);color:var(--text2);transition:all .2s}
+.option.selected .opt-letter{background:var(--accent);color:#fff}
+.option.correct .opt-letter{background:var(--green);color:#fff}
+.option.wrong .opt-letter{background:var(--red);color:#fff}
+.option.reveal .opt-letter{background:var(--green);color:#fff}
+.opt-text{font-size:.9rem;line-height:1.5;padding-top:.15rem}
+
+/* Feedback */
+.q-feedback{margin-top:.8rem;padding:.8rem 1rem;border-radius:8px;font-size:.88rem;line-height:1.6;display:none}
+.q-feedback.show{display:block}
+.q-feedback.correct{background:rgba(46,204,113,.08);border-left:3px solid var(--green);color:var(--green)}
+.q-feedback.wrong{background:rgba(231,76,60,.08);border-left:3px solid var(--red);color:var(--text2)}
+.q-feedback strong{color:var(--accent)}
+
+/* Buttons */
+.btn{background:linear-gradient(135deg,var(--accent),#16A085);color:#fff;border:none;padding:.6rem 1.4rem;border-radius:8px;font-size:.88rem;font-weight:700;cursor:pointer;transition:all .2s}
+.btn:hover{transform:translateY(-1px);box-shadow:0 4px 15px rgba(26,188,156,.3)}
+.btn:disabled{opacity:.4;cursor:not-allowed;transform:none;box-shadow:none}
+.btn-gold{background:linear-gradient(135deg,var(--gold),#F39C12);color:#1a1a2e}
+.btn-gold:hover{box-shadow:0 4px 15px rgba(244,208,63,.3)}
+.btn-outline{background:none;border:1px solid var(--border);color:var(--text2)}
+.btn-outline:hover{border-color:var(--accent);color:var(--accent);box-shadow:none}
+.btn-row{display:flex;gap:.5rem;flex-wrap:wrap;justify-content:center;margin:1rem 0}
+
+/* Score */
+.score-card{text-align:center;padding:2rem;background:linear-gradient(135deg,rgba(26,188,156,.1),rgba(244,208,63,.06));border-radius:14px;border:1px solid var(--border);margin-bottom:1.2rem}
+.score-emoji{font-size:3rem;margin-bottom:.5rem}
+.score-big{font-size:3.5rem;font-weight:800;font-family:Georgia,serif}
+.score-sub{font-size:.9rem;color:var(--text2);margin-top:.3rem}
+.score-detail{display:flex;justify-content:center;gap:2rem;margin-top:1rem}
+.score-stat{text-align:center}
+.score-stat .sv{font-size:1.5rem;font-weight:700}
+.score-stat .sl{font-size:.7rem;color:var(--text2);text-transform:uppercase;letter-spacing:.5px}
+
+/* Category breakdown */
+.cat-bar{display:flex;align-items:center;gap:.5rem;margin:.3rem 0;font-size:.82rem}
+.cat-name{width:130px;text-align:right;color:var(--text2);font-size:.78rem}
+.cat-track{flex:1;height:8px;background:rgba(255,255,255,.06);border-radius:4px;overflow:hidden}
+.cat-fill{height:100%;border-radius:4px;transition:width .5s}
+
+/* Review */
+.review-item{background:var(--glass);border:1px solid var(--border);border-radius:10px;padding:1rem;margin-bottom:.8rem}
+.review-item .ri-q{font-weight:600;margin-bottom:.3rem;font-size:.9rem}
+.review-item .ri-answer{font-size:.85rem;color:var(--text2);line-height:1.5}
+.review-item .ri-correct{color:var(--green)}
+.review-item .ri-wrong{color:var(--red)}
+
+.footer{text-align:center;padding:1.5rem;color:var(--text2);font-size:.8rem;border-top:1px solid var(--border);margin-top:2rem}
+@media(max-width:600px){.hero h1{font-size:1.5rem}}
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <div class="hero-badge">Quiz — Aula 1</div>
+  <h1>Fundamentos e<br>Desenho Experimental</h1>
+  <p>25 questões sobre causalidade, tipos de desenho, randomização e validade</p>
+</div>
+
+<div class="progress-wrap">
+  <div class="progress-inner">
+    <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+    <div class="progress-text" id="progressText">0 / 25</div>
+  </div>
+</div>
+
+<div class="container">
+  <div id="quizArea"></div>
+  <div id="scoreArea" style="display:none"></div>
+</div>
+
+<div class="footer">
+  Prof. Dr. Leonardo Vils · Fundamentos de Estudos Experimentais I · 2026
+</div>
+
+<script>
+const $ = id => document.getElementById(id);
+
+const QUESTIONS = [
+  // ── CAUSALIDADE (1-6) ──
+  {
+    cat: "Causalidade",
+    q: "Qual é a principal vantagem do método experimental sobre pesquisas correlacionais?",
+    opts: [
+      "Permite coletar dados mais rapidamente",
+      "Permite inferir relações de causa e efeito",
+      "Exige amostras menores",
+      "Dispensa análise estatística"
+    ],
+    correct: 1,
+    explain: "O experimento é o único método que, ao manipular uma variável independente e controlar as demais, permite atribuir causalidade — não apenas associação."
+  },
+  {
+    cat: "Causalidade",
+    q: "O <em>Problema Fundamental da Inferência Causal</em> de Rubin afirma que:",
+    opts: [
+      "Não é possível observar o resultado de um mesmo indivíduo no tratamento E no controle simultaneamente",
+      "Toda pesquisa experimental é enviesada",
+      "Causalidade só pode ser estabelecida com N > 1.000",
+      "Variáveis confundidoras são impossíveis de controlar"
+    ],
+    correct: 0,
+    explain: "O contrafactual — o que teria acontecido com a mesma pessoa se não tivesse recebido o tratamento — é fundamentalmente inobservável. Por isso usamos grupos de controle como proxy."
+  },
+  {
+    cat: "Causalidade",
+    q: "Para que um experimento demonstre causalidade, quais três condições são necessárias?",
+    opts: [
+      "Correlação, replicação e publicação",
+      "Covariância, precedência temporal e eliminação de explicações alternativas",
+      "Aleatorização, duplo-cego e placebo",
+      "Manipulação, mensuração e significância estatística"
+    ],
+    correct: 1,
+    explain: "As três condições de Mill adaptadas: (1) a causa e o efeito devem covariar, (2) a causa deve preceder o efeito no tempo, e (3) explicações alternativas devem ser eliminadas."
+  },
+  {
+    cat: "Causalidade",
+    q: "\"Países que consomem mais chocolate ganham mais prêmios Nobel.\" Isso é um exemplo de:",
+    opts: [
+      "Causalidade reversa comprovada",
+      "Correlação espúria — uma terceira variável pode explicar ambas",
+      "Evidência experimental robusta",
+      "Efeito Hawthorne"
+    ],
+    correct: 1,
+    explain: "É o clássico 'correlação não é causalidade'. PIB per capita, investimento em educação e cultura acadêmica podem explicar tanto o consumo de chocolate quanto os prêmios."
+  },
+  {
+    cat: "Causalidade",
+    q: "No caso das <em>Balas e Gorjetas</em>, qual foi a variável independente manipulada?",
+    opts: [
+      "O tipo de restaurante",
+      "A quantidade e forma de oferecer balas ao cliente",
+      "O valor da conta",
+      "A simpatia do garçom"
+    ],
+    correct: 1,
+    explain: "O experimento manipulou a forma de oferecer balas (nenhuma, uma, duas, ou duas + volta com mais) para medir o efeito na gorjeta. A VI foi a condição de balas."
+  },
+  {
+    cat: "Causalidade",
+    q: "O que é a suposição <em>SUTVA</em> (Stable Unit Treatment Value Assumption)?",
+    opts: [
+      "Cada participante deve ser testado apenas uma vez",
+      "O tratamento de um participante não afeta os resultados de outro",
+      "Os grupos devem ter o mesmo tamanho",
+      "A variável dependente deve ser contínua"
+    ],
+    correct: 1,
+    explain: "SUTVA exige que o resultado de um participante dependa apenas do tratamento que ELE recebeu, não do que outros receberam. Violações ocorrem quando há contaminação entre grupos."
+  },
+
+  // ── VARIÁVEIS E MANIPULAÇÃO (7-10) ──
+  {
+    cat: "Variáveis",
+    q: "Em um experimento, a <em>variável independente</em> (VI) é aquela que:",
+    opts: [
+      "É medida como resultado do experimento",
+      "É manipulada deliberadamente pelo pesquisador",
+      "Confunde a relação entre causa e efeito",
+      "É mantida constante durante o estudo"
+    ],
+    correct: 1,
+    explain: "A VI é o que o pesquisador manipula (ex: tipo de treinamento, dose do fármaco). A VD é o que mede. Variáveis controladas são mantidas constantes."
+  },
+  {
+    cat: "Variáveis",
+    q: "O que é uma <em>manipulation check</em>?",
+    opts: [
+      "Um teste estatístico para verificar normalidade",
+      "Uma medida para verificar se a manipulação da VI funcionou como planejado",
+      "A verificação de que os dados não têm outliers",
+      "Um pré-teste aplicado antes da randomização"
+    ],
+    correct: 1,
+    explain: "Se você manipulou 'ansiedade' (alta vs. baixa), precisa confirmar que os participantes realmente ficaram mais ansiosos na condição alta. Sem isso, um resultado nulo pode ser falha na manipulação, não ausência de efeito."
+  },
+  {
+    cat: "Variáveis",
+    q: "Uma variável que o pesquisador NÃO manipulou, mas que pode afetar a VD e confundir os resultados, chama-se:",
+    opts: [
+      "Variável independente",
+      "Variável moderadora",
+      "Variável confundidora (confound)",
+      "Variável dependente"
+    ],
+    correct: 2,
+    explain: "Confound é uma variável estranha que varia sistematicamente com a VI e afeta a VD, criando uma explicação alternativa para os resultados. A randomização é a principal arma contra confounders."
+  },
+  {
+    cat: "Variáveis",
+    q: "No experimento de <em>teste cego de açúcar</em>, o uso de embalagens idênticas serviu para:",
+    opts: [
+      "Reduzir o custo do experimento",
+      "Aumentar o tamanho da amostra",
+      "Controlar o viés de expectativa (blinding)",
+      "Facilitar a randomização"
+    ],
+    correct: 2,
+    explain: "Embalagens idênticas garantem que o participante não sabe qual marca está provando — é o blinding/mascaramento. Sem isso, expectativas sobre marcas poderiam influenciar a avaliação."
+  },
+
+  // ── TIPOS DE DESENHO (11-18) ──
+  {
+    cat: "Tipos de Desenho",
+    q: "Em um desenho <em>between-subjects</em>:",
+    opts: [
+      "Cada participante passa por todas as condições experimentais",
+      "Cada participante é exposto a apenas uma condição",
+      "As condições são aplicadas em sequência ao mesmo grupo",
+      "Não há grupo controle"
+    ],
+    correct: 1,
+    explain: "Between-subjects = grupos independentes. Cada pessoa participa de apenas UMA condição. A comparação é entre grupos diferentes."
+  },
+  {
+    cat: "Tipos de Desenho",
+    q: "A principal vantagem de um desenho <em>within-subjects</em> sobre between-subjects é:",
+    opts: [
+      "Eliminação do efeito de ordem",
+      "Menor risco de demand characteristics",
+      "Maior poder estatístico com menos participantes",
+      "Não precisa de randomização"
+    ],
+    correct: 2,
+    explain: "Como cada pessoa é seu próprio controle, a variância individual é eliminada. Isso aumenta o poder — você precisa de menos participantes para detectar o mesmo efeito."
+  },
+  {
+    cat: "Tipos de Desenho",
+    q: "O principal risco de um desenho within-subjects é:",
+    opts: [
+      "Necessidade de amostras muito grandes",
+      "Efeitos de ordem: prática, fadiga e carryover",
+      "Impossibilidade de usar ANOVA",
+      "Dificuldade de medir a variável dependente"
+    ],
+    correct: 1,
+    explain: "Quando a mesma pessoa faz tudo, a ordem importa: pode melhorar (prática), piorar (fadiga), ou o tratamento anterior pode contaminar o seguinte (carryover). Counterbalancing é a solução."
+  },
+  {
+    cat: "Tipos de Desenho",
+    q: "Um desenho <em>2×3 fatorial</em> significa:",
+    opts: [
+      "2 participantes por condição e 3 variáveis dependentes",
+      "2 variáveis independentes, uma com 2 e outra com 3 níveis = 6 condições",
+      "2 grupos experimentais e 3 grupos controle",
+      "3 medições repetidas em 2 momentos"
+    ],
+    correct: 1,
+    explain: "Fatorial 2×3 = dois fatores cruzados. O primeiro tem 2 níveis, o segundo tem 3, gerando 2×3 = 6 condições experimentais. Permite testar efeitos principais e interação."
+  },
+  {
+    cat: "Tipos de Desenho",
+    q: "O que é uma <em>interação</em> em um desenho fatorial?",
+    opts: [
+      "A correlação entre as duas variáveis dependentes",
+      "O efeito de uma VI depende do nível da outra VI",
+      "A comunicação entre participantes de grupos diferentes",
+      "A soma dos efeitos principais dos dois fatores"
+    ],
+    correct: 1,
+    explain: "Interação significa que o efeito de A depende de B. Ex: um treinamento funciona para novatos mas não para experientes. Os efeitos não são simplesmente aditivos."
+  },
+  {
+    cat: "Tipos de Desenho",
+    q: "O <em>Solomon Four-Group Design</em> adiciona dois grupos extras ao desenho clássico para controlar:",
+    opts: [
+      "O efeito de mortalidade experimental",
+      "O efeito da testagem (pré-teste) sobre o pós-teste",
+      "A difusão do tratamento entre grupos",
+      "O viés do experimentador"
+    ],
+    correct: 1,
+    explain: "Solomon acrescenta dois grupos sem pré-teste (um com tratamento, outro sem) para isolar se o pré-teste sensibilizou os participantes e inflou o efeito observado."
+  },
+  {
+    cat: "Tipos de Desenho",
+    q: "Em um desenho <em>crossover</em>, os participantes:",
+    opts: [
+      "São distribuídos aleatoriamente em grupos permanentes",
+      "Recebem todos os tratamentos, mas em ordens diferentes, com washout entre eles",
+      "Começam no grupo controle e depois migram para o tratamento",
+      "São testados apenas uma vez"
+    ],
+    correct: 1,
+    explain: "No crossover, cada participante recebe todos os tratamentos em sequências distintas, com período de washout entre eles para minimizar carryover. É um within-subjects controlado."
+  },
+  {
+    cat: "Tipos de Desenho",
+    q: "O <em>Latin Square</em> é usado para:",
+    opts: [
+      "Calcular o tamanho do efeito em desenhos fatoriais",
+      "Balancear a ordem dos tratamentos sem precisar de todas as permutações possíveis",
+      "Randomizar participantes em blocos",
+      "Testar interações de três fatores"
+    ],
+    correct: 1,
+    explain: "Com k tratamentos, existem k! permutações possíveis. O Latin Square usa apenas k ordens, garantindo que cada tratamento apareça em cada posição exatamente uma vez."
+  },
+
+  // ── RANDOMIZAÇÃO (19-21) ──
+  {
+    cat: "Randomização",
+    q: "A <em>randomização</em> em experimentos serve principalmente para:",
+    opts: [
+      "Garantir que a amostra seja representativa da população",
+      "Equalizar variáveis confundidoras conhecidas e desconhecidas entre os grupos",
+      "Aumentar o tamanho da amostra",
+      "Eliminar a necessidade de grupo controle"
+    ],
+    correct: 1,
+    explain: "A randomização distribui aleatoriamente TODAS as variáveis — inclusive as que o pesquisador nem sabe que existem — de forma equilibrada entre os grupos. É a grande arma do experimento."
+  },
+  {
+    cat: "Randomização",
+    q: "A <em>randomização por blocos</em> é recomendada quando:",
+    opts: [
+      "O pesquisador quer eliminar completamente os efeitos de ordem",
+      "Há uma variável estratificadora conhecida (ex: gênero, experiência) que pode influenciar a VD",
+      "A amostra é muito grande para randomização simples",
+      "O desenho é within-subjects"
+    ],
+    correct: 1,
+    explain: "Na randomização por blocos, primeiro divide-se a amostra em blocos homogêneos (ex: homens/mulheres) e depois randomiza-se dentro de cada bloco. Garante equilíbrio em variáveis-chave."
+  },
+  {
+    cat: "Randomização",
+    q: "Qual a diferença entre <em>random assignment</em> e <em>random sampling</em>?",
+    opts: [
+      "São a mesma coisa, apenas nomes diferentes",
+      "Random sampling seleciona participantes da população; random assignment distribui participantes nos grupos",
+      "Random assignment seleciona participantes; random sampling distribui nos grupos",
+      "Random sampling é usado apenas em pesquisas qualitativas"
+    ],
+    correct: 1,
+    explain: "Random sampling (amostragem aleatória) é sobre quem participa — afeta a validade externa. Random assignment (atribuição aleatória) é sobre em qual grupo — afeta a validade interna."
+  },
+
+  // ── VALIDADE E AMEAÇAS (22-25) ──
+  {
+    cat: "Validade",
+    q: "As <em>quatro dimensões da validade</em> segundo Shadish, Cook & Campbell são:",
+    opts: [
+      "Interna, externa, de construto e de conclusão estatística",
+      "Aparente, de conteúdo, convergente e discriminante",
+      "Nomológica, preditiva, concorrente e incremental",
+      "Interna, ecológica, temporal e de população"
+    ],
+    correct: 0,
+    explain: "Validade interna (causalidade), externa (generalização), de construto (operacionalização) e de conclusão estatística (adequação da análise) — as quatro dimensões do framework de Shadish et al."
+  },
+  {
+    cat: "Validade",
+    q: "A <em>validade interna</em> refere-se a:",
+    opts: [
+      "A capacidade de generalizar os resultados para outras populações",
+      "A confiança de que a relação observada é causal e não fruto de variáveis estranhas",
+      "A consistência das respostas ao instrumento de medida",
+      "A fidelidade com que a manipulação operacionaliza o construto teórico"
+    ],
+    correct: 1,
+    explain: "Validade interna é a confiança de que a VI causou a mudança na VD — e que nenhuma variável confundidora explica o resultado. É a raison d'être do experimento."
+  },
+  {
+    cat: "Validade",
+    q: "Um pesquisador seleciona alunos com as piores notas para um programa de reforço e observa melhora no pós-teste. A ameaça mais provável é:",
+    opts: [
+      "Efeito Hawthorne",
+      "Regressão à média",
+      "Maturação",
+      "Difusão do tratamento"
+    ],
+    correct: 1,
+    explain: "Escores extremos (as piores notas) tendem a se aproximar da média na medição seguinte — com ou sem intervenção. Isso é regressão à média, não efeito do programa."
+  },
+  {
+    cat: "Validade",
+    q: "As <em>demand characteristics</em> ocorrem quando:",
+    opts: [
+      "O experimentador inconscientemente trata os grupos de forma diferente",
+      "Participantes percebem a hipótese do estudo e ajustam seu comportamento para confirmá-la (ou contrariá-la)",
+      "O instrumento de medida não é confiável",
+      "Os grupos diferem antes do tratamento"
+    ],
+    correct: 1,
+    explain: "Demand characteristics são pistas no procedimento experimental que permitem ao participante 'adivinhar' o que se espera dele — e agir de acordo. Por isso o blinding é tão importante."
+  }
+];
+
+let answers = new Array(QUESTIONS.length).fill(-1);
+let revealed = new Array(QUESTIONS.length).fill(false);
+let currentView = "quiz"; // quiz or score
+
+function init() {
+  answers.fill(-1);
+  revealed.fill(false);
+  currentView = "quiz";
+  $("scoreArea").style.display = "none";
+  renderQuiz();
+  updateProgress();
+}
+
+function renderQuiz() {
+  let html = "";
+  for (let i = 0; i < QUESTIONS.length; i++) {
+    const q = QUESTIONS[i];
+    const answered = revealed[i];
+    const isCorrect = answers[i] === q.correct;
+    const cardClass = answered ? (isCorrect ? "answered-correct" : "answered-wrong") : "";
+
+    html += `<div class="q-card ${cardClass}" id="q${i}">
+      <div class="q-num">Questão ${i+1} <span class="q-category">${q.cat}</span></div>
+      <div class="q-text">${q.q}</div>
+      <div class="options">`;
+
+    const letters = ["A","B","C","D"];
+    for (let j = 0; j < q.opts.length; j++) {
+      let cls = "";
+      if (answered) {
+        cls = "disabled ";
+        if (j === q.correct) cls += "correct";
+        else if (j === answers[i] && j !== q.correct) cls += "wrong";
+        else cls += "";
+      } else {
+        if (answers[i] === j) cls = "selected";
+      }
+      html += `<div class="option ${cls}" onclick="selectOption(${i},${j})">
+        <div class="opt-letter">${answered && j === q.correct ? '✓' : answered && j === answers[i] && j !== q.correct ? '✗' : letters[j]}</div>
+        <div class="opt-text">${q.opts[j]}</div>
+      </div>`;
+    }
+
+    html += `</div>`;
+
+    // Feedback
+    if (answered) {
+      const fbClass = isCorrect ? "correct" : "wrong";
+      html += `<div class="q-feedback show ${fbClass}">
+        ${isCorrect ? '✓ Correto! ' : '✗ Incorreto. '}${q.explain}
+      </div>`;
+    } else if (answers[i] >= 0) {
+      html += `<div style="margin-top:.6rem;text-align:right">
+        <button class="btn" onclick="confirmAnswer(${i})">Confirmar</button>
+      </div>`;
+    }
+
+    html += `</div>`;
+  }
+
+  // Final button
+  const allAnswered = revealed.every(r => r);
+  if (allAnswered) {
+    html += `<div class="btn-row"><button class="btn btn-gold" onclick="showScore()">Ver Resultado Final</button></div>`;
+  }
+
+  $("quizArea").innerHTML = html;
+}
+
+function selectOption(qi, oi) {
+  if (revealed[qi]) return;
+  answers[qi] = oi;
+  renderQuiz();
+}
+
+function confirmAnswer(qi) {
+  if (answers[qi] < 0) return;
+  revealed[qi] = true;
+  renderQuiz();
+  updateProgress();
+
+  // Scroll to feedback
+  setTimeout(() => {
+    const el = document.querySelector(`#q${qi} .q-feedback`);
+    if (el) el.scrollIntoView({ behavior: "smooth", block: "center" });
+  }, 100);
+}
+
+function updateProgress() {
+  const done = revealed.filter(r => r).length;
+  const total = QUESTIONS.length;
+  $("progressFill").style.width = (done / total * 100) + "%";
+  $("progressText").textContent = done + " / " + total;
+}
+
+function showScore() {
+  currentView = "score";
+  $("quizArea").style.display = "none";
+  $("scoreArea").style.display = "block";
+
+  const correct = QUESTIONS.filter((q,i) => answers[i] === q.correct).length;
+  const total = QUESTIONS.length;
+  const pct = Math.round(correct / total * 100);
+
+  let emoji, msg;
+  if (pct >= 90) { emoji = "🏆"; msg = "Excelente! Domínio completo dos fundamentos."; }
+  else if (pct >= 75) { emoji = "👏"; msg = "Muito bom! Boa compreensão, com alguns pontos para revisar."; }
+  else if (pct >= 60) { emoji = "📚"; msg = "Razoável. Revise os tópicos que errou — vale reler os slides."; }
+  else { emoji = "🔄"; msg = "Precisa de mais estudo. Revise os slides e tente novamente!"; }
+
+  // Category breakdown
+  const cats = {};
+  QUESTIONS.forEach((q,i) => {
+    if (!cats[q.cat]) cats[q.cat] = {total:0, correct:0};
+    cats[q.cat].total++;
+    if (answers[i] === q.correct) cats[q.cat].correct++;
+  });
+
+  let catHtml = "";
+  const catColors = {
+    "Causalidade": "var(--accent)", "Variáveis": "var(--blue)",
+    "Tipos de Desenho": "var(--purple)", "Randomização": "var(--gold)", "Validade": "var(--orange)"
+  };
+  for (const [name, data] of Object.entries(cats)) {
+    const p = data.correct / data.total * 100;
+    catHtml += `<div class="cat-bar">
+      <div class="cat-name">${name}</div>
+      <div class="cat-track"><div class="cat-fill" style="width:${p}%;background:${catColors[name]||'var(--accent)'}"></div></div>
+      <div style="min-width:50px;font-size:.8rem;color:${p>=75?'var(--green)':p>=50?'var(--gold)':'var(--red)'}">${data.correct}/${data.total}</div>
+    </div>`;
+  }
+
+  // Wrong questions review
+  let reviewHtml = "";
+  QUESTIONS.forEach((q,i) => {
+    if (answers[i] !== q.correct) {
+      const letters = ["A","B","C","D"];
+      reviewHtml += `<div class="review-item">
+        <div class="ri-q">${i+1}. ${q.q.replace(/<\/?em>/g,'')}</div>
+        <div class="ri-answer">
+          <span class="ri-wrong">Sua resposta: ${letters[answers[i]]} — ${q.opts[answers[i]]}</span><br>
+          <span class="ri-correct">Correta: ${letters[q.correct]} — ${q.opts[q.correct]}</span><br>
+          <span style="color:var(--text2)">${q.explain}</span>
+        </div>
+      </div>`;
+    }
+  });
+
+  $("scoreArea").innerHTML = `
+    <div class="score-card">
+      <div class="score-emoji">${emoji}</div>
+      <div class="score-big" style="color:${pct>=75?'var(--green)':pct>=50?'var(--gold)':'var(--red)'}">${pct}%</div>
+      <div class="score-sub">${msg}</div>
+      <div class="score-detail">
+        <div class="score-stat"><div class="sv" style="color:var(--green)">${correct}</div><div class="sl">Acertos</div></div>
+        <div class="score-stat"><div class="sv" style="color:var(--red)">${total-correct}</div><div class="sl">Erros</div></div>
+        <div class="score-stat"><div class="sv" style="color:var(--text2)">${total}</div><div class="sl">Total</div></div>
+      </div>
+    </div>
+
+    <div class="q-card">
+      <div class="q-num">Desempenho por Categoria</div>
+      ${catHtml}
+    </div>
+
+    ${reviewHtml ? `<div class="q-card"><div class="q-num">Revisão dos Erros</div>${reviewHtml}</div>` : ''}
+
+    <div class="btn-row">
+      <button class="btn" onclick="restart()">Refazer Quiz</button>
+      <button class="btn btn-outline" onclick="backToQuiz()">Voltar às Questões</button>
+    </div>
+  `;
+
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+function restart() {
+  $("quizArea").style.display = "block";
+  $("scoreArea").style.display = "none";
+  init();
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+function backToQuiz() {
+  $("quizArea").style.display = "block";
+  $("scoreArea").style.display = "none";
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+init();
+</script>
+</body>
+</html>

@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Visualizador de Tamanho de Efeito — Fundamentos de Estudos Experimentais I</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#0a0a0f;--surface:rgba(255,255,255,.04);--glass:rgba(255,255,255,.07);
+  --border:rgba(255,255,255,.08);--text:#ECF0F1;--text2:#95A5A6;
+  --accent:#1ABC9C;--accent2:#16A085;--gold:#F4D03F;--red:#E74C3C;
+  --blue:#3498DB;--purple:#9B59B6;
+}
+body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+.hero{text-align:center;padding:2.5rem 1rem 1.5rem;background:linear-gradient(135deg,rgba(26,188,156,.12),rgba(155,89,182,.08))}
+.hero-badge{display:inline-block;background:var(--purple);color:#fff;font-size:.7rem;font-weight:700;padding:.25rem .8rem;border-radius:20px;text-transform:uppercase;letter-spacing:1px;margin-bottom:.8rem}
+.hero h1{font-family:Georgia,serif;font-size:2rem;font-weight:700;line-height:1.2;margin-bottom:.5rem}
+.hero p{color:var(--text2);font-size:.95rem;max-width:600px;margin:0 auto}
+.container{max-width:900px;margin:0 auto;padding:1.5rem 1rem}
+.card{background:var(--glass);border:1px solid var(--border);border-radius:12px;padding:1.5rem;margin-bottom:1.2rem;backdrop-filter:blur(12px)}
+.card-title{font-family:Georgia,serif;font-size:1.1rem;font-weight:700;color:var(--accent);margin-bottom:.8rem}
+.slider-big{display:flex;align-items:center;gap:1.2rem;margin:1rem 0}
+.slider-big label{font-size:.85rem;color:var(--text2);font-weight:600;min-width:80px}
+.slider-big input[type=range]{flex:1;height:8px;-webkit-appearance:none;background:linear-gradient(90deg,rgba(26,188,156,.3),rgba(155,89,182,.3),rgba(231,76,60,.3));border-radius:4px;outline:none}
+.slider-big input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:24px;height:24px;background:var(--accent);border-radius:50%;cursor:pointer;border:3px solid var(--bg);box-shadow:0 0 10px rgba(26,188,156,.4)}
+.slider-big input[type=range]::-moz-range-thumb{width:24px;height:24px;background:var(--accent);border-radius:50%;cursor:pointer;border:3px solid var(--bg)}
+.d-display{font-size:2.5rem;font-weight:800;font-family:Georgia,serif;min-width:100px;text-align:center}
+.d-label{font-size:.75rem;color:var(--text2);text-align:center;margin-top:.2rem}
+.presets{display:flex;gap:.5rem;flex-wrap:wrap;margin-top:.5rem;justify-content:center}
+.preset{background:rgba(255,255,255,.06);border:1px solid var(--border);color:var(--text2);padding:.35rem .8rem;border-radius:6px;font-size:.8rem;cursor:pointer;transition:all .2s}
+.preset:hover,.preset.active{background:rgba(26,188,156,.15);border-color:var(--accent);color:var(--accent)}
+canvas{width:100%;border-radius:8px}
+.metrics{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:.8rem;margin-top:1.2rem}
+.metric{background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:10px;padding:1rem;text-align:center}
+.metric .m-val{font-size:1.8rem;font-weight:800;font-family:Georgia,serif;margin:.3rem 0}
+.metric .m-label{font-size:.75rem;color:var(--text2);text-transform:uppercase;letter-spacing:.5px}
+.metric .m-desc{font-size:.78rem;color:var(--text2);margin-top:.3rem;line-height:1.4}
+.cohen-ref{display:grid;grid-template-columns:repeat(3,1fr);gap:.6rem;margin-top:.8rem}
+.cohen-box{padding:.6rem;border-radius:8px;text-align:center;font-size:.8rem;border:1px solid var(--border)}
+.cohen-box .cb-d{font-size:1.2rem;font-weight:700;font-family:Georgia,serif}
+.cohen-box .cb-label{font-size:.7rem;color:var(--text2);margin-top:.2rem}
+.insight{background:rgba(155,89,182,.08);border-left:3px solid var(--purple);padding:1rem 1.2rem;border-radius:0 8px 8px 0;margin-top:1rem;font-size:.9rem;line-height:1.6;color:var(--text2)}
+.insight strong{color:var(--purple)}
+.footer{text-align:center;padding:1.5rem;color:var(--text2);font-size:.8rem;border-top:1px solid var(--border);margin-top:2rem}
+@media(max-width:600px){.hero h1{font-size:1.5rem}.slider-big{flex-wrap:wrap}.d-display{font-size:2rem}}
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <div class="hero-badge">Widget Interativo</div>
+  <h1>Visualizador de<br>Tamanho de Efeito</h1>
+  <p>Veja o que Cohen's <em>d</em> realmente significa — duas distribuições, um slider</p>
+</div>
+
+<div class="container">
+
+  <div class="card">
+    <div class="card-title">Cohen's <em>d</em></div>
+    <div class="slider-big">
+      <label>Tamanho:</label>
+      <input type="range" id="sliderD" min="0" max="3" value="0.5" step="0.05">
+      <div>
+        <div class="d-display" id="dVal" style="color:var(--accent)">0.50</div>
+        <div class="d-label" id="dLabel">Médio</div>
+      </div>
+    </div>
+    <div class="presets">
+      <button class="preset" onclick="setD(0)">d = 0</button>
+      <button class="preset" onclick="setD(0.2)">d = 0.2 (pequeno)</button>
+      <button class="preset active" onclick="setD(0.5)">d = 0.5 (médio)</button>
+      <button class="preset" onclick="setD(0.8)">d = 0.8 (grande)</button>
+      <button class="preset" onclick="setD(1.2)">d = 1.2</button>
+      <button class="preset" onclick="setD(2.0)">d = 2.0</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Distribuições: Controle vs. Tratamento</div>
+    <canvas id="chart" height="350"></canvas>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Métricas de Efeito</div>
+    <div class="metrics">
+      <div class="metric">
+        <div class="m-label">Sobreposição</div>
+        <div class="m-val" id="mOverlap" style="color:var(--blue)">—</div>
+        <div class="m-desc">Área em comum entre as duas distribuições</div>
+      </div>
+      <div class="metric">
+        <div class="m-label">U₃ de Cohen</div>
+        <div class="m-val" id="mU3" style="color:var(--purple)">—</div>
+        <div class="m-desc">% do tratamento acima da mediana do controle</div>
+      </div>
+      <div class="metric">
+        <div class="m-label">Prob. Superioridade</div>
+        <div class="m-val" id="mPS" style="color:var(--accent)">—</div>
+        <div class="m-desc">Chance de uma pessoa do tratamento pontuar mais que uma do controle</div>
+      </div>
+      <div class="metric">
+        <div class="m-label">Número Necessário</div>
+        <div class="m-val" id="mNNT" style="color:var(--gold)">—</div>
+        <div class="m-desc">NNT: quantas pessoas tratar para 1 sucesso extra (aprox.)</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Referência de Cohen (1988)</div>
+    <div class="cohen-ref">
+      <div class="cohen-box" style="background:rgba(26,188,156,.06)">
+        <div class="cb-d" style="color:var(--accent)">d = 0.2</div>
+        <div class="cb-label">Pequeno<br>"difícil de ver a olho nu"</div>
+      </div>
+      <div class="cohen-box" style="background:rgba(155,89,182,.06)">
+        <div class="cb-d" style="color:var(--purple)">d = 0.5</div>
+        <div class="cb-label">Médio<br>"visível se prestar atenção"</div>
+      </div>
+      <div class="cohen-box" style="background:rgba(231,76,60,.06)">
+        <div class="cb-d" style="color:var(--red)">d = 0.8</div>
+        <div class="cb-label">Grande<br>"óbvio para qualquer observador"</div>
+      </div>
+    </div>
+    <div class="insight" id="insightBox">
+      Mova o slider e observe como a separação entre as curvas muda. Mesmo com <strong>d = 0.8</strong> (grande), há sobreposição considerável — por isso precisamos de testes estatísticos, não apenas "olhômetro".
+    </div>
+  </div>
+
+</div>
+
+<div class="footer">
+  Prof. Dr. Leonardo Vils · Fundamentos de Estudos Experimentais I · 2026
+</div>
+
+<script>
+const $ = id => document.getElementById(id);
+let d = 0.5;
+
+function normPDF(x, mu, sd) {
+  return Math.exp(-0.5*((x-mu)/sd)**2) / (sd * Math.sqrt(2*Math.PI));
+}
+
+function normCDF(x) {
+  const a1=0.254829592, a2=-0.284496736, a3=1.421413741, a4=-1.453152027, a5=1.061405429;
+  const p=0.3275911;
+  const sign = x < 0 ? -1 : 1;
+  const ax = Math.abs(x) / Math.SQRT2;
+  const t = 1 / (1 + p*ax);
+  const y = 1 - (((((a5*t + a4)*t) + a3)*t + a2)*t + a1)*t * Math.exp(-ax*ax);
+  return 0.5 * (1 + sign*y);
+}
+
+function setD(val) {
+  d = val;
+  $("sliderD").value = val;
+  update();
+  document.querySelectorAll(".preset").forEach(b => {
+    b.classList.toggle("active", parseFloat(b.textContent.match(/[\d.]+/)?.[0] || -1) === val);
+  });
+}
+
+$("sliderD").oninput = function() {
+  d = +this.value;
+  document.querySelectorAll(".preset").forEach(b => b.classList.remove("active"));
+  update();
+};
+
+function getColor(d) {
+  if (d <= 0.35) return "var(--accent)";
+  if (d <= 0.65) return "var(--purple)";
+  return "var(--red)";
+}
+
+function getLabel(d) {
+  if (d === 0) return "Nenhum";
+  if (d <= 0.2) return "Pequeno";
+  if (d <= 0.5) return "Médio";
+  if (d <= 0.8) return "Grande";
+  if (d <= 1.2) return "Muito grande";
+  return "Enorme";
+}
+
+function update() {
+  const color = getColor(d);
+  $("dVal").textContent = d.toFixed(2);
+  $("dVal").style.color = color;
+  $("dLabel").textContent = getLabel(d);
+
+  // Metrics
+  const overlap = 2 * normCDF(-Math.abs(d)/2);
+  const u3 = normCDF(d);
+  const ps = normCDF(d / Math.SQRT2);
+  const nnt = d === 0 ? "∞" : Math.max(1, Math.round(1 / (normCDF(d + normCDFInv(0.5)) - 0.5 + 0.0001)));
+
+  $("mOverlap").textContent = (overlap * 100).toFixed(1) + "%";
+  $("mU3").textContent = (u3 * 100).toFixed(1) + "%";
+  $("mPS").textContent = (ps * 100).toFixed(1) + "%";
+  $("mNNT").textContent = d === 0 ? "∞" : nnt;
+
+  drawChart();
+  updateInsight();
+}
+
+function normCDFInv(p) {
+  // Rational approximation (Abramowitz & Stegun)
+  if (p <= 0) return -Infinity;
+  if (p >= 1) return Infinity;
+  if (p === 0.5) return 0;
+  const a = [0, -3.969683028665376e1, 2.209460984245205e2, -2.759285104469687e2, 1.383577518672690e2, -3.066479806614716e1, 2.506628277459239e0];
+  const b = [0, -5.447609879822406e1, 1.615858368580409e2, -1.556989798598866e2, 6.680131188771972e1, -1.328068155288572e1];
+  const c = [0, -7.784894002430293e-3, -3.223964580411365e-1, -2.400758277161838e0, -2.549732539343734e0, 4.374664141464968e0, 2.938163982698783e0];
+  const dd = [0, 7.784695709041462e-3, 3.224671290700398e-1, 2.445134137142996e0, 3.754408661907416e0];
+  const pLow = 0.02425, pHigh = 1 - pLow;
+  let q, r;
+  if (p < pLow) {
+    q = Math.sqrt(-2*Math.log(p));
+    return (((((c[1]*q+c[2])*q+c[3])*q+c[4])*q+c[5])*q+c[6]) / ((((dd[1]*q+dd[2])*q+dd[3])*q+dd[4])*q+1);
+  } else if (p <= pHigh) {
+    q = p - 0.5; r = q*q;
+    return (((((a[1]*r+a[2])*r+a[3])*r+a[4])*r+a[5])*r+a[6])*q / (((((b[1]*r+b[2])*r+b[3])*r+b[4])*r+b[5])*r+1);
+  } else {
+    q = Math.sqrt(-2*Math.log(1-p));
+    return -(((((c[1]*q+c[2])*q+c[3])*q+c[4])*q+c[5])*q+c[6]) / ((((dd[1]*q+dd[2])*q+dd[3])*q+dd[4])*q+1);
+  }
+}
+
+function drawChart() {
+  const canvas = $("chart");
+  const dpr = window.devicePixelRatio || 1;
+  const w = canvas.clientWidth, h = 350;
+  canvas.width = w*dpr; canvas.height = h*dpr;
+  const ctx = canvas.getContext("2d");
+  ctx.scale(dpr, dpr);
+
+  const pad = { top:20, bottom:40, left:30, right:30 };
+  const plotW = w - pad.left - pad.right;
+  const plotH = h - pad.top - pad.bottom;
+
+  const mu1 = 0, mu2 = d, sd = 1;
+  const xMin = Math.min(mu1, mu2) - 3.5;
+  const xMax = Math.max(mu1, mu2) + 3.5;
+  const yMax = 0.45;
+
+  function toX(v) { return pad.left + (v - xMin) / (xMax - xMin) * plotW; }
+  function toY(v) { return pad.top + plotH - (v / yMax) * plotH; }
+
+  ctx.clearRect(0, 0, w, h);
+
+  // Grid lines
+  ctx.strokeStyle = "rgba(255,255,255,.05)";
+  ctx.lineWidth = 1;
+  for (let y = 0; y <= yMax; y += 0.1) {
+    ctx.beginPath();
+    ctx.moveTo(pad.left, toY(y));
+    ctx.lineTo(w - pad.right, toY(y));
+    ctx.stroke();
+  }
+
+  // Overlap fill
+  const steps = 400;
+  const dx = (xMax - xMin) / steps;
+  ctx.beginPath();
+  ctx.moveTo(toX(xMin), toY(0));
+  for (let i = 0; i <= steps; i++) {
+    const x = xMin + i * dx;
+    const y = Math.min(normPDF(x, mu1, sd), normPDF(x, mu2, sd));
+    ctx.lineTo(toX(x), toY(y));
+  }
+  ctx.lineTo(toX(xMax), toY(0));
+  ctx.closePath();
+  ctx.fillStyle = "rgba(26,188,156,.15)";
+  ctx.fill();
+
+  // Control distribution (fill)
+  ctx.beginPath();
+  ctx.moveTo(toX(xMin), toY(0));
+  for (let i = 0; i <= steps; i++) {
+    const x = xMin + i * dx;
+    ctx.lineTo(toX(x), toY(normPDF(x, mu1, sd)));
+  }
+  ctx.lineTo(toX(xMax), toY(0));
+  ctx.closePath();
+  ctx.fillStyle = "rgba(52,152,219,.1)";
+  ctx.fill();
+
+  // Treatment distribution (fill)
+  ctx.beginPath();
+  ctx.moveTo(toX(xMin), toY(0));
+  for (let i = 0; i <= steps; i++) {
+    const x = xMin + i * dx;
+    ctx.lineTo(toX(x), toY(normPDF(x, mu2, sd)));
+  }
+  ctx.lineTo(toX(xMax), toY(0));
+  ctx.closePath();
+  ctx.fillStyle = "rgba(231,76,60,.1)";
+  ctx.fill();
+
+  // Control curve
+  ctx.beginPath();
+  for (let i = 0; i <= steps; i++) {
+    const x = xMin + i * dx;
+    const y = normPDF(x, mu1, sd);
+    i === 0 ? ctx.moveTo(toX(x), toY(y)) : ctx.lineTo(toX(x), toY(y));
+  }
+  ctx.strokeStyle = "#3498DB";
+  ctx.lineWidth = 2.5;
+  ctx.stroke();
+
+  // Treatment curve
+  ctx.beginPath();
+  for (let i = 0; i <= steps; i++) {
+    const x = xMin + i * dx;
+    const y = normPDF(x, mu2, sd);
+    i === 0 ? ctx.moveTo(toX(x), toY(y)) : ctx.lineTo(toX(x), toY(y));
+  }
+  ctx.strokeStyle = "#E74C3C";
+  ctx.lineWidth = 2.5;
+  ctx.stroke();
+
+  // Mean lines
+  ctx.setLineDash([6,4]);
+  ctx.lineWidth = 1.5;
+  // Control mean
+  ctx.strokeStyle = "rgba(52,152,219,.6)";
+  ctx.beginPath();
+  ctx.moveTo(toX(mu1), toY(0));
+  ctx.lineTo(toX(mu1), toY(normPDF(mu1, mu1, sd)));
+  ctx.stroke();
+  // Treatment mean
+  ctx.strokeStyle = "rgba(231,76,60,.6)";
+  ctx.beginPath();
+  ctx.moveTo(toX(mu2), toY(0));
+  ctx.lineTo(toX(mu2), toY(normPDF(mu2, mu2, sd)));
+  ctx.stroke();
+  ctx.setLineDash([]);
+
+  // d arrow
+  if (d > 0.05) {
+    const arrY = toY(yMax * 0.85);
+    ctx.strokeStyle = "rgba(255,255,255,.4)";
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    ctx.moveTo(toX(mu1), arrY);
+    ctx.lineTo(toX(mu2), arrY);
+    ctx.stroke();
+    // arrowhead
+    const ax = toX(mu2), ay = arrY;
+    ctx.fillStyle = "rgba(255,255,255,.4)";
+    ctx.beginPath();
+    ctx.moveTo(ax, ay);
+    ctx.lineTo(ax-8, ay-4);
+    ctx.lineTo(ax-8, ay+4);
+    ctx.fill();
+    // label
+    ctx.fillStyle = "var(--text)";
+    ctx.font = "bold 13px Georgia,serif";
+    ctx.textAlign = "center";
+    ctx.fillText("d = " + d.toFixed(2), (toX(mu1)+toX(mu2))/2, arrY - 8);
+  }
+
+  // Labels
+  ctx.font = "12px 'Segoe UI',sans-serif";
+  ctx.textAlign = "center";
+  ctx.fillStyle = "#3498DB";
+  ctx.fillText("Controle (μ=0)", toX(mu1), toY(0) + 18);
+  ctx.fillStyle = "#E74C3C";
+  ctx.fillText("Tratamento (μ=" + d.toFixed(1) + ")", toX(mu2), toY(0) + 32);
+
+  // X axis
+  ctx.strokeStyle = "rgba(255,255,255,.15)";
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.moveTo(pad.left, toY(0));
+  ctx.lineTo(w - pad.right, toY(0));
+  ctx.stroke();
+}
+
+function updateInsight() {
+  const box = $("insightBox");
+  if (d === 0) {
+    box.innerHTML = "Com <strong>d = 0</strong>, as distribuições são idênticas — não há efeito do tratamento. As curvas se sobrepõem completamente.";
+  } else if (d <= 0.2) {
+    box.innerHTML = `Com <strong>d = ${d.toFixed(2)}</strong> (efeito pequeno), a diferença é quase imperceptível visualmente. Cohen dizia: "difícil de ver a olho nu, mas real e importante em muitos contextos". Pense na diferença de QI entre gêmeos criados juntos vs. separados.`;
+  } else if (d <= 0.5) {
+    box.innerHTML = `Com <strong>d = ${d.toFixed(2)}</strong> (efeito médio), já é possível notar a separação. Repare que ainda há bastante sobreposição — muitas pessoas do controle pontuam mais que as do tratamento. É o tamanho de efeito típico em psicologia social.`;
+  } else if (d <= 0.8) {
+    box.innerHTML = `Com <strong>d = ${d.toFixed(2)}</strong> (efeito grande), a separação é visível. Mesmo assim, a sobreposição não é trivial. Por isso reportar <em>d</em> é tão importante — p-value sozinho não conta essa história.`;
+  } else if (d <= 1.5) {
+    box.innerHTML = `Com <strong>d = ${d.toFixed(2)}</strong> — efeito muito grande! Nessa magnitude, a maioria das pessoas no grupo tratamento pontua acima da mediana do controle. Efeitos assim são raros em ciências sociais, mais comuns em intervenções clínicas ou pedagógicas intensas.`;
+  } else {
+    box.innerHTML = `Com <strong>d = ${d.toFixed(2)}</strong> — as distribuições estão quase completamente separadas. Efeitos dessa magnitude são extraordinários. Para referência: a diferença de altura entre mulheres e homens adultos é ≈ d = 1.7.`;
+  }
+}
+
+update();
+window.addEventListener("resize", () => drawChart());
+</script>
+</body>
+</html>

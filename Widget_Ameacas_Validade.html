@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Identificador de Ameaças à Validade — Fundamentos de Estudos Experimentais I</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#0a0a0f;--glass:rgba(255,255,255,.07);--border:rgba(255,255,255,.08);
+  --text:#ECF0F1;--text2:#95A5A6;
+  --accent:#1ABC9C;--gold:#F4D03F;--red:#E74C3C;--blue:#3498DB;--purple:#9B59B6;
+  --green:#2ECC71;--orange:#E67E22;
+}
+body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+.hero{text-align:center;padding:2.5rem 1rem 1.5rem;background:linear-gradient(135deg,rgba(231,76,60,.1),rgba(230,126,34,.08))}
+.hero-badge{display:inline-block;background:var(--orange);color:#fff;font-size:.7rem;font-weight:700;padding:.25rem .8rem;border-radius:20px;text-transform:uppercase;letter-spacing:1px;margin-bottom:.8rem}
+.hero h1{font-family:Georgia,serif;font-size:2rem;font-weight:700;line-height:1.2;margin-bottom:.5rem}
+.hero p{color:var(--text2);font-size:.95rem;max-width:650px;margin:0 auto}
+.container{max-width:900px;margin:0 auto;padding:1.5rem 1rem}
+.card{background:var(--glass);border:1px solid var(--border);border-radius:12px;padding:1.5rem;margin-bottom:1.2rem}
+.card-title{font-family:Georgia,serif;font-size:1.1rem;font-weight:700;color:var(--orange);margin-bottom:.8rem}
+
+/* Progress */
+.progress-bar{display:flex;gap:4px;margin-bottom:1.5rem}
+.progress-dot{flex:1;height:6px;border-radius:3px;background:rgba(255,255,255,.08);transition:all .3s}
+.progress-dot.done{background:var(--green)}
+.progress-dot.current{background:var(--orange);box-shadow:0 0 8px rgba(230,126,34,.4)}
+.progress-dot.wrong{background:var(--red)}
+.progress-text{text-align:center;font-size:.8rem;color:var(--text2);margin-bottom:1rem}
+
+/* Scenario */
+.scenario{background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:10px;padding:1.2rem;margin-bottom:1rem}
+.scenario-num{font-size:.7rem;color:var(--orange);text-transform:uppercase;letter-spacing:1px;font-weight:700;margin-bottom:.5rem}
+.scenario-title{font-family:Georgia,serif;font-size:1.15rem;font-weight:700;color:var(--text);margin-bottom:.6rem}
+.scenario-text{font-size:.92rem;color:var(--text2);line-height:1.7}
+.scenario-text strong{color:var(--text)}
+
+/* Threats grid */
+.threats{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:.5rem;margin:1rem 0}
+.threat{display:flex;align-items:center;gap:.6rem;padding:.65rem .8rem;border-radius:8px;border:2px solid rgba(255,255,255,.06);cursor:pointer;transition:all .2s;background:rgba(255,255,255,.02)}
+.threat:hover{border-color:rgba(255,255,255,.15);background:rgba(255,255,255,.04)}
+.threat.selected{border-color:var(--orange);background:rgba(230,126,34,.08)}
+.threat.correct{border-color:var(--green)!important;background:rgba(46,204,113,.1)!important}
+.threat.missed{border-color:var(--gold)!important;background:rgba(244,208,63,.08)!important}
+.threat.wrong-pick{border-color:var(--red)!important;background:rgba(231,76,60,.08)!important}
+.threat .t-check{width:20px;height:20px;border-radius:5px;border:2px solid rgba(255,255,255,.15);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:.75rem;transition:all .2s}
+.threat.selected .t-check{border-color:var(--orange);background:var(--orange);color:#fff}
+.threat.correct .t-check{border-color:var(--green);background:var(--green);color:#fff}
+.threat.missed .t-check{border-color:var(--gold);background:var(--gold);color:#1a1a2e}
+.threat.wrong-pick .t-check{border-color:var(--red);background:var(--red);color:#fff}
+.threat .t-label{font-size:.85rem;font-weight:600}
+.threat .t-sub{font-size:.72rem;color:var(--text2);margin-top:.1rem}
+
+.btn{background:linear-gradient(135deg,var(--orange),#D35400);color:#fff;border:none;padding:.65rem 1.5rem;border-radius:8px;font-size:.9rem;font-weight:700;cursor:pointer;transition:all .2s}
+.btn:hover{transform:translateY(-1px);box-shadow:0 4px 15px rgba(230,126,34,.3)}
+.btn:disabled{opacity:.4;cursor:not-allowed;transform:none;box-shadow:none}
+.btn-row{display:flex;gap:.6rem;flex-wrap:wrap;margin-top:.8rem}
+.btn-outline{background:none;border:1px solid var(--border);color:var(--text2)}
+.btn-outline:hover{border-color:var(--orange);color:var(--orange);box-shadow:none}
+.btn-green{background:linear-gradient(135deg,var(--green),#27AE60)}
+.btn-green:hover{box-shadow:0 4px 15px rgba(46,204,113,.3)}
+
+/* Feedback */
+.feedback{border-radius:10px;padding:1.2rem;margin-top:1rem;display:none;line-height:1.7;font-size:.9rem}
+.feedback.show{display:block}
+.feedback h3{font-family:Georgia,serif;font-size:1rem;margin-bottom:.5rem}
+.feedback .fb-item{padding:.4rem 0;border-bottom:1px solid rgba(255,255,255,.05)}
+.feedback .fb-item:last-child{border:none}
+.feedback .fb-icon{display:inline-block;width:18px;text-align:center;margin-right:.3rem}
+
+/* Score */
+.score-card{text-align:center;padding:2rem;background:linear-gradient(135deg,rgba(230,126,34,.1),rgba(46,204,113,.08));border-radius:12px;border:1px solid var(--border)}
+.score-big{font-size:3.5rem;font-weight:800;font-family:Georgia,serif;margin:.5rem 0}
+.score-label{font-size:.85rem;color:var(--text2)}
+.score-breakdown{display:flex;justify-content:center;gap:2rem;margin-top:1rem}
+.score-stat{text-align:center}
+.score-stat .ss-val{font-size:1.3rem;font-weight:700}
+.score-stat .ss-label{font-size:.7rem;color:var(--text2);text-transform:uppercase}
+
+/* Reference */
+.ref-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:.6rem;margin-top:.8rem}
+.ref-item{background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:8px;padding:.8rem}
+.ref-item h4{font-size:.85rem;color:var(--orange);margin-bottom:.3rem}
+.ref-item p{font-size:.8rem;color:var(--text2);line-height:1.5}
+
+.footer{text-align:center;padding:1.5rem;color:var(--text2);font-size:.8rem;border-top:1px solid var(--border);margin-top:2rem}
+@media(max-width:600px){.hero h1{font-size:1.5rem}.threats{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <div class="hero-badge">Quiz Interativo</div>
+  <h1>Identificador de<br>Ameaças à Validade</h1>
+  <p>Leia cada cenário experimental e identifique as ameaças à validade presentes</p>
+</div>
+
+<div class="container">
+
+<div id="quizArea">
+  <div class="progress-bar" id="progressBar"></div>
+  <div class="progress-text" id="progressText"></div>
+
+  <div class="scenario" id="scenarioBox">
+    <div class="scenario-num" id="scenarioNum"></div>
+    <div class="scenario-title" id="scenarioTitle"></div>
+    <div class="scenario-text" id="scenarioText"></div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Quais ameaças à validade estão presentes?</div>
+    <p style="color:var(--text2);font-size:.85rem;margin-bottom:.8rem">Selecione todas que se aplicam, depois clique em "Verificar".</p>
+    <div class="threats" id="threatGrid"></div>
+    <div class="btn-row">
+      <button class="btn" id="btnCheck" onclick="checkAnswer()">Verificar Resposta</button>
+      <button class="btn btn-green" id="btnNext" onclick="nextScenario()" style="display:none">Próximo Cenário →</button>
+    </div>
+    <div class="feedback" id="feedback"></div>
+  </div>
+</div>
+
+<div id="scoreArea" style="display:none">
+  <div class="score-card">
+    <div class="score-label">Resultado Final</div>
+    <div class="score-big" id="finalScore" style="color:var(--green)">—</div>
+    <div class="score-label">de acerto nas ameaças identificadas</div>
+    <div class="score-breakdown">
+      <div class="score-stat">
+        <div class="ss-val" id="ssCorrect" style="color:var(--green)">0</div>
+        <div class="ss-label">Acertos</div>
+      </div>
+      <div class="score-stat">
+        <div class="ss-val" id="ssMissed" style="color:var(--gold)">0</div>
+        <div class="ss-label">Não identificadas</div>
+      </div>
+      <div class="score-stat">
+        <div class="ss-val" id="ssWrong" style="color:var(--red)">0</div>
+        <div class="ss-label">Falsos alarmes</div>
+      </div>
+    </div>
+  </div>
+  <div class="btn-row" style="justify-content:center;margin-top:1rem">
+    <button class="btn" onclick="restart()">Recomeçar</button>
+    <button class="btn btn-outline" onclick="showRef()">Ver Referência de Ameaças</button>
+  </div>
+</div>
+
+<div class="card" id="refCard" style="display:none">
+  <div class="card-title">Referência: Ameaças à Validade Interna</div>
+  <p style="color:var(--text2);font-size:.85rem;margin-bottom:.6rem">Baseado em Shadish, Cook & Campbell (2002) e Campbell & Stanley (1963)</p>
+  <div class="ref-grid" id="refGrid"></div>
+</div>
+
+</div>
+
+<div class="footer">
+  Prof. Dr. Leonardo Vils · Fundamentos de Estudos Experimentais I · 2026
+</div>
+
+<script>
+const $ = id => document.getElementById(id);
+
+const THREATS = [
+  {id:"history", name:"História", desc:"Evento externo entre pré e pós-teste afeta os resultados"},
+  {id:"maturation", name:"Maturação", desc:"Mudanças naturais nos participantes ao longo do tempo"},
+  {id:"testing", name:"Efeito de Testagem", desc:"A exposição ao pré-teste altera o desempenho no pós-teste"},
+  {id:"instrumentation", name:"Instrumentação", desc:"Mudança no instrumento de medida entre medições"},
+  {id:"regression", name:"Regressão à Média", desc:"Escores extremos tendem a migrar para a média na repetição"},
+  {id:"selection", name:"Seleção", desc:"Grupos diferem sistematicamente antes do tratamento"},
+  {id:"mortality", name:"Mortalidade/Attrition", desc:"Participantes abandonam diferencialmente entre grupos"},
+  {id:"diffusion", name:"Difusão do Tratamento", desc:"Grupo controle acessa o tratamento ou informação sobre ele"},
+  {id:"demand", name:"Demand Characteristics", desc:"Participantes adivinham a hipótese e ajustam comportamento"},
+  {id:"hawthorne", name:"Efeito Hawthorne", desc:"Ser observado/estudado muda o comportamento, não o tratamento"},
+  {id:"experimenter", name:"Viés do Experimentador", desc:"Expectativas do pesquisador influenciam as medições ou interação"},
+  {id:"compensatory", name:"Rivalidade Compensatória", desc:"Grupo controle se esforça mais para compensar a falta de tratamento"},
+];
+
+const SCENARIOS = [
+  {
+    title: "Treinamento de Liderança",
+    text: "Uma empresa quer testar um novo programa de treinamento de liderança. Selecionam os <strong>20 gerentes com piores avaliações de desempenho</strong> para o treinamento (grupo tratamento) e comparam com 20 gerentes com avaliações medianas (grupo controle). Após 3 meses, medem novamente. Os gerentes treinados melhoraram significativamente.",
+    correct: ["regression","selection"],
+    explanations: {
+      regression: "Os gerentes foram selecionados justamente por terem as PIORES avaliações — escores extremos. Na medição seguinte, esses escores tenderiam a subir naturalmente (regressão à média), mesmo sem treinamento.",
+      selection: "Os grupos não são equivalentes: um tem os piores e o outro os medianos. Qualquer diferença pós-teste pode refletir essa diferença pré-existente, não o treinamento."
+    }
+  },
+  {
+    title: "App de Mindfulness",
+    text: "Pesquisadores randomizam 200 funcionários em dois grupos: um usa um app de mindfulness por 8 semanas, o outro não recebe nada. Na 4ª semana, a empresa anuncia uma <strong>reestruturação com possíveis demissões</strong>. No pós-teste, ambos os grupos mostram alta ansiedade e o tratamento não é significativo.",
+    correct: ["history"],
+    explanations: {
+      history: "A ameaça de demissão é um evento externo (história) que ocorreu entre o início e o fim do estudo, afetando ambos os grupos. O estresse gerado pode ter mascarado qualquer efeito positivo do mindfulness."
+    }
+  },
+  {
+    title: "Método de Ensino em Escolas",
+    text: "Um pesquisador compara dois métodos de ensino de matemática em crianças de 8 anos. O Método A é aplicado na <strong>Escola 1</strong> e o Método B na <strong>Escola 2</strong>. Após 6 meses, o Método A mostra resultados superiores. O pesquisador conclui que o Método A é mais eficaz.",
+    correct: ["selection","maturation","history"],
+    explanations: {
+      selection: "As escolas provavelmente diferem em nível socioeconômico, qualidade dos professores, infraestrutura. A diferença pode ser das escolas, não dos métodos.",
+      maturation: "Em 6 meses, crianças de 8 anos passam por mudanças cognitivas significativas. Se as escolas têm perfis diferentes, a maturação pode ser desigual.",
+      history: "Ao longo de 6 meses, eventos diferentes podem ocorrer em cada escola (greves, mudança de professor, eventos locais) que afetam o desempenho."
+    }
+  },
+  {
+    title: "Suplemento e Performance Cognitiva",
+    text: "Voluntários são recrutados para testar um suplemento cognitivo. Fazem um teste de QI (pré-teste), tomam o suplemento por 2 semanas, e refazem <strong>o mesmo teste de QI</strong> (pós-teste). Resultado: melhora significativa de 8 pontos.",
+    correct: ["testing","regression"],
+    explanations: {
+      testing: "Fazer o mesmo teste duas vezes gera efeito de prática — os participantes já conhecem o formato, as perguntas, e respondem melhor na segunda vez, independentemente do suplemento.",
+      regression: "Voluntários que se consideram 'abaixo do potencial' tendem a se voluntariar. Se seus escores iniciais eram atipicamente baixos, a repetição tenderia a aproximá-los da média real."
+    }
+  },
+  {
+    title: "Programa de Emagrecimento",
+    text: "Um programa de 12 semanas promete perda de peso. Iniciam 150 participantes, mas apenas <strong>80 completam o programa</strong>. O pesquisador analisa somente os 80 que terminaram e reporta perda média de 6kg. O grupo controle (lista de espera, N=100) perdeu apenas 1kg.",
+    correct: ["mortality","demand"],
+    explanations: {
+      mortality: "70 participantes desistiram! Quem provavelmente desistiu? Os que não estavam perdendo peso. Analisar só quem ficou infla artificialmente o resultado — é um viés de sobrevivência.",
+      demand: "Os participantes sabem que estão em um programa de emagrecimento e podem estar ajustando comportamento (exercício, dieta) além do que o programa prescreve, simplesmente por se sentirem monitorados."
+    }
+  },
+  {
+    title: "Nudge no Refeitório",
+    text: "Um pesquisador quer testar se reorganizar o buffet (colocar saladas na frente) aumenta o consumo de vegetais. Implementa a mudança em <strong>um restaurante corporativo</strong> e compara o consumo de vegetais com o mês anterior. Também instala <strong>cartazes sobre alimentação saudável</strong> simultaneamente. O consumo de vegetais aumenta 30%.",
+    correct: ["history","instrumentation","hawthorne"],
+    explanations: {
+      history: "Comparar com o mês anterior é problemático — pode ser outro período do ano, cardápio diferente, ou até mudança no quadro de funcionários que almoçam ali.",
+      instrumentation: "Dois tratamentos foram aplicados ao mesmo tempo (layout + cartazes). A 'instrumentação' mudou de forma confusa — não é possível separar qual intervenção causou o efeito.",
+      hawthorne: "Se os funcionários perceberam que estão sendo estudados (novos cartazes, mudança no buffet), podem ter mudado o comportamento simplesmente por se sentirem observados."
+    }
+  },
+  {
+    title: "Gamificação em RH",
+    text: "Uma empresa implementa gamificação no treinamento de compliance. O grupo experimental usa a plataforma gamificada; o grupo controle usa slides tradicionais. O <strong>instrutor do grupo experimental é entusiasmado</strong> com gamificação e faz apresentações dinâmicas. O <strong>instrutor do grupo controle</strong> é conhecido por ser monótono. Resultado: o grupo gamificado aprende mais.",
+    correct: ["experimenter","selection"],
+    explanations: {
+      experimenter: "O instrutor entusiasmado pode ser mais envolvente independentemente da gamificação — seu entusiasmo é uma variável confundidora que se confunde com o tratamento. Idealmente, o mesmo instrutor deveria conduzir ambos os grupos.",
+      selection: "Se os instrutores diferem, os grupos efetivamente recebem tratamentos diferentes (gamificação + bom instrutor vs. slides + mau instrutor). A diferença pode ser do instrutor, não do método."
+    }
+  },
+  {
+    title: "Avaliação 360° e Desempenho",
+    text: "Uma consultoria implementa avaliação 360° em uma divisão de uma multinacional. A outra divisão (controle) mantém a avaliação tradicional. <strong>Funcionários da divisão tratada conversam com colegas da divisão controle</strong> no refeitório e compartilham os questionários e feedbacks que receberam. Após 6 meses, ambas as divisões melhoram.",
+    correct: ["diffusion","hawthorne"],
+    explanations: {
+      diffusion: "Os funcionários do grupo controle tiveram acesso à informação do tratamento (os questionários 360°). Alguns podem ter começado a buscar feedback informalmente, contaminando o grupo controle.",
+      hawthorne: "Ambos os grupos sabem que estão sendo comparados. A divisão controle pode ter se esforçado mais (rivalidade compensatória) ou a divisão tratada pode ter melhorado só por se sentir no 'holofote'."
+    }
+  },
+  {
+    title: "Coaching Executivo",
+    text: "Um estudo randomizado testa coaching executivo. Os participantes do grupo tratamento sabem que estão recebendo coaching de 'alta performance'. O grupo controle recebe apenas um e-book genérico. O <strong>questionário de autoavaliação pós-teste</strong> pergunta: 'Quanto você melhorou como líder?'. O grupo coaching reporta melhora significativamente maior.",
+    correct: ["demand","instrumentation"],
+    explanations: {
+      demand: "Os participantes que receberam coaching de 'alta performance' provavelmente sentem pressão social para reportar melhora — afinal, receberam um tratamento premium. A pergunta 'quanto você melhorou?' praticamente convida a resposta desejável.",
+      instrumentation: "O instrumento de medida (autoavaliação) é altamente suscetível a viés. Uma medida objetiva de desempenho (avaliação do gestor, KPIs) seria mais robusta contra demand characteristics."
+    }
+  },
+  {
+    title: "Horário Flexível e Produtividade",
+    text: "Uma startup oferece horário flexível aos desenvolvedores que <strong>voluntariamente optaram</strong> pela modalidade. Comparam a produtividade deles com os que preferiram o horário fixo. Após 3 meses, o grupo flexível produz 20% mais código. Conclusão: horário flexível aumenta produtividade.",
+    correct: ["selection","demand"],
+    explanations: {
+      selection: "Não houve randomização — os participantes escolheram seus grupos. Quem opta por flexibilidade pode já ser mais produtivo, autodirigido e motivado. A diferença pode ser de perfil, não de horário.",
+      demand: "Os desenvolvedores do grupo flexível podem se sentir na obrigação de produzir mais para justificar o benefício recebido, gerando um efeito de reciprocidade, não do horário em si."
+    }
+  }
+];
+
+let currentIdx = 0;
+let selected = new Set();
+let answered = false;
+let results = []; // {correct, missed, wrong} per scenario
+let shuffledOrder = [];
+
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i=a.length-1;i>0;i--) { const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]; }
+  return a;
+}
+
+function init() {
+  shuffledOrder = shuffle([...Array(SCENARIOS.length).keys()]);
+  currentIdx = 0;
+  results = [];
+  $("scoreArea").style.display = "none";
+  $("quizArea").style.display = "block";
+  $("refCard").style.display = "none";
+  renderScenario();
+}
+
+function renderScenario() {
+  const idx = shuffledOrder[currentIdx];
+  const sc = SCENARIOS[idx];
+  selected = new Set();
+  answered = false;
+
+  // Progress
+  let dots = "";
+  for (let i = 0; i < SCENARIOS.length; i++) {
+    let cls = "";
+    if (i < currentIdx) cls = results[i].wrong === 0 && results[i].missed === 0 ? "done" : "wrong";
+    else if (i === currentIdx) cls = "current";
+    dots += `<div class="progress-dot ${cls}"></div>`;
+  }
+  $("progressBar").innerHTML = dots;
+  $("progressText").textContent = `Cenário ${currentIdx + 1} de ${SCENARIOS.length}`;
+
+  $("scenarioNum").textContent = `Cenário ${currentIdx + 1}`;
+  $("scenarioTitle").textContent = sc.title;
+  $("scenarioText").innerHTML = sc.text;
+
+  // Threats
+  let html = "";
+  for (const t of THREATS) {
+    html += `<div class="threat" id="th-${t.id}" onclick="toggleThreat('${t.id}')">
+      <div class="t-check"></div>
+      <div>
+        <div class="t-label">${t.name}</div>
+        <div class="t-sub">${t.desc}</div>
+      </div>
+    </div>`;
+  }
+  $("threatGrid").innerHTML = html;
+
+  $("btnCheck").style.display = "";
+  $("btnCheck").disabled = false;
+  $("btnNext").style.display = "none";
+  $("feedback").className = "feedback";
+}
+
+function toggleThreat(id) {
+  if (answered) return;
+  if (selected.has(id)) selected.delete(id);
+  else selected.add(id);
+  document.querySelectorAll(".threat").forEach(el => {
+    const tid = el.id.replace("th-","");
+    el.classList.toggle("selected", selected.has(tid));
+    el.querySelector(".t-check").textContent = selected.has(tid) ? "✓" : "";
+  });
+}
+
+function checkAnswer() {
+  if (answered) return;
+  answered = true;
+  const idx = shuffledOrder[currentIdx];
+  const sc = SCENARIOS[idx];
+  const correctSet = new Set(sc.correct);
+
+  let correct = 0, missed = 0, wrong = 0;
+  let fbHtml = "";
+
+  // Mark correct picks
+  for (const id of selected) {
+    const el = $("th-"+id);
+    if (correctSet.has(id)) {
+      el.classList.add("correct");
+      el.querySelector(".t-check").textContent = "✓";
+      correct++;
+      fbHtml += `<div class="fb-item"><span class="fb-icon" style="color:var(--green)">✓</span><strong>${THREATS.find(t=>t.id===id).name}:</strong> ${sc.explanations[id]}</div>`;
+    } else {
+      el.classList.add("wrong-pick");
+      el.querySelector(".t-check").textContent = "✗";
+      wrong++;
+      fbHtml += `<div class="fb-item"><span class="fb-icon" style="color:var(--red)">✗</span><strong>${THREATS.find(t=>t.id===id).name}:</strong> Não é uma ameaça principal neste cenário.</div>`;
+    }
+  }
+
+  // Mark missed
+  for (const id of correctSet) {
+    if (!selected.has(id)) {
+      const el = $("th-"+id);
+      el.classList.add("missed");
+      el.querySelector(".t-check").textContent = "!";
+      missed++;
+      fbHtml += `<div class="fb-item"><span class="fb-icon" style="color:var(--gold)">!</span><strong>${THREATS.find(t=>t.id===id).name}:</strong> ${sc.explanations[id]} <em style="color:var(--gold)">(não identificada)</em></div>`;
+    }
+  }
+
+  results.push({ correct, missed, wrong });
+
+  const fb = $("feedback");
+  const total = correctSet.size;
+  if (correct === total && wrong === 0) {
+    fb.innerHTML = `<h3 style="color:var(--green)">Excelente! Identificou todas as ameaças corretamente.</h3>${fbHtml}`;
+    fb.style.background = "rgba(46,204,113,.08)";
+    fb.style.borderLeft = "3px solid var(--green)";
+  } else if (correct > 0 && wrong === 0) {
+    fb.innerHTML = `<h3 style="color:var(--gold)">Parcialmente correto — sem falsos alarmes, mas faltou ${missed}.</h3>${fbHtml}`;
+    fb.style.background = "rgba(244,208,63,.08)";
+    fb.style.borderLeft = "3px solid var(--gold)";
+  } else {
+    fb.innerHTML = `<h3 style="color:var(--orange)">Revise as explicações abaixo.</h3>${fbHtml}`;
+    fb.style.background = "rgba(230,126,34,.08)";
+    fb.style.borderLeft = "3px solid var(--orange)";
+  }
+  fb.className = "feedback show";
+
+  $("btnCheck").style.display = "none";
+  $("btnNext").style.display = "";
+
+  // Update progress dot
+  const dots = $("progressBar").children;
+  dots[currentIdx].classList.remove("current");
+  dots[currentIdx].classList.add(correct === total && wrong === 0 ? "done" : "wrong");
+}
+
+function nextScenario() {
+  currentIdx++;
+  if (currentIdx >= SCENARIOS.length) {
+    showScore();
+    return;
+  }
+  renderScenario();
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+function showScore() {
+  $("quizArea").style.display = "none";
+  $("scoreArea").style.display = "block";
+
+  let totalCorrect = 0, totalMissed = 0, totalWrong = 0, totalPossible = 0;
+  results.forEach((r, i) => {
+    const sc = SCENARIOS[shuffledOrder[i]];
+    totalCorrect += r.correct;
+    totalMissed += r.missed;
+    totalWrong += r.wrong;
+    totalPossible += sc.correct.length;
+  });
+
+  const pct = totalPossible > 0 ? Math.round(totalCorrect / totalPossible * 100) : 0;
+  $("finalScore").textContent = pct + "%";
+  $("finalScore").style.color = pct >= 80 ? "var(--green)" : pct >= 50 ? "var(--gold)" : "var(--red)";
+  $("ssCorrect").textContent = totalCorrect;
+  $("ssMissed").textContent = totalMissed;
+  $("ssWrong").textContent = totalWrong;
+
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+function restart() {
+  init();
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+function showRef() {
+  const card = $("refCard");
+  card.style.display = card.style.display === "none" ? "block" : "none";
+  let html = "";
+  for (const t of THREATS) {
+    html += `<div class="ref-item"><h4>${t.name}</h4><p>${t.desc}</p></div>`;
+  }
+  $("refGrid").innerHTML = html;
+}
+
+init();
+</script>
+</body>
+</html>

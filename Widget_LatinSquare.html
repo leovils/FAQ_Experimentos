@@ -1,0 +1,818 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Latin Square e Counterbalancing — Fundamentos de Estudos Experimentais I</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#0a0a0f;--glass:rgba(255,255,255,.07);--border:rgba(255,255,255,.08);
+  --text:#ECF0F1;--text2:#95A5A6;
+  --accent:#1ABC9C;--gold:#F4D03F;--red:#E74C3C;--blue:#3498DB;--purple:#9B59B6;
+  --orange:#E67E22;--pink:#E91E63;--cyan:#00BCD4;
+}
+body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+.hero{text-align:center;padding:2.5rem 1rem 1.5rem;background:linear-gradient(135deg,rgba(26,188,156,.12),rgba(52,152,219,.08),rgba(155,89,182,.06))}
+.hero-badge{display:inline-block;background:var(--accent);color:#fff;font-size:.7rem;font-weight:700;padding:.25rem .8rem;border-radius:20px;text-transform:uppercase;letter-spacing:1px;margin-bottom:.8rem}
+.hero h1{font-family:Georgia,serif;font-size:2rem;font-weight:700;line-height:1.2;margin-bottom:.5rem}
+.hero p{color:var(--text2);font-size:.95rem;max-width:650px;margin:0 auto}
+.container{max-width:960px;margin:0 auto;padding:1.5rem 1rem}
+.card{background:var(--glass);border:1px solid var(--border);border-radius:12px;padding:1.5rem;margin-bottom:1.2rem;backdrop-filter:blur(12px)}
+.card-title{font-family:Georgia,serif;font-size:1.1rem;font-weight:700;color:var(--accent);margin-bottom:.8rem;display:flex;align-items:center;gap:.5rem}
+.card-title .tag{font-size:.65rem;background:rgba(26,188,156,.15);color:var(--accent);padding:.2rem .5rem;border-radius:10px;font-family:'Segoe UI',sans-serif;font-weight:600}
+
+/* Tabs */
+.tabs{display:flex;gap:0;margin-bottom:1.5rem;border-bottom:2px solid var(--border);overflow-x:auto}
+.tab{padding:.7rem 1.2rem;font-size:.85rem;font-weight:600;color:var(--text2);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-2px;transition:all .2s;white-space:nowrap}
+.tab:hover{color:var(--text)}
+.tab.active{color:var(--accent);border-bottom-color:var(--accent)}
+.tab-content{display:none}
+.tab-content.active{display:block}
+
+/* Controls */
+.controls{display:flex;flex-wrap:wrap;gap:1rem;align-items:flex-end;margin-bottom:1rem}
+.control-group{flex:1;min-width:160px}
+.control-group label{display:block;font-size:.78rem;color:var(--text2);margin-bottom:.4rem;font-weight:600;text-transform:uppercase;letter-spacing:.5px}
+.control-group .val{color:var(--accent);font-weight:700}
+input[type=range]{width:100%;height:6px;-webkit-appearance:none;background:rgba(255,255,255,.1);border-radius:3px;outline:none;margin-top:.3rem}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:18px;height:18px;background:var(--accent);border-radius:50%;cursor:pointer;border:2px solid var(--bg)}
+input[type=range]::-moz-range-thumb{width:18px;height:18px;background:var(--accent);border-radius:50%;cursor:pointer;border:2px solid var(--bg)}
+select{background:rgba(255,255,255,.1);color:var(--text);border:1px solid var(--border);padding:.45rem .7rem;border-radius:6px;font-size:.9rem;cursor:pointer}
+select option{background:#1a1a2e;color:var(--text)}
+
+/* Matrix */
+.matrix-wrap{overflow-x:auto;margin:.8rem 0}
+.matrix{border-collapse:separate;border-spacing:3px}
+.matrix th{padding:.4rem .6rem;font-size:.75rem;color:var(--text2);text-transform:uppercase;letter-spacing:.5px;font-weight:600;text-align:center}
+.matrix td{width:52px;height:44px;text-align:center;font-weight:700;font-size:.9rem;border-radius:6px;transition:all .25s;cursor:default}
+.matrix .row-label{width:auto;background:none;font-size:.75rem;color:var(--text2);text-align:right;padding-right:.5rem;cursor:default;font-weight:600}
+
+/* Treatment colors */
+.t0{background:rgba(26,188,156,.25);color:#1ABC9C}
+.t1{background:rgba(231,76,60,.25);color:#E74C3C}
+.t2{background:rgba(52,152,219,.25);color:#3498DB}
+.t3{background:rgba(244,208,63,.25);color:#F4D03F}
+.t4{background:rgba(155,89,182,.25);color:#9B59B6}
+.t5{background:rgba(230,126,34,.25);color:#E67E22}
+
+/* Permutations */
+.perm-grid{display:flex;flex-wrap:wrap;gap:4px;max-height:260px;overflow-y:auto;padding:.3rem}
+.perm-row{display:flex;gap:2px;background:rgba(255,255,255,.02);border-radius:4px;padding:2px 4px;font-size:.7rem;align-items:center}
+.perm-row .perm-num{color:var(--text2);width:24px;text-align:right;margin-right:4px;font-size:.6rem}
+.perm-cell{width:22px;height:20px;border-radius:3px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.65rem}
+
+/* Stats */
+.compare{display:grid;grid-template-columns:1fr auto 1fr;gap:1rem;align-items:center;margin:1rem 0}
+.compare-box{text-align:center;padding:1rem;background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:10px}
+.compare-box .cb-num{font-size:2.2rem;font-weight:800;font-family:Georgia,serif}
+.compare-box .cb-label{font-size:.75rem;color:var(--text2);margin-top:.3rem;text-transform:uppercase;letter-spacing:.5px}
+.compare-vs{font-size:1.2rem;color:var(--text2);font-weight:700}
+
+/* Build mode */
+.build-matrix td{cursor:pointer;border:2px solid transparent;transition:all .15s}
+.build-matrix td:hover{border-color:rgba(255,255,255,.3);transform:scale(1.05)}
+.build-matrix td.empty{background:rgba(255,255,255,.04);color:rgba(255,255,255,.15);border:2px dashed rgba(255,255,255,.1)}
+.build-matrix td.error{border-color:var(--red)!important;animation:shake .3s}
+.build-matrix td.valid{border-color:#2ECC71!important}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-3px)}75%{transform:translateX(3px)}}
+
+.palette{display:flex;gap:6px;margin:.8rem 0;flex-wrap:wrap;align-items:center}
+.palette-label{font-size:.78rem;color:var(--text2);margin-right:.3rem}
+.palette-item{width:40px;height:34px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.85rem;cursor:pointer;border:2px solid transparent;transition:all .15s}
+.palette-item:hover{transform:scale(1.1)}
+.palette-item.selected{border-color:#fff;transform:scale(1.1);box-shadow:0 0 12px rgba(255,255,255,.2)}
+
+.btn{background:linear-gradient(135deg,var(--accent),#16A085);color:#fff;border:none;padding:.55rem 1.2rem;border-radius:8px;font-size:.85rem;font-weight:700;cursor:pointer;transition:all .2s}
+.btn:hover{transform:translateY(-1px);box-shadow:0 4px 15px rgba(26,188,156,.3)}
+.btn-sm{padding:.4rem .8rem;font-size:.78rem}
+.btn-outline{background:none;border:1px solid var(--border);color:var(--text2)}
+.btn-outline:hover{border-color:var(--accent);color:var(--accent);box-shadow:none}
+.btn-row{display:flex;gap:.5rem;flex-wrap:wrap;margin:.8rem 0}
+
+.feedback{padding:.8rem 1rem;border-radius:8px;margin-top:.8rem;font-size:.9rem;line-height:1.5;display:none}
+.feedback.success{display:block;background:rgba(46,204,113,.1);border-left:3px solid #2ECC71;color:#2ECC71}
+.feedback.error{display:block;background:rgba(231,76,60,.1);border-left:3px solid var(--red);color:var(--red)}
+.feedback.info{display:block;background:rgba(52,152,219,.1);border-left:3px solid var(--blue);color:var(--blue)}
+
+/* Simulation */
+.sim-row{display:flex;gap:.8rem;flex-wrap:wrap;margin:.8rem 0}
+.sim-group{flex:1;min-width:250px;background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:10px;padding:1rem}
+.sim-group h3{font-family:Georgia,serif;font-size:.95rem;margin-bottom:.6rem}
+canvas{width:100%;border-radius:8px}
+
+.insight{background:rgba(26,188,156,.08);border-left:3px solid var(--accent);padding:1rem 1.2rem;border-radius:0 8px 8px 0;margin-top:1rem;font-size:.88rem;line-height:1.6;color:var(--text2)}
+.insight strong{color:var(--accent)}
+.insight em{color:var(--gold)}
+
+.footer{text-align:center;padding:1.5rem;color:var(--text2);font-size:.8rem;border-top:1px solid var(--border);margin-top:2rem}
+@media(max-width:600px){.hero h1{font-size:1.5rem}.compare{grid-template-columns:1fr}.compare-vs{display:none}.tabs{gap:0}.tab{padding:.5rem .7rem;font-size:.78rem}}
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <div class="hero-badge">Widget Interativo</div>
+  <h1>Latin Square e<br>Counterbalancing</h1>
+  <p>Entenda por que e como balancear a ordem dos tratamentos em desenhos within-subjects</p>
+</div>
+
+<div class="container">
+
+<!-- TABS -->
+<div class="tabs">
+  <div class="tab active" onclick="switchTab(0)">Entendendo</div>
+  <div class="tab" onclick="switchTab(1)">Latin Square</div>
+  <div class="tab" onclick="switchTab(2)">Monte o Seu</div>
+  <div class="tab" onclick="switchTab(3)">Simulador</div>
+</div>
+
+<!-- ═══════════════════════════ TAB 0: ENTENDENDO ═══════════════════════════ -->
+<div class="tab-content active" id="tab0">
+
+  <div class="card">
+    <div class="card-title">O problema: efeitos de ordem</div>
+    <p style="color:var(--text2);font-size:.9rem;line-height:1.7;margin-bottom:.8rem">
+      Em um desenho <strong style="color:var(--accent)">within-subjects</strong>, cada participante passa por todos os tratamentos. Parece ótimo — mais poder, menos participantes. Mas surge um problema: a <em style="color:var(--gold)">ordem</em> em que os tratamentos são apresentados pode contaminar os resultados.
+    </p>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:.8rem;margin:.8rem 0">
+      <div style="background:rgba(231,76,60,.08);border-radius:8px;padding:.8rem">
+        <div style="font-weight:700;color:var(--red);font-size:.85rem;margin-bottom:.3rem">Fadiga</div>
+        <div style="color:var(--text2);font-size:.82rem;line-height:1.5">O participante cansa ao longo da sessão. Tratamentos no final recebem respostas piores — não porque são piores, mas porque a pessoa está exausta.</div>
+      </div>
+      <div style="background:rgba(52,152,219,.08);border-radius:8px;padding:.8rem">
+        <div style="font-weight:700;color:var(--blue);font-size:.85rem;margin-bottom:.3rem">Prática</div>
+        <div style="color:var(--text2);font-size:.82rem;line-height:1.5">O participante melhora com a repetição. Tratamentos no final parecem superiores — mas é a prática, não o tratamento.</div>
+      </div>
+      <div style="background:rgba(155,89,182,.08);border-radius:8px;padding:.8rem">
+        <div style="font-weight:700;color:var(--purple);font-size:.85rem;margin-bottom:.3rem">Carryover</div>
+        <div style="color:var(--text2);font-size:.82rem;line-height:1.5">O efeito de um tratamento "vaza" para o seguinte. O que vem depois de A pode ser diferente do que vem depois de B.</div>
+      </div>
+    </div>
+    <div class="insight">
+      <strong>Counterbalancing</strong> é a solução: atribuir ordens diferentes a diferentes participantes, de modo que cada tratamento apareça em cada posição o mesmo número de vezes. Assim, os efeitos de ordem se <em>cancelam</em> na média.
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Completo vs. Parcial <span class="tag">conceito-chave</span></div>
+    <div class="controls">
+      <div class="control-group">
+        <label>Tratamentos: <span class="val" id="kVal0">3</span></label>
+        <select id="selK0" onchange="updateTab0()">
+          <option value="2">2</option>
+          <option value="3" selected>3</option>
+          <option value="4">4</option>
+          <option value="5">5</option>
+          <option value="6">6</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="compare">
+      <div class="compare-box">
+        <div class="cb-num" id="permCount" style="color:var(--red)">6</div>
+        <div class="cb-label">Todas as permutações<br>(counterbalancing completo)</div>
+      </div>
+      <div class="compare-vs">vs.</div>
+      <div class="compare-box">
+        <div class="cb-num" id="lsCount" style="color:#2ECC71">3</div>
+        <div class="cb-label">Ordens no Latin Square<br>(counterbalancing parcial)</div>
+      </div>
+    </div>
+
+    <p style="color:var(--text2);font-size:.85rem;margin:.5rem 0">Todas as permutações possíveis:</p>
+    <div class="perm-grid" id="permGrid"></div>
+
+    <div class="insight" id="insight0"></div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════ TAB 1: LATIN SQUARE ═══════════════════════════ -->
+<div class="tab-content" id="tab1">
+
+  <div class="card">
+    <div class="card-title">Quadrado Latino <span class="tag">visualização</span></div>
+    <div class="controls">
+      <div class="control-group">
+        <label>Tratamentos: <span class="val" id="kVal1">4</span></label>
+        <select id="selK1" onchange="updateTab1()">
+          <option value="2">2</option>
+          <option value="3">3</option>
+          <option value="4" selected>4</option>
+          <option value="5">5</option>
+          <option value="6">6</option>
+        </select>
+      </div>
+    </div>
+
+    <p style="color:var(--text2);font-size:.85rem;margin-bottom:.6rem">Cada linha = um grupo de participantes. Cada coluna = posição na sequência. Cada tratamento aparece <strong style="color:var(--accent)">exatamente uma vez</strong> em cada linha e cada coluna.</p>
+
+    <div class="matrix-wrap">
+      <table class="matrix" id="lsMatrix"></table>
+    </div>
+
+    <div style="margin-top:.8rem">
+      <p style="color:var(--text2);font-size:.85rem;margin-bottom:.5rem"><strong style="color:var(--accent)">Verificação:</strong> conte as cores em cada coluna — cada tratamento aparece uma única vez.</p>
+      <div id="colCheck" style="display:flex;gap:.5rem;flex-wrap:wrap"></div>
+    </div>
+
+    <div class="insight">
+      <strong>Por que funciona?</strong> Se a posição 1 causa fadiga zero e a posição 4 causa fadiga máxima, cada tratamento recebe a "mesma dose" de fadiga na média — porque cada um aparece exatamente uma vez em cada posição. O viés de ordem se distribui igualmente e <em>se cancela</em> na comparação entre tratamentos.
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Williams Design (Balanced Latin Square)</div>
+    <p style="color:var(--text2);font-size:.88rem;line-height:1.6;margin-bottom:.6rem">
+      O Latin Square padrão controla efeitos de <em style="color:var(--gold)">posição</em>, mas não de <em style="color:var(--gold)">carryover</em> — o efeito residual de um tratamento sobre o seguinte. O <strong style="color:var(--accent)">Williams Design</strong> resolve isso: cada tratamento também é <strong>precedido</strong> por cada outro tratamento o mesmo número de vezes.
+    </p>
+    <div class="matrix-wrap">
+      <table class="matrix" id="williamsMatrix"></table>
+    </div>
+    <div class="insight" id="williamsInsight"></div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════ TAB 2: MONTE O SEU ═══════════════════════════ -->
+<div class="tab-content" id="tab2">
+
+  <div class="card">
+    <div class="card-title">Monte seu Latin Square <span class="tag">exercício</span></div>
+    <div class="controls">
+      <div class="control-group">
+        <label>Tratamentos: <span class="val" id="kVal2">3</span></label>
+        <select id="selK2" onchange="updateTab2()">
+          <option value="2">2</option>
+          <option value="3" selected>3</option>
+          <option value="4">4</option>
+          <option value="5">5</option>
+        </select>
+      </div>
+    </div>
+    <p style="color:var(--text2);font-size:.88rem;margin-bottom:.5rem">Clique em uma célula vazia e depois no tratamento que quer colocar. Tente preencher a matriz de modo que cada tratamento apareça <strong style="color:var(--accent)">uma única vez em cada linha e cada coluna</strong>.</p>
+
+    <div class="palette" id="palette">
+      <span class="palette-label">Tratamentos:</span>
+    </div>
+
+    <div class="matrix-wrap">
+      <table class="matrix build-matrix" id="buildMatrix"></table>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn" onclick="checkBuild()">✓ Verificar</button>
+      <button class="btn btn-outline" onclick="clearBuild()">Limpar</button>
+      <button class="btn btn-outline" onclick="hintBuild()">💡 Dica</button>
+      <button class="btn btn-outline" onclick="solveBuild()">Ver resposta</button>
+    </div>
+
+    <div class="feedback" id="buildFeedback"></div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════ TAB 3: SIMULADOR ═══════════════════════════ -->
+<div class="tab-content" id="tab3">
+
+  <div class="card">
+    <div class="card-title">Simulador de Efeitos de Ordem <span class="tag">simulação</span></div>
+    <p style="color:var(--text2);font-size:.88rem;margin-bottom:.8rem">
+      Veja como a falta de counterbalancing distorce os resultados. O simulador compara dois cenários: todos os participantes na mesma ordem (sem balanceamento) vs. ordens distribuídas por Latin Square.
+    </p>
+
+    <div class="controls">
+      <div class="control-group">
+        <label>Tratamentos: <span class="val" id="kVal3">3</span></label>
+        <select id="selK3" onchange="updateTab3()">
+          <option value="2">2</option>
+          <option value="3" selected>3</option>
+          <option value="4">4</option>
+        </select>
+      </div>
+      <div class="control-group">
+        <label>N por ordem: <span class="val" id="nVal3">20</span></label>
+        <input type="range" id="sliderN3" min="5" max="50" value="20" step="5" oninput="$('nVal3').textContent=this.value;updateTab3()">
+      </div>
+      <div class="control-group">
+        <label>Efeito de ordem: <span class="val" id="orderVal3">Fadiga moderada</span></label>
+        <input type="range" id="sliderOrder3" min="0" max="4" value="2" step="1" oninput="updateOrderLabel();updateTab3()">
+      </div>
+    </div>
+
+    <p style="color:var(--text2);font-size:.82rem;margin-bottom:.3rem">Efeitos reais dos tratamentos (definidos pelo pesquisador):</p>
+    <div id="trueEffects" style="display:flex;gap:.5rem;flex-wrap:wrap;margin-bottom:.8rem"></div>
+  </div>
+
+  <div class="sim-row">
+    <div class="sim-group">
+      <h3 style="color:var(--red)">❌ Sem Counterbalancing</h3>
+      <p style="color:var(--text2);font-size:.8rem;margin-bottom:.5rem">Todos na ordem A → B → C → ...</p>
+      <canvas id="chartNo" height="240"></canvas>
+    </div>
+    <div class="sim-group">
+      <h3 style="color:#2ECC71">✓ Com Latin Square</h3>
+      <p style="color:var(--text2);font-size:.8rem;margin-bottom:.5rem">Ordens balanceadas pelo quadrado latino</p>
+      <canvas id="chartYes" height="240"></canvas>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title" style="color:var(--gold)">Resultado</div>
+    <div id="simResult" style="color:var(--text2);font-size:.9rem;line-height:1.7"></div>
+  </div>
+
+</div>
+
+</div>
+
+<div class="footer">
+  Prof. Dr. Leonardo Vils · Fundamentos de Estudos Experimentais I · 2026
+</div>
+
+<script>
+const $ = id => document.getElementById(id);
+const LABELS = ["A","B","C","D","E","F"];
+const TCOLORS = [
+  {bg:"rgba(26,188,156,.25)",fg:"#1ABC9C"},
+  {bg:"rgba(231,76,60,.25)",fg:"#E74C3C"},
+  {bg:"rgba(52,152,219,.25)",fg:"#3498DB"},
+  {bg:"rgba(244,208,63,.25)",fg:"#F4D03F"},
+  {bg:"rgba(155,89,182,.25)",fg:"#9B59B6"},
+  {bg:"rgba(230,126,34,.25)",fg:"#E67E22"}
+];
+const TRUE_EFFECTS = [0, 2, 5, 3, 1, 4]; // true treatment effects
+
+// ── Utility ──
+function factorial(n){ let r=1; for(let i=2;i<=n;i++) r*=i; return r; }
+function permutations(arr){
+  if(arr.length<=1) return [arr];
+  const res=[];
+  for(let i=0;i<arr.length;i++){
+    const rest=[...arr.slice(0,i),...arr.slice(i+1)];
+    for(const p of permutations(rest)) res.push([arr[i],...p]);
+  }
+  return res;
+}
+
+function latinSquare(k){
+  // Standard cyclic Latin Square
+  const sq=[];
+  for(let r=0;r<k;r++){
+    const row=[];
+    for(let c=0;c<k;c++) row.push((r+c)%k);
+    sq.push(row);
+  }
+  return sq;
+}
+
+function williamsDesign(k){
+  // Williams balanced Latin Square (controls first-order carryover)
+  if(k===2) return [[0,1],[1,0]];
+  const rows=[];
+  if(k%2===0){
+    for(let i=0;i<k;i++){
+      const row=[];
+      for(let j=0;j<k;j++){
+        if(j===0) row.push(i);
+        else if(j%2===1) row.push((i+Math.ceil(j/2))%k);
+        else row.push((i+k-Math.floor(j/2))%k);
+      }
+      rows.push(row);
+    }
+  } else {
+    // For odd k: generate k rows, then mirror for 2k rows
+    for(let i=0;i<k;i++){
+      const row=[];
+      for(let j=0;j<k;j++){
+        if(j===0) row.push(i);
+        else if(j%2===1) row.push((i+Math.ceil(j/2))%k);
+        else row.push((i+k-Math.floor(j/2))%k);
+      }
+      rows.push(row);
+    }
+    // Mirror
+    for(let i=0;i<k;i++){
+      rows.push([...rows[i]].reverse());
+    }
+  }
+  return rows;
+}
+
+function makeCell(val,cls){
+  return `<td class="t${val}" style="background:${TCOLORS[val].bg};color:${TCOLORS[val].fg}">${LABELS[val]}</td>`;
+}
+
+// ── TABS ──
+let activeTab=0;
+function switchTab(i){
+  activeTab=i;
+  document.querySelectorAll('.tab').forEach((t,j)=>t.classList.toggle('active',j===i));
+  document.querySelectorAll('.tab-content').forEach((t,j)=>t.classList.toggle('active',j===i));
+}
+
+// ═══════════ TAB 0: Entendendo ═══════════
+function updateTab0(){
+  const k=+$("selK0").value;
+  $("kVal0").textContent=k;
+  const nPerm=factorial(k);
+  const nLS=k;
+  $("permCount").textContent=nPerm.toLocaleString();
+  $("lsCount").textContent=nLS;
+
+  // Generate permutations (limit display)
+  const arr=[]; for(let i=0;i<k;i++) arr.push(i);
+  const perms=permutations(arr);
+  const grid=$("permGrid");
+  let html="";
+  const maxShow=Math.min(perms.length,120);
+  for(let p=0;p<maxShow;p++){
+    html+=`<div class="perm-row"><span class="perm-num">${p+1}.</span>`;
+    for(const v of perms[p]){
+      html+=`<div class="perm-cell" style="background:${TCOLORS[v].bg};color:${TCOLORS[v].fg}">${LABELS[v]}</div>`;
+    }
+    html+=`</div>`;
+  }
+  if(perms.length>maxShow) html+=`<div style="color:var(--text2);font-size:.75rem;padding:.3rem">... e mais ${perms.length-maxShow} ordens</div>`;
+  grid.innerHTML=html;
+
+  $("insight0").innerHTML=`Com <strong>${k} tratamentos</strong>, existem <strong style="color:var(--red)">${nPerm}</strong> ordens possíveis (${k}!). O counterbalancing completo exigiria ${nPerm} grupos — ${nPerm > 24 ? 'inviável na prática!' : nPerm > 6 ? 'já começa a ficar complicado.' : 'ainda possível, mas o Latin Square resolve com apenas '+k+'.'} O <strong>Latin Square</strong> usa apenas <strong style="color:#2ECC71">${nLS}</strong> ordens e garante que cada tratamento apareça em cada posição exatamente uma vez — uma redução de <em>${Math.round((1-nLS/nPerm)*100)}%</em>.`;
+}
+
+// ═══════════ TAB 1: Latin Square ═══════════
+function updateTab1(){
+  const k=+$("selK1").value;
+  $("kVal1").textContent=k;
+
+  // Standard LS
+  const sq=latinSquare(k);
+  let html="<tr><th></th>";
+  for(let c=0;c<k;c++) html+=`<th>Pos. ${c+1}</th>`;
+  html+="</tr>";
+  for(let r=0;r<k;r++){
+    html+=`<tr><td class="row-label">Grupo ${r+1}</td>`;
+    for(let c=0;c<k;c++) html+=makeCell(sq[r][c]);
+    html+="</tr>";
+  }
+  $("lsMatrix").innerHTML=html;
+
+  // Column check
+  let checkHtml="";
+  for(let c=0;c<k;c++){
+    const col=sq.map(r=>r[c]);
+    const unique=new Set(col);
+    const ok=unique.size===k;
+    checkHtml+=`<div style="display:flex;flex-direction:column;align-items:center;gap:2px">
+      <div style="font-size:.7rem;color:var(--text2)">Pos.${c+1}</div>`;
+    for(const v of col){
+      checkHtml+=`<div style="width:28px;height:22px;border-radius:4px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.7rem;background:${TCOLORS[v].bg};color:${TCOLORS[v].fg}">${LABELS[v]}</div>`;
+    }
+    checkHtml+=`<div style="font-size:.7rem;color:${ok?'#2ECC71':'var(--red)'}">${ok?'✓':'✗'}</div></div>`;
+  }
+  $("colCheck").innerHTML=checkHtml;
+
+  // Williams
+  const wd=williamsDesign(k);
+  let wHtml="<tr><th></th>";
+  for(let c=0;c<k;c++) wHtml+=`<th>Pos. ${c+1}</th>`;
+  wHtml+="</tr>";
+  for(let r=0;r<wd.length;r++){
+    wHtml+=`<tr><td class="row-label">Grupo ${r+1}</td>`;
+    for(let c=0;c<k;c++) wHtml+=makeCell(wd[r][c]);
+    wHtml+="</tr>";
+  }
+  $("williamsMatrix").innerHTML=wHtml;
+
+  const nWd=wd.length;
+  $("williamsInsight").innerHTML=`O Williams Design para <strong>${k} tratamentos</strong> usa <strong>${nWd} ordens</strong>${k%2!==0?' (2×k para k ímpar)':''}. Além de cada tratamento aparecer em cada posição uma vez, cada tratamento é <em>precedido</em> por cada outro tratamento o mesmo número de vezes — controlando efeitos de carryover de primeira ordem.`;
+}
+
+// ═══════════ TAB 2: Monte o Seu ═══════════
+let buildK=3, buildGrid=[], selectedTreatment=-1;
+
+function updateTab2(){
+  buildK=+$("selK2").value;
+  $("kVal2").textContent=buildK;
+  buildGrid=[];
+  for(let r=0;r<buildK;r++){
+    buildGrid.push([]);
+    for(let c=0;c<buildK;c++) buildGrid[r].push(-1);
+  }
+  selectedTreatment=-1;
+  renderBuild();
+  $("buildFeedback").className="feedback";
+  $("buildFeedback").style.display="none";
+}
+
+function renderBuild(){
+  // Palette
+  let pHtml='<span class="palette-label">Tratamentos:</span>';
+  for(let i=0;i<buildK;i++){
+    pHtml+=`<div class="palette-item ${selectedTreatment===i?'selected':''}" style="background:${TCOLORS[i].bg};color:${TCOLORS[i].fg}" onclick="selectTreatment(${i})">${LABELS[i]}</div>`;
+  }
+  pHtml+=`<div class="palette-item" style="background:rgba(255,255,255,.05);color:var(--text2)" onclick="selectTreatment(-2)">✕</div>`;
+  $("palette").innerHTML=pHtml;
+
+  // Matrix
+  let html="<tr><th></th>";
+  for(let c=0;c<buildK;c++) html+=`<th>Pos. ${c+1}</th>`;
+  html+="</tr>";
+  for(let r=0;r<buildK;r++){
+    html+=`<tr><td class="row-label">Grupo ${r+1}</td>`;
+    for(let c=0;c<buildK;c++){
+      const v=buildGrid[r][c];
+      if(v===-1){
+        html+=`<td class="empty" onclick="placeCell(${r},${c})">?</td>`;
+      } else {
+        html+=`<td class="t${v}" style="background:${TCOLORS[v].bg};color:${TCOLORS[v].fg}" onclick="placeCell(${r},${c})">${LABELS[v]}</td>`;
+      }
+    }
+    html+="</tr>";
+  }
+  $("buildMatrix").innerHTML=html;
+}
+
+function selectTreatment(t){ selectedTreatment=t; renderBuild(); }
+
+function placeCell(r,c){
+  if(selectedTreatment===-1) return;
+  if(selectedTreatment===-2){ buildGrid[r][c]=-1; }
+  else { buildGrid[r][c]=selectedTreatment; }
+  renderBuild();
+}
+
+function checkBuild(){
+  const fb=$("buildFeedback");
+  // Check if complete
+  let empty=false;
+  for(let r=0;r<buildK;r++) for(let c=0;c<buildK;c++) if(buildGrid[r][c]===-1) empty=true;
+  if(empty){
+    fb.className="feedback info";
+    fb.textContent="Preencha todas as células antes de verificar!";
+    fb.style.display="block";
+    return;
+  }
+
+  // Check rows
+  let errors=[];
+  for(let r=0;r<buildK;r++){
+    const set=new Set(buildGrid[r]);
+    if(set.size!==buildK) errors.push(`Linha ${r+1}: tratamento repetido`);
+  }
+  for(let c=0;c<buildK;c++){
+    const col=buildGrid.map(row=>row[c]);
+    const set=new Set(col);
+    if(set.size!==buildK) errors.push(`Coluna ${c+1}: tratamento repetido`);
+  }
+
+  if(errors.length===0){
+    fb.className="feedback success";
+    fb.innerHTML="<strong>Perfeito!</strong> Você montou um Latin Square válido — cada tratamento aparece exatamente uma vez em cada linha e cada coluna. Esse design controlaria efeitos de posição em um experimento within-subjects com "+buildK+" condições.";
+  } else {
+    fb.className="feedback error";
+    fb.innerHTML="<strong>Ainda não é um Latin Square válido.</strong> Problemas encontrados:<br>• " + errors.join("<br>• ") + "<br><br>Lembre-se: cada tratamento deve aparecer <strong>exatamente uma vez</strong> em cada linha e em cada coluna.";
+    // Highlight errors in matrix
+    highlightErrors();
+  }
+  fb.style.display="block";
+}
+
+function highlightErrors(){
+  const cells=$("buildMatrix").querySelectorAll("td:not(.row-label)");
+  let idx=0;
+  for(let r=0;r<buildK;r++){
+    // Check row duplicates
+    const rowCounts={};
+    for(let c=0;c<buildK;c++){
+      const v=buildGrid[r][c];
+      rowCounts[v]=(rowCounts[v]||0)+1;
+    }
+    for(let c=0;c<buildK;c++){
+      const v=buildGrid[r][c];
+      if(rowCounts[v]>1) cells[r*buildK+c].classList.add("error");
+    }
+  }
+  for(let c=0;c<buildK;c++){
+    const colCounts={};
+    for(let r=0;r<buildK;r++){
+      const v=buildGrid[r][c];
+      colCounts[v]=(colCounts[v]||0)+1;
+    }
+    for(let r=0;r<buildK;r++){
+      const v=buildGrid[r][c];
+      if(colCounts[v]>1) cells[r*buildK+c].classList.add("error");
+    }
+  }
+}
+
+function clearBuild(){
+  for(let r=0;r<buildK;r++) for(let c=0;c<buildK;c++) buildGrid[r][c]=-1;
+  $("buildFeedback").style.display="none";
+  renderBuild();
+}
+
+function hintBuild(){
+  // Find first empty cell and suggest correct value
+  const sol=latinSquare(buildK);
+  for(let r=0;r<buildK;r++){
+    for(let c=0;c<buildK;c++){
+      if(buildGrid[r][c]===-1){
+        buildGrid[r][c]=sol[r][c];
+        renderBuild();
+        const fb=$("buildFeedback");
+        fb.className="feedback info";
+        fb.innerHTML=`Dica: coloquei <strong>${LABELS[sol[r][c]]}</strong> na posição Grupo ${r+1}, Pos. ${c+1}. Continue preenchendo!`;
+        fb.style.display="block";
+        return;
+      }
+    }
+  }
+}
+
+function solveBuild(){
+  const sol=latinSquare(buildK);
+  for(let r=0;r<buildK;r++) for(let c=0;c<buildK;c++) buildGrid[r][c]=sol[r][c];
+  renderBuild();
+  const fb=$("buildFeedback");
+  fb.className="feedback success";
+  fb.innerHTML="Aqui está uma solução válida (Latin Square cíclico). Existem outras soluções possíveis — o importante é que cada tratamento apareça uma vez em cada linha e coluna.";
+  fb.style.display="block";
+}
+
+// ═══════════ TAB 3: Simulador ═══════════
+function updateOrderLabel(){
+  const v=+$("sliderOrder3").value;
+  const labels=["Nenhum","Fadiga leve","Fadiga moderada","Fadiga forte","Fadiga extrema"];
+  $("orderVal3").textContent=labels[v];
+}
+
+function updateTab3(){
+  const k=+$("selK3").value;
+  $("kVal3").textContent=k;
+  const nPer=+$("sliderN3").value;
+  const orderEffect=+$("sliderOrder3").value;
+
+  // True effects display
+  let teHtml="";
+  for(let i=0;i<k;i++){
+    teHtml+=`<div style="display:flex;align-items:center;gap:.3rem;background:${TCOLORS[i].bg};padding:.3rem .6rem;border-radius:6px">
+      <span style="font-weight:700;color:${TCOLORS[i].fg}">${LABELS[i]}</span>
+      <span style="font-size:.78rem;color:var(--text2)">= ${TRUE_EFFECTS[i]} pontos</span>
+    </div>`;
+  }
+  $("trueEffects").innerHTML=teHtml;
+
+  // Simulate
+  const orderPenalty = orderEffect * 1.5; // penalty per position
+  const noise = 3; // random noise SD
+
+  // Without counterbalancing: everyone gets A,B,C,...
+  const noBalance = [];
+  for(let t=0;t<k;t++){
+    let sum=0;
+    for(let p=0;p<nPer*k;p++){
+      sum += TRUE_EFFECTS[t] - orderPenalty*t + gaussRand()*noise;
+    }
+    noBalance.push(sum/(nPer*k));
+  }
+
+  // With Latin Square
+  const sq=latinSquare(k);
+  const withBalance = new Array(k).fill(0);
+  const withCounts = new Array(k).fill(0);
+  for(let row=0;row<k;row++){
+    for(let pos=0;pos<k;pos++){
+      const treat=sq[row][pos];
+      for(let p=0;p<nPer;p++){
+        withBalance[treat] += TRUE_EFFECTS[treat] - orderPenalty*pos + gaussRand()*noise;
+        withCounts[treat]++;
+      }
+    }
+  }
+  for(let t=0;t<k;t++) withBalance[t]/=withCounts[t];
+
+  drawSimChart($("chartNo"), noBalance, k, "Sem balanceamento", true);
+  drawSimChart($("chartYes"), withBalance, k, "Com Latin Square", false);
+
+  // Result
+  const trueRank=TRUE_EFFECTS.slice(0,k).map((v,i)=>({i,v})).sort((a,b)=>b.v-a.v).map(x=>LABELS[x.i]).join(" > ");
+  const noRank=noBalance.map((v,i)=>({i,v})).sort((a,b)=>b.v-a.v).map(x=>LABELS[x.i]).join(" > ");
+  const yesRank=withBalance.map((v,i)=>({i,v})).sort((a,b)=>b.v-a.v).map(x=>LABELS[x.i]).join(" > ");
+
+  const noCorrect = noRank===trueRank;
+  const yesCorrect = yesRank===trueRank;
+
+  let resHtml=`<p><strong style="color:var(--accent)">Ranking real dos tratamentos:</strong> ${trueRank}</p>`;
+  resHtml+=`<p style="margin-top:.5rem"><strong style="color:var(--red)">Sem counterbalancing:</strong> ${noRank} ${noCorrect?'<span style="color:#2ECC71">✓ correto</span>':'<span style="color:var(--red)">✗ distorcido pela fadiga!</span>'}</p>`;
+  resHtml+=`<p style="margin-top:.3rem"><strong style="color:#2ECC71">Com Latin Square:</strong> ${yesRank} ${yesCorrect?'<span style="color:#2ECC71">✓ correto</span>':'<span style="color:var(--gold)">≈ próximo (variação amostral)</span>'}</p>`;
+
+  if(orderEffect>0 && !noCorrect){
+    resHtml+=`<div class="insight" style="margin-top:.8rem"><strong>Observe:</strong> sem counterbalancing, o tratamento que ficou na última posição (${LABELS[k-1]}) foi penalizado pela fadiga acumulada — mesmo que seu efeito real seja ${TRUE_EFFECTS[k-1]>TRUE_EFFECTS[0]?'maior':'igual ou próximo'} ao dos outros. O Latin Square distribui a fadiga igualmente entre todos os tratamentos, recuperando o ranking correto.</div>`;
+  } else if(orderEffect===0){
+    resHtml+=`<div class="insight" style="margin-top:.8rem">Com efeito de ordem = zero, ambas as abordagens funcionam. Aumente o slider de fadiga para ver a distorção aparecer!</div>`;
+  }
+
+  $("simResult").innerHTML=resHtml;
+}
+
+function gaussRand(){
+  let u=Math.random(),v=Math.random();
+  return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v);
+}
+
+function drawSimChart(canvas, values, k, title, isNo){
+  const dpr=window.devicePixelRatio||1;
+  const w=canvas.clientWidth, h=240;
+  canvas.width=w*dpr; canvas.height=h*dpr;
+  const ctx=canvas.getContext("2d");
+  ctx.scale(dpr,dpr);
+
+  const pad={top:25,bottom:35,left:40,right:15};
+  const plotW=w-pad.left-pad.right;
+  const plotH=h-pad.top-pad.bottom;
+
+  ctx.clearRect(0,0,w,h);
+
+  // Y range
+  const yMin=Math.min(...values,-1);
+  const yMax=Math.max(...values,...TRUE_EFFECTS.slice(0,k))+2;
+  const yRange=yMax-yMin||1;
+  function toY(v){return pad.top+plotH-(v-yMin)/yRange*plotH}
+
+  // Grid
+  ctx.strokeStyle="rgba(255,255,255,.05)";
+  ctx.lineWidth=1;
+  const yStep=Math.ceil(yRange/5);
+  for(let y=Math.ceil(yMin);y<=yMax;y+=yStep){
+    ctx.beginPath();ctx.moveTo(pad.left,toY(y));ctx.lineTo(w-pad.right,toY(y));ctx.stroke();
+    ctx.fillStyle="rgba(255,255,255,.2)";ctx.font="9px sans-serif";ctx.textAlign="right";
+    ctx.fillText(y.toFixed(0),pad.left-5,toY(y)+3);
+  }
+
+  // Zero line
+  if(yMin<0){
+    ctx.strokeStyle="rgba(255,255,255,.1)";
+    ctx.beginPath();ctx.moveTo(pad.left,toY(0));ctx.lineTo(w-pad.right,toY(0));ctx.stroke();
+  }
+
+  const barW=plotW/k*0.55;
+  const gap=plotW/k;
+
+  for(let i=0;i<k;i++){
+    const cx=pad.left+gap*i+gap/2;
+    const barH=Math.abs(values[i]-yMin)/yRange*plotH;
+    const by=toY(values[i]);
+
+    // Bar
+    ctx.fillStyle=TCOLORS[i].bg.replace('.25','.5');
+    roundRect(ctx,cx-barW/2,by,barW,toY(yMin)-by,5);
+    ctx.fill();
+
+    // True effect line
+    const trueY=toY(TRUE_EFFECTS[i]);
+    ctx.strokeStyle=TCOLORS[i].fg;
+    ctx.setLineDash([4,3]);
+    ctx.lineWidth=1.5;
+    ctx.beginPath();ctx.moveTo(cx-barW/2-5,trueY);ctx.lineTo(cx+barW/2+5,trueY);ctx.stroke();
+    ctx.setLineDash([]);
+
+    // Value label
+    ctx.fillStyle=TCOLORS[i].fg;
+    ctx.font="bold 11px sans-serif";
+    ctx.textAlign="center";
+    ctx.fillText(values[i].toFixed(1),cx,by-6);
+
+    // Treatment label
+    ctx.fillStyle="rgba(255,255,255,.4)";
+    ctx.font="11px sans-serif";
+    ctx.fillText(LABELS[i],cx,h-pad.bottom+15);
+  }
+
+  // Legend
+  ctx.fillStyle="rgba(255,255,255,.3)";
+  ctx.font="9px sans-serif";
+  ctx.textAlign="left";
+  ctx.setLineDash([4,3]);ctx.strokeStyle="rgba(255,255,255,.3)";ctx.lineWidth=1;
+  ctx.beginPath();ctx.moveTo(pad.left+5,pad.top+8);ctx.lineTo(pad.left+20,pad.top+8);ctx.stroke();
+  ctx.setLineDash([]);
+  ctx.fillText("efeito real",pad.left+23,pad.top+11);
+}
+
+function roundRect(ctx,x,y,w,h,r){
+  if(h<0){y+=h;h=-h}
+  if(h<2*r)r=h/2;
+  ctx.beginPath();
+  ctx.moveTo(x+r,y);ctx.arcTo(x+w,y,x+w,y+h,r);ctx.arcTo(x+w,y+h,x,y+h,0);
+  ctx.arcTo(x,y+h,x,y,0);ctx.arcTo(x,y,x+w,y,r);ctx.closePath();
+}
+
+// ── INIT ──
+updateTab0();
+updateTab1();
+updateTab2();
+updateTab3();
+window.addEventListener("resize",()=>{
+  if(activeTab===3) updateTab3();
+});
+</script>
+</body>
+</html>

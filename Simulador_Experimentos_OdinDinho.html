@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Simulador de Desenho Experimental — Odin Dinho</title>
+<style>
+/* === Theme variables (standalone) === */
+:root {
+  --odin: #2E86C1; --thor: #C0392B; --huginn: #7D3C98; --muninn: #7D3C98; --gold: #F4D03F;
+  --color-background-primary: #0D1117;
+  --color-background-secondary: #161B22;
+  --color-background-tertiary: #21262D;
+  --color-background-info: rgba(46,134,193,0.15);
+  --color-text-primary: #E6EDF3;
+  --color-text-secondary: #8B949E;
+  --color-text-info: #58A6FF;
+  --color-text-success: #3FB950;
+  --color-text-warning: #F4D03F;
+  --color-text-danger: #F85149;
+  --color-border-tertiary: #30363D;
+  --color-border-info: #1F6FEB;
+  --border-radius-md: 8px;
+  --border-radius-lg: 12px;
+}
+body {
+  margin: 0; padding: 2rem;
+  background: var(--color-background-primary);
+  color: var(--color-text-primary);
+  font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+  line-height: 1.5;
+}
+.page-header {
+  text-align: center; margin-bottom: 2rem; padding-bottom: 1.5rem;
+  border-bottom: 1px solid var(--color-border-tertiary);
+}
+.page-header h1 { font-family: Georgia, serif; font-size: 28px; color: var(--gold); margin: 0 0 6px; }
+.page-header p { color: var(--color-text-secondary); font-size: 14px; margin: 0; }
+.container { max-width: 800px; margin: 0 auto; }
+select {
+  background: var(--color-background-tertiary); color: var(--color-text-primary);
+  border: 1px solid var(--color-border-tertiary); border-radius: 6px;
+  padding: 6px 10px; font-size: 13px;
+}
+button {
+  background: var(--odin); color: #fff; border: none; border-radius: 6px;
+  padding: 8px 16px; font-size: 13px; cursor: pointer;
+}
+button:hover { opacity: 0.85; }
+input[type=range] { accent-color: var(--odin); }
+input[type=checkbox] { accent-color: var(--odin); width: 16px; height: 16px; }
+
+/* === Widget styles === */
+.exp-tabs { display: flex; gap: 4px; margin: 0 0 1.5rem; flex-wrap: wrap; }
+.exp-tab { padding: 8px 16px; border-radius: var(--border-radius-md); cursor: pointer; font-size: 13px; font-weight: 500; border: 0.5px solid var(--color-border-tertiary); background: var(--color-background-secondary); color: var(--color-text-secondary); transition: all 0.15s; user-select: none; }
+.exp-tab.active { background: var(--color-background-info); color: var(--color-text-info); border-color: var(--color-border-info); }
+.exp-tab:hover:not(.active) { background: var(--color-background-tertiary); }
+.exp-panel { display: none; }
+.exp-panel.active { display: block; }
+.char-quote { display: flex; gap: 10px; align-items: flex-start; margin: 12px 0; padding: 10px 14px; border-radius: var(--border-radius-md); background: var(--color-background-secondary); }
+.char-badge { padding: 3px 10px; border-radius: 12px; font-size: 11px; font-weight: 500; color: #fff; white-space: nowrap; flex-shrink: 0; }
+.char-badge.odin { background: var(--odin); }
+.char-badge.thor { background: var(--thor); }
+.char-badge.huginn { background: var(--huginn); }
+.char-badge.muninn { background: var(--muninn); }
+.char-text { font-size: 13px; color: var(--color-text-secondary); line-height: 1.5; font-style: italic; }
+.design-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 1rem 0; }
+.cell-row { display: flex; gap: 2px; }
+.cell-box { flex: 1; padding: 10px 8px; text-align: center; border-radius: var(--border-radius-md); font-size: 12px; min-height: 48px; display: flex; flex-direction: column; justify-content: center; }
+.cell-header { background: var(--color-background-info); color: var(--color-text-info); font-weight: 500; }
+.cell-data { background: var(--color-background-secondary); color: var(--color-text-primary); }
+.metrics-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; margin: 1rem 0; }
+.metric-card { background: var(--color-background-secondary); border-radius: var(--border-radius-md); padding: 12px; }
+.metric-label { font-size: 12px; color: var(--color-text-secondary); }
+.metric-val { font-size: 20px; font-weight: 500; margin-top: 2px; }
+.slider-row { display: flex; align-items: center; gap: 12px; margin: 8px 0; }
+.slider-row label { font-size: 13px; color: var(--color-text-secondary); min-width: 100px; }
+.slider-row input[type=range] { flex: 1; }
+.slider-row .val { font-size: 13px; font-weight: 500; min-width: 40px; text-align: right; color: var(--color-text-primary); }
+.threat-item { display: flex; gap: 8px; padding: 8px 0; border-bottom: 0.5px solid var(--color-border-tertiary); }
+.threat-item:last-child { border: none; }
+.threat-name { font-weight: 500; font-size: 13px; min-width: 120px; color: var(--color-text-primary); }
+.threat-desc { font-size: 12px; color: var(--color-text-secondary); flex: 1; }
+.threat-fix { font-size: 12px; color: var(--color-text-info); min-width: 140px; text-align: right; }
+.interaction-chart { width: 100%; height: 220px; position: relative; margin: 1rem 0; }
+canvas { width: 100%; height: 100%; }
+
+@media (max-width: 600px) {
+  body { padding: 1rem; }
+  .design-grid { grid-template-columns: 1fr; }
+  .threat-item { flex-direction: column; gap: 4px; }
+  .threat-fix { text-align: left; }
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+<div class="page-header">
+  <h1>Simulador de Desenho e Análise de Experimentos</h1>
+  <p>Material interativo — Disciplina de Desenho e Análise de Experimentos &bull; Prof. Leonardo Vils</p>
+</div>
+
+<div class="exp-tabs">
+  <div class="exp-tab active" onclick="showTab('design', this)">Desenho</div>
+  <div class="exp-tab" onclick="showTab('power', this)">Power e N</div>
+  <div class="exp-tab" onclick="showTab('interaction', this)">Interação</div>
+  <div class="exp-tab" onclick="showTab('threats', this)">Ameaças</div>
+  <div class="exp-tab" onclick="showTab('checklist', this)">Checklist</div>
+</div>
+
+<!-- TAB 1: DESENHO -->
+<div id="panel-design" class="exp-panel active">
+  <div class="char-quote">
+    <span class="char-badge odin">Odin Dinho</span>
+    <span class="char-text">Monte seu fatorial. Escolha quantos fatores, quantos níveis, e veja as células se formarem.</span>
+  </div>
+  <div class="design-grid">
+    <div>
+      <div class="slider-row">
+        <label>Fator A (níveis)</label>
+        <input type="range" min="2" max="5" value="2" step="1" id="fa" oninput="updateDesign()">
+        <span class="val" id="fa-v">2</span>
+      </div>
+      <div class="slider-row">
+        <label>Fator B (níveis)</label>
+        <input type="range" min="0" max="5" value="2" step="1" id="fb" oninput="updateDesign()">
+        <span class="val" id="fb-v">2</span>
+      </div>
+      <div class="slider-row">
+        <label>N por célula</label>
+        <input type="range" min="10" max="100" value="40" step="5" id="ncell" oninput="updateDesign()">
+        <span class="val" id="ncell-v">40</span>
+      </div>
+      <div style="margin-top: 12px;">
+        <label style="font-size: 13px; color: var(--color-text-secondary);">Tipo de desenho</label><br>
+        <select id="dtype" onchange="updateDesign()" style="margin-top: 4px;">
+          <option value="between">Between-subjects</option>
+          <option value="within">Within-subjects</option>
+          <option value="mixed">Mixed (A between, B within)</option>
+        </select>
+      </div>
+    </div>
+    <div>
+      <div class="metrics-row" style="grid-template-columns: 1fr 1fr;">
+        <div class="metric-card"><div class="metric-label">Células</div><div class="metric-val" id="cells">4</div></div>
+        <div class="metric-card"><div class="metric-label">N total</div><div class="metric-val" id="ntotal">160</div></div>
+      </div>
+      <div class="metrics-row" style="grid-template-columns: 1fr 1fr;">
+        <div class="metric-card"><div class="metric-label">Testes F</div><div class="metric-val" id="ftests">3</div></div>
+        <div class="metric-card"><div class="metric-label">Análise</div><div class="metric-val" id="analysis" style="font-size: 13px;">ANOVA fatorial</div></div>
+      </div>
+    </div>
+  </div>
+  <div id="cell-grid"></div>
+  <div class="char-quote">
+    <span class="char-badge thor">ThorMento</span>
+    <span class="char-text" id="thor-comment">Fácil! Dois fatores, quatro condições. Qual é a graça?</span>
+  </div>
+</div>
+
+<!-- TAB 2: POWER -->
+<div id="panel-power" class="exp-panel">
+  <div class="char-quote">
+    <span class="char-badge muninn">Muninn</span>
+    <span class="char-text">Power = probabilidade de detectar o efeito se ele existir. Abaixo de 80% e você está jogando moeda.</span>
+  </div>
+  <div class="slider-row">
+    <label>Effect size (f)</label>
+    <input type="range" min="0.10" max="0.80" value="0.25" step="0.05" id="es" oninput="updatePower()">
+    <span class="val" id="es-v">0.25</span>
+  </div>
+  <div class="slider-row">
+    <label>Alpha</label>
+    <input type="range" min="0.01" max="0.10" value="0.05" step="0.01" id="alpha" oninput="updatePower()">
+    <span class="val" id="alpha-v">0.05</span>
+  </div>
+  <div class="slider-row">
+    <label>N por grupo</label>
+    <input type="range" min="10" max="200" value="50" step="5" id="npow" oninput="updatePower()">
+    <span class="val" id="npow-v">50</span>
+  </div>
+  <div class="slider-row">
+    <label>Grupos (k)</label>
+    <input type="range" min="2" max="8" value="4" step="1" id="kgroups" oninput="updatePower()">
+    <span class="val" id="kgroups-v">4</span>
+  </div>
+  <div class="metrics-row">
+    <div class="metric-card"><div class="metric-label">Power estimado</div><div class="metric-val" id="power-val" style="color: var(--color-text-success);">0.93</div></div>
+    <div class="metric-card"><div class="metric-label">N total</div><div class="metric-val" id="power-n">200</div></div>
+    <div class="metric-card"><div class="metric-label">df efeito</div><div class="metric-val" id="power-df1">3</div></div>
+    <div class="metric-card"><div class="metric-label">df erro</div><div class="metric-val" id="power-df2">196</div></div>
+  </div>
+  <div class="interaction-chart"><canvas id="powerChart"></canvas></div>
+  <div class="char-quote">
+    <span class="char-badge huginn">Huginn</span>
+    <span class="char-text" id="huginn-power">Com esse N e effect size, parece sólido. Mas lembre: interações exigem ~4x mais N que efeitos principais.</span>
+  </div>
+</div>
+
+<!-- TAB 3: INTERAÇÃO -->
+<div id="panel-interaction" class="exp-panel">
+  <div class="char-quote">
+    <span class="char-badge odin">Odin Dinho</span>
+    <span class="char-text">Mova os sliders para ver como a interação muda o padrão. Linhas paralelas = sem interação. Linhas cruzando = interação.</span>
+  </div>
+  <div class="design-grid">
+    <div>
+      <p style="font-size: 13px; font-weight: 500; margin: 0 0 8px; color: var(--color-text-primary);">Grupo 1 (nível B1)</p>
+      <div class="slider-row">
+        <label>A1-B1</label>
+        <input type="range" min="1" max="7" value="3" step="0.5" id="a1b1" oninput="updateInteraction()">
+        <span class="val" id="a1b1-v">3.0</span>
+      </div>
+      <div class="slider-row">
+        <label>A2-B1</label>
+        <input type="range" min="1" max="7" value="5" step="0.5" id="a2b1" oninput="updateInteraction()">
+        <span class="val" id="a2b1-v">5.0</span>
+      </div>
+    </div>
+    <div>
+      <p style="font-size: 13px; font-weight: 500; margin: 0 0 8px; color: var(--color-text-primary);">Grupo 2 (nível B2)</p>
+      <div class="slider-row">
+        <label>A1-B2</label>
+        <input type="range" min="1" max="7" value="3" step="0.5" id="a1b2" oninput="updateInteraction()">
+        <span class="val" id="a1b2-v">3.0</span>
+      </div>
+      <div class="slider-row">
+        <label>A2-B2</label>
+        <input type="range" min="1" max="7" value="4" step="0.5" id="a2b2" oninput="updateInteraction()">
+        <span class="val" id="a2b2-v">4.0</span>
+      </div>
+    </div>
+  </div>
+  <div class="interaction-chart"><canvas id="intChart"></canvas></div>
+  <div class="metrics-row">
+    <div class="metric-card"><div class="metric-label">Efeito principal A</div><div class="metric-val" id="mainA">1.5</div></div>
+    <div class="metric-card"><div class="metric-label">Efeito principal B</div><div class="metric-val" id="mainB">-0.5</div></div>
+    <div class="metric-card"><div class="metric-label">Interação AxB</div><div class="metric-val" id="intAB" style="font-size: 16px;">ordinal</div></div>
+  </div>
+  <div class="char-quote">
+    <span class="char-badge huginn">Huginn</span>
+    <span class="char-text" id="huginn-int">Quando há interação, os efeitos principais contam apenas metade da história. Decomponha em simple effects!</span>
+  </div>
+</div>
+
+<!-- TAB 4: AMEAÇAS -->
+<div id="panel-threats" class="exp-panel">
+  <div class="char-quote">
+    <span class="char-badge thor">ThorMento</span>
+    <span class="char-text">Ameaças? Besteira! Roda a ANOVA e pronto!</span>
+  </div>
+  <div class="char-quote">
+    <span class="char-badge odin">Odin Dinho</span>
+    <span class="char-text">Ignora uma dessas e seu F vira fumaça. Cada ameaça tem antídoto.</span>
+  </div>
+  <div id="threats-list">
+    <div class="threat-item"><span class="threat-name">História</span><span class="threat-desc">Evento externo entre pré e pós-teste contamina o resultado</span><span class="threat-fix">Grupo controle concorrente</span></div>
+    <div class="threat-item"><span class="threat-name">Maturação</span><span class="threat-desc">Participantes mudam naturalmente com o tempo</span><span class="threat-fix">Período curto + controle</span></div>
+    <div class="threat-item"><span class="threat-name">Testing</span><span class="threat-desc">Pré-teste afeta desempenho no pós-teste</span><span class="threat-fix">Solomon four-group</span></div>
+    <div class="threat-item"><span class="threat-name">Instrumentação</span><span class="threat-desc">O instrumento de medida muda entre medidas</span><span class="threat-fix">Padronização rigorosa</span></div>
+    <div class="threat-item"><span class="threat-name">Regressão à média</span><span class="threat-desc">Seleção de extremos que regridem ao centro</span><span class="threat-fix">Randomização</span></div>
+    <div class="threat-item"><span class="threat-name">Seleção</span><span class="threat-desc">Grupos diferem sistematicamente antes do tratamento</span><span class="threat-fix">Randomização (solução central)</span></div>
+    <div class="threat-item"><span class="threat-name">Mortalidade</span><span class="threat-desc">Perda diferencial de participantes entre condições</span><span class="threat-fix">Análise de attrition, ITT</span></div>
+    <div class="threat-item"><span class="threat-name">Difusão</span><span class="threat-desc">Participantes do controle acessam o tratamento</span><span class="threat-fix">Isolamento entre condições</span></div>
+  </div>
+</div>
+
+<!-- TAB 5: CHECKLIST -->
+<div id="panel-checklist" class="exp-panel">
+  <div class="char-quote">
+    <span class="char-badge odin">Odin Dinho</span>
+    <span class="char-text">Siga essa lista e ThorMento não terá por onde entrar.</span>
+  </div>
+  <div id="check-items"></div>
+  <div class="metrics-row" style="margin-top: 1rem;">
+    <div class="metric-card"><div class="metric-label">Progresso</div><div class="metric-val" id="check-progress">0 / 11</div></div>
+    <div class="metric-card"><div class="metric-label">Status</div><div class="metric-val" id="check-status" style="font-size: 14px; color: var(--color-text-warning);">Incompleto</div></div>
+  </div>
+</div>
+
+</div><!-- .container -->
+
+<script>
+function showTab(name, el) {
+  document.querySelectorAll('.exp-tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.exp-panel').forEach(p => p.classList.remove('active'));
+  document.getElementById('panel-' + name).classList.add('active');
+  el.classList.add('active');
+  if (name === 'power') setTimeout(drawPowerChart, 50);
+  if (name === 'interaction') setTimeout(drawInteractionChart, 50);
+}
+
+function updateDesign() {
+  const a = +document.getElementById('fa').value;
+  const b = +document.getElementById('fb').value;
+  const n = +document.getElementById('ncell').value;
+  const dt = document.getElementById('dtype').value;
+  document.getElementById('fa-v').textContent = a;
+  document.getElementById('fb-v').textContent = b || 'nenhum';
+  document.getElementById('ncell-v').textContent = n;
+  const cells = b > 0 ? a * b : a;
+  const ntotal = dt === 'within' ? n : (dt === 'mixed' ? n * a : n * cells);
+  const ftests = b > 0 ? (a > 1 ? 1 : 0) + (b > 1 ? 1 : 0) + 1 : 1;
+  document.getElementById('cells').textContent = cells;
+  document.getElementById('ntotal').textContent = ntotal;
+  document.getElementById('ftests').textContent = ftests;
+  let analysis = '';
+  if (b === 0) analysis = a === 2 ? 't independente' : 'ANOVA one-way';
+  else if (dt === 'between') analysis = 'ANOVA fatorial';
+  else if (dt === 'within') analysis = 'ANOVA RM fatorial';
+  else analysis = 'Mixed ANOVA';
+  document.getElementById('analysis').textContent = analysis;
+  let grid = '';
+  if (b > 0) {
+    let headerRow = '<div class="cell-row"><div class="cell-box cell-header" style="flex:0.7;"></div>';
+    for (let j = 1; j <= b; j++) headerRow += '<div class="cell-box cell-header">B' + j + '</div>';
+    headerRow += '</div>';
+    grid += headerRow;
+    for (let i = 1; i <= a; i++) {
+      let row = '<div class="cell-row"><div class="cell-box cell-header" style="flex:0.7;">A' + i + '</div>';
+      for (let j = 1; j <= b; j++) row += '<div class="cell-box cell-data">n=' + n + '</div>';
+      row += '</div>';
+      grid += row;
+    }
+  } else {
+    let row = '<div class="cell-row">';
+    for (let i = 1; i <= a; i++) row += '<div class="cell-box cell-data">Grupo ' + i + '<br>n=' + n + '</div>';
+    row += '</div>';
+    grid = row;
+  }
+  document.getElementById('cell-grid').innerHTML = grid;
+  let thorMsg = cells <= 4 ? 'Fácil! Poucas condições. Qual é a graça?' :
+    cells <= 9 ? 'Hmm, já começa a ficar complicado. Mas bora!' :
+    'Eita! Muitas células. Vai precisar de um exército de participantes!';
+  if (ntotal > 300) thorMsg = 'Putz, ' + ntotal + ' participantes?! Onde você vai achar tanta gente?!';
+  document.getElementById('thor-comment').textContent = thorMsg;
+}
+
+function updatePower() {
+  const f = +document.getElementById('es').value;
+  const alpha = +document.getElementById('alpha').value;
+  const n = +document.getElementById('npow').value;
+  const k = +document.getElementById('kgroups').value;
+  document.getElementById('es-v').textContent = f.toFixed(2);
+  document.getElementById('alpha-v').textContent = alpha.toFixed(2);
+  document.getElementById('npow-v').textContent = n;
+  document.getElementById('kgroups-v').textContent = k;
+  const df1 = k - 1, df2 = n * k - k;
+  const lambda = n * k * f * f;
+  const power = Math.min(0.999, 1 - Math.exp(-0.4 * lambda / (df1 + 1)));
+  document.getElementById('power-val').textContent = power.toFixed(2);
+  document.getElementById('power-val').style.color = power >= 0.8 ? 'var(--color-text-success)' : power >= 0.5 ? 'var(--color-text-warning)' : 'var(--color-text-danger)';
+  document.getElementById('power-n').textContent = n * k;
+  document.getElementById('power-df1').textContent = df1;
+  document.getElementById('power-df2').textContent = df2;
+  let msg = power >= 0.8 ? 'Power adequado. Mas lembre: interações exigem ~4x mais N que efeitos principais.' :
+    power >= 0.5 ? 'Power insuficiente. Aumente o N ou aceite risco alto de Erro Tipo II.' :
+    'Power perigosamente baixo! Você provavelmente não detectará o efeito mesmo que ele exista.';
+  document.getElementById('huginn-power').textContent = msg;
+  drawPowerChart();
+}
+
+function drawPowerChart() {
+  const canvas = document.getElementById('powerChart');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const W = canvas.parentElement.clientWidth;
+  const H = 220;
+  canvas.width = W * 2; canvas.height = H * 2;
+  canvas.style.width = W + 'px'; canvas.style.height = H + 'px';
+  ctx.scale(2, 2);
+  ctx.clearRect(0, 0, W, H);
+  const f = +document.getElementById('es').value;
+  const alpha = +document.getElementById('alpha').value;
+  const k = +document.getElementById('kgroups').value;
+  const curN = +document.getElementById('npow').value;
+  const pad = { l: 50, r: 20, t: 20, b: 35 };
+  const cw = W - pad.l - pad.r, ch = H - pad.t - pad.b;
+  const textColor = '#8B949E';
+  const lineColor = '#30363D';
+  ctx.strokeStyle = lineColor; ctx.lineWidth = 0.5;
+  for (let i = 0; i <= 4; i++) {
+    const y = pad.t + ch * (1 - i / 4);
+    ctx.beginPath(); ctx.moveTo(pad.l, y); ctx.lineTo(pad.l + cw, y); ctx.stroke();
+    ctx.fillStyle = textColor; ctx.font = '11px sans-serif'; ctx.textAlign = 'right';
+    ctx.fillText((i * 25) + '%', pad.l - 6, y + 4);
+  }
+  ctx.strokeStyle = '#F4D03F'; ctx.lineWidth = 0.5; ctx.setLineDash([4, 4]);
+  const y80 = pad.t + ch * (1 - 0.8);
+  ctx.beginPath(); ctx.moveTo(pad.l, y80); ctx.lineTo(pad.l + cw, y80); ctx.stroke();
+  ctx.setLineDash([]);
+  ctx.fillStyle = '#F4D03F'; ctx.font = '10px sans-serif'; ctx.textAlign = 'left';
+  ctx.fillText('80%', pad.l + cw - 28, y80 - 4);
+  const nVals = [];
+  for (let n = 10; n <= 200; n += 5) nVals.push(n);
+  ctx.beginPath(); ctx.strokeStyle = '#2E86C1'; ctx.lineWidth = 2;
+  nVals.forEach((n, i) => {
+    const lambda = n * k * f * f;
+    const df1 = k - 1;
+    const pw = Math.min(0.999, 1 - Math.exp(-0.4 * lambda / (df1 + 1)));
+    const x = pad.l + (n - 10) / 190 * cw;
+    const y = pad.t + ch * (1 - pw);
+    i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+  });
+  ctx.stroke();
+  const curLambda = curN * k * f * f;
+  const curPw = Math.min(0.999, 1 - Math.exp(-0.4 * curLambda / (k)));
+  const cx = pad.l + (curN - 10) / 190 * cw;
+  const cy = pad.t + ch * (1 - curPw);
+  ctx.beginPath(); ctx.arc(cx, cy, 5, 0, Math.PI * 2);
+  ctx.fillStyle = curPw >= 0.8 ? '#3FB950' : '#F85149'; ctx.fill();
+  ctx.fillStyle = textColor; ctx.font = '11px sans-serif'; ctx.textAlign = 'center';
+  for (let n = 20; n <= 200; n += 40) {
+    const x = pad.l + (n - 10) / 190 * cw;
+    ctx.fillText(n, x, H - 8);
+  }
+  ctx.fillText('N por grupo', pad.l + cw / 2, H - 0);
+}
+
+function updateInteraction() {
+  const a1b1 = +document.getElementById('a1b1').value;
+  const a2b1 = +document.getElementById('a2b1').value;
+  const a1b2 = +document.getElementById('a1b2').value;
+  const a2b2 = +document.getElementById('a2b2').value;
+  document.getElementById('a1b1-v').textContent = a1b1.toFixed(1);
+  document.getElementById('a2b1-v').textContent = a2b1.toFixed(1);
+  document.getElementById('a1b2-v').textContent = a1b2.toFixed(1);
+  document.getElementById('a2b2-v').textContent = a2b2.toFixed(1);
+  const mainA = ((a2b1 + a2b2) / 2 - (a1b1 + a1b2) / 2).toFixed(2);
+  const mainB = ((a1b2 + a2b2) / 2 - (a1b1 + a2b1) / 2).toFixed(2);
+  document.getElementById('mainA').textContent = mainA;
+  document.getElementById('mainB').textContent = mainB;
+  const diffB1 = a2b1 - a1b1, diffB2 = a2b2 - a1b2;
+  const intSize = Math.abs(diffB1 - diffB2).toFixed(2);
+  let intType = 'nenhuma';
+  if (Math.abs(diffB1 - diffB2) < 0.3) intType = 'nenhuma';
+  else if ((diffB1 > 0 && diffB2 > 0) || (diffB1 < 0 && diffB2 < 0)) intType = 'ordinal (' + intSize + ')';
+  else intType = 'disordinal (' + intSize + ')';
+  document.getElementById('intAB').textContent = intType;
+  let msg = Math.abs(diffB1 - diffB2) < 0.3 ?
+    'Linhas praticamente paralelas. Sem interação. Os efeitos principais dizem tudo.' :
+    intType.includes('disordinal') ?
+    'Interação disordinal! As linhas se cruzam. Os efeitos principais são enganosos aqui.' :
+    'Interação ordinal. O efeito de A existe em ambos os níveis de B, mas com intensidade diferente.';
+  document.getElementById('huginn-int').textContent = msg;
+  drawInteractionChart();
+}
+
+function drawInteractionChart() {
+  const canvas = document.getElementById('intChart');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const W = canvas.parentElement.clientWidth;
+  const H = 220;
+  canvas.width = W * 2; canvas.height = H * 2;
+  canvas.style.width = W + 'px'; canvas.style.height = H + 'px';
+  ctx.scale(2, 2);
+  ctx.clearRect(0, 0, W, H);
+  const a1b1 = +document.getElementById('a1b1').value;
+  const a2b1 = +document.getElementById('a2b1').value;
+  const a1b2 = +document.getElementById('a1b2').value;
+  const a2b2 = +document.getElementById('a2b2').value;
+  const pad = { l: 50, r: 80, t: 20, b: 35 };
+  const cw = W - pad.l - pad.r, ch = H - pad.t - pad.b;
+  const textColor = '#8B949E';
+  const lineColor = '#30363D';
+  ctx.strokeStyle = lineColor; ctx.lineWidth = 0.5;
+  for (let i = 1; i <= 7; i++) {
+    const y = pad.t + ch * (1 - (i - 1) / 6);
+    ctx.beginPath(); ctx.moveTo(pad.l, y); ctx.lineTo(pad.l + cw, y); ctx.stroke();
+    ctx.fillStyle = textColor; ctx.font = '11px sans-serif'; ctx.textAlign = 'right';
+    ctx.fillText(i, pad.l - 8, y + 4);
+  }
+  const x1 = pad.l + cw * 0.2, x2 = pad.l + cw * 0.8;
+  ctx.fillStyle = textColor; ctx.textAlign = 'center'; ctx.font = '11px sans-serif';
+  ctx.fillText('A1', x1, H - 8); ctx.fillText('A2', x2, H - 8);
+  function yPos(val) { return pad.t + ch * (1 - (val - 1) / 6); }
+  ctx.beginPath(); ctx.strokeStyle = '#2E86C1'; ctx.lineWidth = 2.5;
+  ctx.moveTo(x1, yPos(a1b1)); ctx.lineTo(x2, yPos(a2b1)); ctx.stroke();
+  ctx.beginPath(); ctx.arc(x1, yPos(a1b1), 4, 0, Math.PI * 2); ctx.fillStyle = '#2E86C1'; ctx.fill();
+  ctx.beginPath(); ctx.arc(x2, yPos(a2b1), 4, 0, Math.PI * 2); ctx.fill();
+  ctx.beginPath(); ctx.strokeStyle = '#E74C3C'; ctx.lineWidth = 2.5;
+  ctx.moveTo(x1, yPos(a1b2)); ctx.lineTo(x2, yPos(a2b2)); ctx.stroke();
+  ctx.beginPath(); ctx.arc(x1, yPos(a1b2), 4, 0, Math.PI * 2); ctx.fillStyle = '#E74C3C'; ctx.fill();
+  ctx.beginPath(); ctx.arc(x2, yPos(a2b2), 4, 0, Math.PI * 2); ctx.fill();
+  ctx.font = '12px sans-serif';
+  ctx.fillStyle = '#2E86C1'; ctx.textAlign = 'left'; ctx.fillText('B1', pad.l + cw + 10, yPos((a1b1 + a2b1) / 2) + 4);
+  ctx.fillStyle = '#E74C3C'; ctx.fillText('B2', pad.l + cw + 10, yPos((a1b2 + a2b2) / 2) + 4);
+}
+
+const checkItems = [
+  'Pergunta com relação causal clara',
+  'Desenho coerente com a hipótese',
+  'Manipulação operacionalizada e pré-testada',
+  'Manipulation check incluído',
+  'Randomização descrita',
+  'Power analysis a priori (N justificado)',
+  'Pressupostos verificados',
+  'Effect sizes com intervalos de confiança',
+  'Interações decompostas em simple effects',
+  'Ameaças à validade discutidas',
+  'Pré-registro (OSF ou AsPredicted)',
+];
+function buildChecklist() {
+  const el = document.getElementById('check-items');
+  el.innerHTML = checkItems.map(function(item, i) {
+    return '<label style="display: flex; align-items: center; gap: 10px; padding: 8px 0; border-bottom: 0.5px solid var(--color-border-tertiary); cursor: pointer; font-size: 13px; color: var(--color-text-primary);">' +
+      '<input type="checkbox" id="ck' + i + '" onchange="updateChecklist()">' +
+      item + '</label>';
+  }).join('');
+}
+function updateChecklist() {
+  let done = 0;
+  checkItems.forEach(function(_, i) { if (document.getElementById('ck' + i).checked) done++; });
+  document.getElementById('check-progress').textContent = done + ' / ' + checkItems.length;
+  var status = done === checkItems.length ? 'Aprovado!' : done >= 8 ? 'Quase lá' : 'Incompleto';
+  var statusEl = document.getElementById('check-status');
+  statusEl.textContent = status;
+  statusEl.style.color = done === checkItems.length ? 'var(--color-text-success)' : done >= 8 ? 'var(--color-text-info)' : 'var(--color-text-warning)';
+}
+
+// Init
+buildChecklist();
+updateDesign();
+updatePower();
+updateInteraction();
+</script>
+</body>
+</html>

@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Simulador de Randomização — Fundamentos de Estudos Experimentais I</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#0a0a0f;--surface:rgba(255,255,255,.04);--glass:rgba(255,255,255,.07);
+  --border:rgba(255,255,255,.08);--text:#ECF0F1;--text2:#95A5A6;
+  --accent:#1ABC9C;--accent2:#16A085;--gold:#F4D03F;--red:#E74C3C;
+  --blue:#3498DB;--purple:#9B59B6;--navy:#1B4F72;
+}
+body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden}
+.hero{text-align:center;padding:2.5rem 1rem 1.5rem;background:linear-gradient(135deg,rgba(26,188,156,.12),rgba(52,152,219,.08))}
+.hero-badge{display:inline-block;background:var(--accent);color:#fff;font-size:.7rem;font-weight:700;padding:.25rem .8rem;border-radius:20px;text-transform:uppercase;letter-spacing:1px;margin-bottom:.8rem}
+.hero h1{font-family:Georgia,serif;font-size:2rem;font-weight:700;line-height:1.2;margin-bottom:.5rem}
+.hero p{color:var(--text2);font-size:.95rem;max-width:600px;margin:0 auto}
+.container{max-width:900px;margin:0 auto;padding:1.5rem 1rem}
+.card{background:var(--glass);border:1px solid var(--border);border-radius:12px;padding:1.5rem;margin-bottom:1.2rem;backdrop-filter:blur(12px)}
+.card-title{font-family:Georgia,serif;font-size:1.1rem;font-weight:700;color:var(--accent);margin-bottom:.8rem}
+.controls{display:flex;flex-wrap:wrap;gap:1.2rem;align-items:flex-end;margin-bottom:1rem}
+.control-group{flex:1;min-width:180px}
+.control-group label{display:block;font-size:.8rem;color:var(--text2);margin-bottom:.4rem;font-weight:600;text-transform:uppercase;letter-spacing:.5px}
+.control-group .val{color:var(--accent);font-weight:700;font-size:1rem}
+input[type=range]{width:100%;height:6px;-webkit-appearance:none;background:rgba(255,255,255,.1);border-radius:3px;outline:none;margin-top:.3rem}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:18px;height:18px;background:var(--accent);border-radius:50%;cursor:pointer;border:2px solid var(--bg)}
+input[type=range]::-moz-range-thumb{width:18px;height:18px;background:var(--accent);border-radius:50%;cursor:pointer;border:2px solid var(--bg)}
+.btn{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;border:none;padding:.7rem 1.8rem;border-radius:8px;font-size:.95rem;font-weight:700;cursor:pointer;transition:all .2s;letter-spacing:.5px}
+.btn:hover{transform:translateY(-1px);box-shadow:0 4px 15px rgba(26,188,156,.3)}
+.btn:active{transform:translateY(0)}
+.btn-auto{background:linear-gradient(135deg,var(--blue),var(--navy))}
+.btn-auto:hover{box-shadow:0 4px 15px rgba(52,152,219,.3)}
+.btn-row{display:flex;gap:.8rem;flex-wrap:wrap;margin-top:.5rem}
+canvas{width:100%;border-radius:8px;margin-top:.5rem}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:.8rem;margin-top:1rem}
+.stat-box{background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:8px;padding:.8rem;text-align:center}
+.stat-box .stat-label{font-size:.7rem;color:var(--text2);text-transform:uppercase;letter-spacing:.5px}
+.stat-box .stat-val{font-size:1.4rem;font-weight:700;color:var(--accent);margin-top:.2rem}
+.stat-box .stat-val.balanced{color:#2ECC71}
+.stat-box .stat-val.unbalanced{color:var(--red)}
+.insight{background:rgba(26,188,156,.08);border-left:3px solid var(--accent);padding:1rem 1.2rem;border-radius:0 8px 8px 0;margin-top:1rem;font-size:.9rem;line-height:1.6;color:var(--text2)}
+.insight strong{color:var(--accent)}
+.legend{display:flex;gap:1.5rem;justify-content:center;margin:.8rem 0;font-size:.85rem}
+.legend-item{display:flex;align-items:center;gap:.4rem}
+.legend-dot{width:12px;height:12px;border-radius:3px}
+.history-bar{height:4px;background:rgba(255,255,255,.05);border-radius:2px;margin-top:.5rem;overflow:hidden}
+.history-fill{height:100%;background:var(--accent);border-radius:2px;transition:width .3s}
+.footer{text-align:center;padding:1.5rem;color:var(--text2);font-size:.8rem;border-top:1px solid var(--border);margin-top:2rem}
+@media(max-width:600px){.hero h1{font-size:1.5rem}.controls{flex-direction:column}}
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <div class="hero-badge">Widget Interativo</div>
+  <h1>Simulador de<br>Randomização</h1>
+  <p>Veja como a atribuição aleatória equilibra variáveis confundidoras entre grupos experimentais</p>
+</div>
+
+<div class="container">
+
+  <div class="card">
+    <div class="card-title">Configurações do Experimento</div>
+    <div class="controls">
+      <div class="control-group">
+        <label>Participantes por grupo: <span class="val" id="nVal">30</span></label>
+        <input type="range" id="sliderN" min="5" max="200" value="30" step="5">
+      </div>
+      <div class="control-group">
+        <label>Variáveis confundidoras: <span class="val" id="cVal">4</span></label>
+        <input type="range" id="sliderC" min="2" max="6" value="4" step="1">
+      </div>
+    </div>
+    <div class="btn-row">
+      <button class="btn" onclick="randomize()">⚡ Randomizar uma vez</button>
+      <button class="btn btn-auto" id="btnAuto" onclick="toggleAuto()">▶ Repetir 50 vezes</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Médias por Grupo após Randomização</div>
+    <div class="legend">
+      <div class="legend-item"><div class="legend-dot" style="background:#3498DB"></div> Grupo Controle</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#E74C3C"></div> Grupo Tratamento</div>
+    </div>
+    <canvas id="chart" height="320"></canvas>
+    <div class="stats" id="statsArea"></div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">O que acontece ao aumentar N?</div>
+    <p style="color:var(--text2);font-size:.9rem;margin-bottom:.8rem">Rode a simulação com N pequeno (5–10) e depois com N grande (100+). Observe como as barras ficam cada vez mais parecidas — esse é o poder da randomização.</p>
+    <div id="insightBox" class="insight" style="display:none"></div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Histórico de Simulações</div>
+    <p style="color:var(--text2);font-size:.85rem">Rodadas: <strong id="roundCount">0</strong> &nbsp;|&nbsp; Balanceadas (todos p > .05): <strong id="balancedCount">0</strong> (<span id="balancedPct">0</span>%)</p>
+    <div class="history-bar"><div class="history-fill" id="historyFill" style="width:0%"></div></div>
+  </div>
+
+</div>
+
+<div class="footer">
+  Prof. Dr. Leonardo Vils · Fundamentos de Estudos Experimentais I · 2026
+</div>
+
+<script>
+const NAMES = ["Idade","Renda","Escolaridade","Experiência","Motivação","Gênero"];
+const MEANS = [35, 4500, 14, 5, 65, 0.5];
+const SDS   = [10, 2000, 3, 3, 15, 0.5];
+
+let N = 30, C = 4;
+let rounds = 0, balanced = 0;
+let autoInterval = null;
+let currentData = null;
+
+const $ = id => document.getElementById(id);
+
+$("sliderN").oninput = function(){ N = +this.value; $("nVal").textContent = N; };
+$("sliderC").oninput = function(){ C = +this.value; $("cVal").textContent = C; };
+
+function genNormal(mu, sd) {
+  let u1 = Math.random(), u2 = Math.random();
+  return mu + sd * Math.sqrt(-2*Math.log(u1)) * Math.cos(2*Math.PI*u2);
+}
+
+function randomize() {
+  const ctrl = [], treat = [];
+  for (let i = 0; i < C; i++) { ctrl.push([]); treat.push([]); }
+
+  // Generate 2*N participants, randomly assign
+  for (let p = 0; p < 2*N; p++) {
+    const group = p < N ? ctrl : treat; // first N to ctrl, rest to treat (after shuffle)
+    for (let c = 0; c < C; c++) {
+      group[c].push(genNormal(MEANS[c], SDS[c]));
+    }
+  }
+
+  // Actually randomize: generate all, then shuffle assignment
+  const all = [];
+  for (let p = 0; p < 2*N; p++) {
+    const person = [];
+    for (let c = 0; c < C; c++) person.push(genNormal(MEANS[c], SDS[c]));
+    all.push(person);
+  }
+  // Fisher-Yates shuffle
+  for (let i = all.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [all[i], all[j]] = [all[j], all[i]];
+  }
+
+  const ctrlData = all.slice(0, N);
+  const treatData = all.slice(N);
+
+  const ctrlMeans = [], treatMeans = [], pvals = [];
+  for (let c = 0; c < C; c++) {
+    const cVals = ctrlData.map(p => p[c]);
+    const tVals = treatData.map(p => p[c]);
+    ctrlMeans.push(mean(cVals));
+    treatMeans.push(mean(tVals));
+    pvals.push(tTestP(cVals, tVals));
+  }
+
+  currentData = { ctrlMeans, treatMeans, pvals };
+  rounds++;
+  if (pvals.every(p => p > 0.05)) balanced++;
+
+  drawChart();
+  drawStats();
+  updateHistory();
+  showInsight();
+}
+
+function mean(arr) { return arr.reduce((a,b) => a+b, 0) / arr.length; }
+function variance(arr) { const m = mean(arr); return arr.reduce((s,x) => s + (x-m)**2, 0) / (arr.length-1); }
+
+function tTestP(a, b) {
+  const na = a.length, nb = b.length;
+  const va = variance(a), vb = variance(b);
+  const se = Math.sqrt(va/na + vb/nb);
+  if (se === 0) return 1;
+  const t = Math.abs(mean(a) - mean(b)) / se;
+  const df = Math.min(na-1, nb-1); // conservative
+  return 2 * (1 - tCDF(t, df));
+}
+
+// Approximation of t-distribution CDF using normal for large df
+function tCDF(t, df) {
+  if (df >= 30) return normCDF(t);
+  // Better approximation for small df
+  const x = df / (df + t*t);
+  return 1 - 0.5 * betaInc(df/2, 0.5, x);
+}
+
+function normCDF(x) {
+  const a1=0.254829592, a2=-0.284496736, a3=1.421413741, a4=-1.453152027, a5=1.061405429;
+  const p=0.3275911;
+  const sign = x < 0 ? -1 : 1;
+  x = Math.abs(x) / Math.SQRT2;
+  const t = 1 / (1 + p*x);
+  const y = 1 - (((((a5*t + a4)*t) + a3)*t + a2)*t + a1)*t * Math.exp(-x*x);
+  return 0.5 * (1 + sign*y);
+}
+
+function betaInc(a, b, x) {
+  // Regularized incomplete beta via continued fraction (Lentz)
+  if (x === 0 || x === 1) return x;
+  const lnBeta = lgamma(a) + lgamma(b) - lgamma(a+b);
+  const front = Math.exp(Math.log(x)*a + Math.log(1-x)*b - lnBeta) / a;
+  let f = 1, c = 1, d = 1 - (a+1)*(a+b+1)*x/(a+2);
+  if (Math.abs(d) < 1e-30) d = 1e-30;
+  d = 1/d; f = d;
+  for (let i = 1; i <= 100; i++) {
+    const m = i;
+    let num = m*(b-m)*x / ((a+2*m-1)*(a+2*m));
+    d = 1 + num*d; if (Math.abs(d)<1e-30) d=1e-30; d = 1/d;
+    c = 1 + num/c; if (Math.abs(c)<1e-30) c=1e-30;
+    f *= d*c;
+    num = -(a+m)*(a+b+m)*x / ((a+2*m)*(a+2*m+1));
+    d = 1 + num*d; if (Math.abs(d)<1e-30) d=1e-30; d = 1/d;
+    c = 1 + num/c; if (Math.abs(c)<1e-30) c=1e-30;
+    f *= d*c;
+    if (Math.abs(d*c - 1) < 1e-8) break;
+  }
+  return 1 - front*f;
+}
+
+function lgamma(x) {
+  const c = [76.18009172947146,-86.50532032941677,24.01409824083091,-1.231739572450155,0.1208650973866179e-2,-0.5395239384953e-5];
+  let y = x, tmp = x + 5.5; tmp -= (x+0.5)*Math.log(tmp);
+  let ser = 1.000000000190015;
+  for (let j = 0; j < 6; j++) ser += c[j] / ++y;
+  return -tmp + Math.log(2.5066282746310005*ser/x);
+}
+
+function drawChart() {
+  const canvas = $("chart");
+  const dpr = window.devicePixelRatio || 1;
+  const w = canvas.clientWidth, h = 320;
+  canvas.width = w*dpr; canvas.height = h*dpr;
+  const ctx = canvas.getContext("2d");
+  ctx.scale(dpr, dpr);
+
+  const d = currentData;
+  const pad = { top:30, bottom:50, left:60, right:20 };
+  const plotW = w - pad.left - pad.right;
+  const plotH = h - pad.top - pad.bottom;
+
+  // Normalize values to 0-1 range per confounder (using population means±2SD as range)
+  const groupW = plotW / C;
+  const barW = groupW * 0.3;
+  const gap = groupW * 0.05;
+
+  ctx.clearRect(0, 0, w, h);
+
+  for (let c = 0; c < C; c++) {
+    const lo = MEANS[c] - 3*SDS[c]/Math.sqrt(N > 1 ? 1 : 1);
+    const hi = MEANS[c] + 3*SDS[c]/Math.sqrt(N > 1 ? 1 : 1);
+    const range = hi - lo || 1;
+
+    const cx = pad.left + c * groupW + groupW/2;
+
+    // Background band
+    ctx.fillStyle = "rgba(255,255,255,.02)";
+    if (c % 2 === 0) ctx.fillRect(pad.left + c*groupW, pad.top, groupW, plotH);
+
+    // Population mean line
+    const popY = pad.top + plotH - ((MEANS[c] - lo) / range) * plotH;
+    ctx.strokeStyle = "rgba(255,255,255,.15)";
+    ctx.setLineDash([4,4]);
+    ctx.beginPath();
+    ctx.moveTo(pad.left + c*groupW + 10, popY);
+    ctx.lineTo(pad.left + (c+1)*groupW - 10, popY);
+    ctx.stroke();
+    ctx.setLineDash([]);
+
+    // Control bar
+    const cy = pad.top + plotH - ((d.ctrlMeans[c] - lo) / range) * plotH;
+    const barH = (d.ctrlMeans[c] - lo) / range * plotH;
+    ctx.fillStyle = "rgba(52,152,219,.7)";
+    ctx.beginPath();
+    roundRect(ctx, cx - barW - gap/2, cy, barW, pad.top + plotH - cy, 4);
+    ctx.fill();
+
+    // Treatment bar
+    const ty = pad.top + plotH - ((d.treatMeans[c] - lo) / range) * plotH;
+    ctx.fillStyle = "rgba(231,76,60,.7)";
+    ctx.beginPath();
+    roundRect(ctx, cx + gap/2, ty, barW, pad.top + plotH - ty, 4);
+    ctx.fill();
+
+    // Label
+    ctx.fillStyle = "#95A5A6";
+    ctx.font = "11px 'Segoe UI',sans-serif";
+    ctx.textAlign = "center";
+    ctx.fillText(NAMES[c], cx, h - pad.bottom + 18);
+
+    // P-value
+    const pv = d.pvals[c];
+    ctx.fillStyle = pv > 0.05 ? "#2ECC71" : "#E74C3C";
+    ctx.font = "bold 10px 'Segoe UI',sans-serif";
+    ctx.fillText("p=" + (pv < 0.001 ? "<.001" : pv.toFixed(3)), cx, pad.top - 8);
+  }
+
+  // Y axis label
+  ctx.save();
+  ctx.fillStyle = "#95A5A6";
+  ctx.font = "11px 'Segoe UI',sans-serif";
+  ctx.textAlign = "center";
+  ctx.translate(14, pad.top + plotH/2);
+  ctx.rotate(-Math.PI/2);
+  ctx.fillText("Média do grupo (normalizada)", 0, 0);
+  ctx.restore();
+}
+
+function roundRect(ctx, x, y, w, h, r) {
+  if (h < 0) { y += h; h = -h; }
+  if (h < 2*r) r = h/2;
+  ctx.moveTo(x+r, y);
+  ctx.arcTo(x+w, y, x+w, y+h, r);
+  ctx.arcTo(x+w, y+h, x, y+h, 0);
+  ctx.arcTo(x, y+h, x, y, 0);
+  ctx.arcTo(x, y, x+w, y, r);
+  ctx.closePath();
+}
+
+function drawStats() {
+  const d = currentData;
+  let html = "";
+  for (let c = 0; c < C; c++) {
+    const diff = Math.abs(d.ctrlMeans[c] - d.treatMeans[c]);
+    const pctDiff = (diff / MEANS[c] * 100).toFixed(1);
+    const ok = d.pvals[c] > 0.05;
+    html += `<div class="stat-box">
+      <div class="stat-label">${NAMES[c]}</div>
+      <div class="stat-val ${ok?'balanced':'unbalanced'}">${pctDiff}%</div>
+      <div style="font-size:.7rem;color:var(--text2)">diferença entre grupos</div>
+    </div>`;
+  }
+  $("statsArea").innerHTML = html;
+}
+
+function updateHistory() {
+  $("roundCount").textContent = rounds;
+  $("balancedCount").textContent = balanced;
+  $("balancedPct").textContent = rounds > 0 ? Math.round(balanced/rounds*100) : 0;
+  $("historyFill").style.width = (rounds > 0 ? balanced/rounds*100 : 0) + "%";
+}
+
+function showInsight() {
+  const box = $("insightBox");
+  box.style.display = "block";
+  const allBalanced = currentData.pvals.every(p => p > 0.05);
+  if (N <= 15) {
+    box.innerHTML = `<strong>N = ${N} por grupo.</strong> Com amostras pequenas, a randomização nem sempre consegue equilibrar todas as variáveis. Você pode ver diferenças notáveis entre os grupos — isso é esperado. Aumente o N e veja a mágica acontecer.`;
+  } else if (N <= 50) {
+    box.innerHTML = `<strong>N = ${N} por grupo.</strong> Com amostras moderadas, a randomização ${allBalanced ? 'já equilibrou bem' : 'ainda mostra alguma variação, mas'} — as diferenças tendem a ficar pequenas. A Lei dos Grandes Números está trabalhando a seu favor.`;
+  } else {
+    box.innerHTML = `<strong>N = ${N} por grupo.</strong> Com amostras grandes, a randomização produz grupos quase idênticos nas variáveis confundidoras. ${allBalanced ? 'Todos os p-values > .05 — equilíbrio alcançado!' : 'Mesmo quando um p-value fica baixo, as diferenças absolutas são minúsculas.'}`;
+  }
+}
+
+function toggleAuto() {
+  if (autoInterval) {
+    clearInterval(autoInterval);
+    autoInterval = null;
+    $("btnAuto").textContent = "▶ Repetir 50 vezes";
+    return;
+  }
+  let count = 0;
+  $("btnAuto").textContent = "⏹ Parar";
+  autoInterval = setInterval(() => {
+    randomize();
+    count++;
+    if (count >= 50) {
+      clearInterval(autoInterval);
+      autoInterval = null;
+      $("btnAuto").textContent = "▶ Repetir 50 vezes";
+    }
+  }, 120);
+}
+
+// Initial run
+randomize();
+
+// Resize handler
+window.addEventListener("resize", () => { if (currentData) drawChart(); });
+</script>
+</body>
+</html>
