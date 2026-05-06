@@ -2,7 +2,7 @@
 
 > Kit interativo para pesquisa experimental em Ciências Sociais Aplicadas.
 
-[![GitHub Pages](https://img.shields.io/badge/GitHub%20Pages-Live-6366F1?style=flat&logo=github)](https://SEU-USUARIO.github.io/experimentos/)
+[![GitHub Pages](https://img.shields.io/badge/GitHub%20Pages-Live-6366F1?style=flat&logo=github)](https://leovils.github.io/FAQ_Experimentos/)
 [![FAQs](https://img.shields.io/badge/FAQs-100-8B5CF6?style=flat)](#-100-faqs)
 [![Slides](https://img.shields.io/badge/Slides-PDF-3B82F6?style=flat)](#-slides)
 [![Widgets](https://img.shields.io/badge/Widgets-7-F59E0B?style=flat)](#-widgets-interativos)
@@ -112,14 +112,14 @@ Programa oficial da disciplina "Fundamentos de Estudos Experimentais I" — 2026
 1. Faça um fork ou crie um novo repositório
 2. Copie os arquivos para a raiz (renomeie conforme a estrutura abaixo)
 3. Vá em **Settings → Pages → Source: Deploy from a branch → main → / (root)**
-4. Acesse `https://seu-usuario.github.io/nome-do-repo/`
+4. Acesse `https://leovils.github.io/FAQ_Experimentos/`
 5. Compartilhe os links com os alunos:
-   - Portal: `https://seu-usuario.github.io/nome-do-repo/`
-   - FAQ: `https://seu-usuario.github.io/nome-do-repo/FAQ_Experimentos.html`
-   - Exercício: `https://seu-usuario.github.io/nome-do-repo/Exercicio_Planejamento_Experimental.html`
-   - Quiz: `https://seu-usuario.github.io/nome-do-repo/Quiz_Aula1.html`
-   - Widgets: `https://seu-usuario.github.io/nome-do-repo/Widget_Randomizacao.html` (etc.)
-   - Simulador: `https://seu-usuario.github.io/nome-do-repo/Simulador_Experimentos_OdinDinho.html`
+   - Portal: `https://leovils.github.io/FAQ_Experimentos/`
+   - FAQ: `https://leovils.github.io/FAQ_Experimentos/FAQ_Experimentos.html`
+   - Exercício: `https://leovils.github.io/FAQ_Experimentos/Exercicio_Planejamento_Experimental.html`
+   - Quiz: `https://leovils.github.io/FAQ_Experimentos/Quiz_Aula1.html`
+   - Widgets: `https://leovils.github.io/FAQ_Experimentos/Widget_Randomizacao.html` (etc.)
+   - Simulador: `https://leovils.github.io/FAQ_Experimentos/Simulador_Experimentos_OdinDinho.html`
    - Os arquivos .docx e .pdf ficam disponíveis para download direto pelo GitHub
 
 ### Opção 2: Abrir localmente
