@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Guia dos Widgets Interativos — Fundamentos de Estudos Experimentais I</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#0a0a0f;--glass:rgba(255,255,255,.06);--border:rgba(255,255,255,.08);
+  --text:#ECF0F1;--text2:#95A5A6;--text3:#7F8C8D;
+  --accent:#1ABC9C;--gold:#F4D03F;--blue:#3498DB;--purple:#9B59B6;--red:#E74C3C;--green:#2ECC71;--orange:#E67E22;--pink:#E91E8F;
+}
+body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--text);line-height:1.7;min-height:100vh}
+
+/* HERO */
+.hero{text-align:center;padding:3rem 1.5rem 2rem;background:linear-gradient(135deg,rgba(244,208,63,.08),rgba(230,126,34,.05))}
+.hero-badge{display:inline-block;background:var(--gold);color:#000;font-size:.65rem;font-weight:700;padding:.25rem .8rem;border-radius:20px;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:1rem}
+.hero h1{font-family:Georgia,serif;font-size:2.2rem;font-weight:700;line-height:1.25;margin-bottom:.5rem}
+.hero h1 span{color:var(--gold)}
+.hero p{color:var(--text2);font-size:1rem;max-width:600px;margin:0 auto}
+
+/* NAV */
+.nav{position:sticky;top:0;z-index:100;background:rgba(10,10,15,.92);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);padding:.6rem 1rem;display:flex;gap:.5rem;overflow-x:auto;justify-content:center;flex-wrap:wrap}
+.nav a{color:var(--text2);text-decoration:none;font-size:.75rem;padding:.35rem .7rem;border-radius:8px;border:1px solid transparent;white-space:nowrap;transition:all .2s}
+.nav a:hover{color:var(--text);border-color:var(--border)}
+.nav a.active{color:var(--gold);border-color:rgba(244,208,63,.3);background:rgba(244,208,63,.08)}
+
+/* CONTAINER */
+.container{max-width:860px;margin:0 auto;padding:2rem 1.5rem}
+
+/* WIDGET SECTION */
+.widget-section{margin-bottom:3rem;scroll-margin-top:70px}
+.widget-header{display:flex;align-items:center;gap:1rem;margin-bottom:1.2rem;padding-bottom:.8rem;border-bottom:1px solid var(--border)}
+.widget-icon{width:48px;height:48px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:1.4rem;flex-shrink:0}
+.widget-header-text h2{font-family:Georgia,serif;font-size:1.4rem;font-weight:700}
+.widget-header-text .widget-file{font-size:.75rem;color:var(--text3);font-family:'Consolas','Courier New',monospace}
+
+/* CONTENT */
+.widget-body p{margin-bottom:1rem;color:var(--text2)}
+.widget-body strong{color:var(--text)}
+
+/* BOXES */
+.box{border-radius:10px;padding:1rem 1.2rem;margin:1rem 0;border-left:3px solid}
+.box-title{font-weight:700;font-size:.85rem;text-transform:uppercase;letter-spacing:.5px;margin-bottom:.5rem;display:flex;align-items:center;gap:.4rem}
+.box p,.box li{font-size:.9rem;color:var(--text2);line-height:1.6}
+.box ul{padding-left:1.2rem;margin-top:.4rem}
+.box li{margin-bottom:.3rem}
+
+.box-observe{background:rgba(52,152,219,.08);border-color:var(--blue)}
+.box-observe .box-title{color:var(--blue)}
+
+.box-exercise{background:rgba(46,204,113,.08);border-color:var(--green)}
+.box-exercise .box-title{color:var(--green)}
+
+.box-tip{background:rgba(244,208,63,.08);border-color:var(--gold)}
+.box-tip .box-title{color:var(--gold)}
+
+.box-trap{background:rgba(231,76,60,.08);border-color:var(--red)}
+.box-trap .box-title{color:var(--red)}
+
+.box-connect{background:rgba(155,89,182,.08);border-color:var(--purple)}
+.box-connect .box-title{color:var(--purple)}
+
+/* STEP LIST */
+.steps{counter-reset:step;margin:1rem 0}
+.step{counter-increment:step;display:flex;gap:.8rem;margin-bottom:.8rem;align-items:flex-start}
+.step::before{content:counter(step);background:rgba(244,208,63,.12);color:var(--gold);width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.8rem;font-weight:700;flex-shrink:0;margin-top:.15rem}
+.step-text{color:var(--text2);font-size:.9rem;line-height:1.6}
+.step-text strong{color:var(--text)}
+
+/* OPEN BUTTON */
+.btn-open{display:inline-flex;align-items:center;gap:.4rem;background:rgba(244,208,63,.12);color:var(--gold);border:1px solid rgba(244,208,63,.25);padding:.5rem 1rem;border-radius:8px;text-decoration:none;font-size:.85rem;font-weight:600;margin-top:.5rem;transition:all .2s}
+.btn-open:hover{background:rgba(244,208,63,.2);border-color:rgba(244,208,63,.4)}
+
+/* TABLE */
+.info-table{width:100%;border-collapse:collapse;margin:1rem 0;font-size:.85rem}
+.info-table th{text-align:left;color:var(--gold);font-weight:600;padding:.5rem .8rem;border-bottom:1px solid var(--border)}
+.info-table td{padding:.5rem .8rem;color:var(--text2);border-bottom:1px solid rgba(255,255,255,.04)}
+.info-table tr:hover td{background:rgba(255,255,255,.02)}
+
+/* FOOTER */
+.footer{text-align:center;padding:2rem 1rem;color:var(--text3);font-size:.8rem;border-top:1px solid var(--border);margin-top:2rem}
+.footer a{color:var(--accent);text-decoration:none}
+
+/* RESPONSIVE */
+@media(max-width:600px){
+  .hero h1{font-size:1.6rem}
+  .widget-header{flex-direction:column;align-items:flex-start;gap:.5rem}
+  .nav{justify-content:flex-start}
+}
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <div class="hero-badge">Guia Pr&aacute;tico</div>
+  <h1>Guia dos <span>Widgets Interativos</span></h1>
+  <p>Como usar cada ferramenta, o que observar e exerc&iacute;cios para fixar os conceitos</p>
+</div>
+
+<nav class="nav" id="nav">
+  <a href="#randomizacao">Randomiza&ccedil;&atilde;o</a>
+  <a href="#effect-size">Tamanho de Efeito</a>
+  <a href="#power">Poder</a>
+  <a href="#latin-square">Latin Square</a>
+  <a href="#ameacas">Amea&ccedil;as</a>
+  <a href="#danca-p">Dan&ccedil;a dos P</a>
+  <a href="#anova">ANOVA</a>
+</nav>
+
+<div class="container">
+
+<!-- ============================================================ -->
+<!-- 1. RANDOMIZAÇÃO -->
+<!-- ============================================================ -->
+<section class="widget-section" id="randomizacao">
+  <div class="widget-header">
+    <div class="widget-icon" style="background:rgba(26,188,156,.15);color:var(--accent)">&#127922;</div>
+    <div class="widget-header-text">
+      <h2>Simulador de Randomiza&ccedil;&atilde;o</h2>
+      <div class="widget-file">Widget_Randomizacao.html</div>
+    </div>
+  </div>
+  <div class="widget-body">
+
+    <p><strong>O que faz:</strong> simula a atribui&ccedil;&atilde;o aleat&oacute;ria de participantes a grupos experimentais (controle vs. tratamento). Cada participante tem caracter&iacute;sticas pr&eacute;-definidas &mdash; idade, g&ecirc;nero, renda &mdash; e o widget mostra como a randomiza&ccedil;&atilde;o distribui essas caracter&iacute;sticas entre os grupos. O modo <strong>auto-repeat 50x</strong> roda 50 atribui&ccedil;&otilde;es consecutivas para voc&ecirc; ver o padr&atilde;o de equil&iacute;brio ao longo de muitas repeti&ccedil;&otilde;es.</p>
+
+    <p><strong>Por que importa:</strong> a randomiza&ccedil;&atilde;o &eacute; o &uacute;nico mecanismo que &mdash; em expectativa &mdash; equilibra <em>todas</em> as vari&aacute;veis de confus&atilde;o entre os grupos, inclusive aquelas que voc&ecirc; nem sabe que existem. Sem randomiza&ccedil;&atilde;o, qualquer diferen&ccedil;a no resultado pode ser atribu&iacute;da a uma vari&aacute;vel esp&uacute;ria, e n&atilde;o ao tratamento.</p>
+
+    <div class="steps">
+      <div class="step"><div class="step-text"><strong>Defina o N</strong> &mdash; escolha o n&uacute;mero total de participantes (ex.: 20, 50, 100).</div></div>
+      <div class="step"><div class="step-text"><strong>Clique em &ldquo;Randomizar&rdquo;</strong> &mdash; veja como os participantes s&atilde;o distribu&iacute;dos.</div></div>
+      <div class="step"><div class="step-text"><strong>Compare os confounders</strong> &mdash; observe as m&eacute;dias de idade, propor&ccedil;&atilde;o de g&ecirc;nero e renda entre os grupos.</div></div>
+      <div class="step"><div class="step-text"><strong>Rode o auto-repeat 50x</strong> &mdash; acompanhe o histograma de diferen&ccedil;as acumuladas.</div></div>
+    </div>
+
+    <div class="box box-observe">
+      <div class="box-title">&#128065; O que observar</div>
+      <ul>
+        <li>Com <strong>N pequeno</strong> (ex.: 10 por grupo), uma &uacute;nica randomiza&ccedil;&atilde;o pode gerar grupos bastante desbalanceados &mdash; isso &eacute; normal.</li>
+        <li>Com <strong>N grande</strong> (ex.: 100 por grupo), as diferen&ccedil;as entre grupos tendem a zero em quase todas as repeti&ccedil;&otilde;es.</li>
+        <li>No auto-repeat, o histograma de diferen&ccedil;as se concentra simetricamente ao redor de zero &mdash; a <strong>Lei dos Grandes N&uacute;meros</strong> em a&ccedil;&atilde;o.</li>
+      </ul>
+    </div>
+
+    <div class="box box-exercise">
+      <div class="box-title">&#128218; Exerc&iacute;cios sugeridos</div>
+      <ul>
+        <li><strong>Exerc&iacute;cio 1:</strong> Com N = 10, fa&ccedil;a 5 randomiza&ccedil;&otilde;es manuais. Anote a maior diferen&ccedil;a de idade entre grupos. Agora repita com N = 100. Compare.</li>
+        <li><strong>Exerc&iacute;cio 2:</strong> Rode o auto-repeat 50x com N = 20 e depois com N = 200. Em qual cen&aacute;rio o histograma &eacute; mais concentrado? Por qu&ecirc;?</li>
+        <li><strong>Exerc&iacute;cio 3:</strong> Imagine que voc&ecirc; encontrou uma diferen&ccedil;a de 8 anos na m&eacute;dia de idade entre grupos. Isso invalida o experimento? Em que circunst&acirc;ncia voc&ecirc; usaria randomiza&ccedil;&atilde;o por blocos em vez de randomiza&ccedil;&atilde;o simples?</li>
+      </ul>
+    </div>
+
+    <div class="box box-connect">
+      <div class="box-title">&#128279; Conex&atilde;o com a teoria</div>
+      <p>Este widget ilustra os conceitos de <strong>randomiza&ccedil;&atilde;o simples</strong> (Cap&iacute;tulo de Randomiza&ccedil;&atilde;o nos slides) e o princ&iacute;pio de que a randomiza&ccedil;&atilde;o funciona &ldquo;em expectativa&rdquo; &mdash; ou seja, na m&eacute;dia de infinitas repeti&ccedil;&otilde;es, n&atilde;o em cada caso individual. &Eacute; tamb&eacute;m a base do argumento de <strong>Rubin</strong> para infer&ecirc;ncia causal.</p>
+    </div>
+
+    <a class="btn-open" href="Widget_Randomizacao.html">&#9654; Abrir Widget</a>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- 2. TAMANHO DE EFEITO -->
+<!-- ============================================================ -->
+<section class="widget-section" id="effect-size">
+  <div class="widget-header">
+    <div class="widget-icon" style="background:rgba(52,152,219,.15);color:var(--blue)">&#128200;</div>
+    <div class="widget-header-text">
+      <h2>Visualizador de Tamanho de Efeito</h2>
+      <div class="widget-file">Widget_Effect_Size.html</div>
+    </div>
+  </div>
+  <div class="widget-body">
+
+    <p><strong>O que faz:</strong> mostra duas curvas normais (grupo controle e grupo tratamento) lado a lado. Voc&ecirc; ajusta o <strong>Cohen&rsquo;s d</strong> com um slider e v&ecirc; em tempo real como as distribui&ccedil;&otilde;es se separam. Al&eacute;m da visualiza&ccedil;&atilde;o, o widget calcula automaticamente quatro m&eacute;tricas: <strong>overlap</strong> (% de sobreposi&ccedil;&atilde;o), <strong>U&#8323;</strong> (percentil do tratamento acima da mediana do controle), <strong>probabilidade de superioridade</strong> e <strong>NNT</strong> (Number Needed to Treat).</p>
+
+    <p><strong>Por que importa:</strong> o p-value diz se existe diferen&ccedil;a &mdash; o tamanho de efeito diz se essa diferen&ccedil;a &eacute; relevante na pr&aacute;tica. Um d = 0.20 (pequeno) pode ser estatisticamente significativo com N = 1000, mas representar uma diferen&ccedil;a de import&acirc;ncia pr&aacute;tica m&iacute;nima. Esse widget ajuda a desenvolver intui&ccedil;&atilde;o visual sobre o que &ldquo;pequeno&rdquo;, &ldquo;m&eacute;dio&rdquo; e &ldquo;grande&rdquo; realmente significam.</p>
+
+    <div class="steps">
+      <div class="step"><div class="step-text"><strong>Ajuste o slider de d</strong> &mdash; comece em d = 0 e aumente lentamente at&eacute; d = 2.0.</div></div>
+      <div class="step"><div class="step-text"><strong>Observe a separa&ccedil;&atilde;o visual</strong> &mdash; note como as curvas se afastam progressivamente.</div></div>
+      <div class="step"><div class="step-text"><strong>Leia as m&eacute;tricas</strong> &mdash; acompanhe overlap, U&#8323;, probabilidade de superioridade e NNT mudando em tempo real.</div></div>
+    </div>
+
+    <div class="box box-observe">
+      <div class="box-title">&#128065; O que observar</div>
+      <ul>
+        <li>Com <strong>d = 0.20</strong> (pequeno), o overlap &eacute; enorme (~85%). &Eacute; dif&iacute;cil distinguir os grupos &ldquo;a olho nu&rdquo;.</li>
+        <li>Com <strong>d = 0.50</strong> (m&eacute;dio), j&aacute; existe separa&ccedil;&atilde;o vis&iacute;vel, e U&#8323; indica que ~69% do grupo tratamento supera a mediana do controle.</li>
+        <li>Com <strong>d = 0.80</strong> (grande), o overlap cai para ~53% &mdash; os grupos s&atilde;o claramente distintos.</li>
+        <li>O <strong>NNT</strong> &eacute; especialmente &uacute;til em contextos aplicados: &ldquo;quantas pessoas preciso tratar para obter um sucesso adicional?&rdquo;</li>
+      </ul>
+    </div>
+
+    <div class="box box-exercise">
+      <div class="box-title">&#128218; Exerc&iacute;cios sugeridos</div>
+      <ul>
+        <li><strong>Exerc&iacute;cio 1:</strong> Coloque d = 0.30 e anote o overlap. Agora imagine que voc&ecirc; &eacute; um gestor decidindo se implementa um treinamento que custa R$ 500.000. O tamanho de efeito justifica o investimento? Escreva um par&aacute;grafo argumentando.</li>
+        <li><strong>Exerc&iacute;cio 2:</strong> Para cada conven&ccedil;&atilde;o de Cohen (0.20, 0.50, 0.80), anote o NNT. Em que tipo de interven&ccedil;&atilde;o um NNT de 6 seria aceit&aacute;vel? E um NNT de 16?</li>
+        <li><strong>Exerc&iacute;cio 3:</strong> Seu artigo reportou d = 0.47, 95% CI [0.12, 0.82]. Coloque d = 0.12, depois d = 0.47, depois d = 0.82 no widget. Qual &eacute; a faixa de overlap poss&iacute;vel? O que isso implica para a interpreta&ccedil;&atilde;o?</li>
+      </ul>
+    </div>
+
+    <div class="box box-tip">
+      <div class="box-title">&#128161; Dica</div>
+      <p>Em Ci&ecirc;ncias Sociais Aplicadas, a maioria dos efeitos experimentais reais fica entre d = 0.20 e d = 0.50. Se seu estudo encontrou d &gt; 1.0, desconfie &mdash; pode haver um artefato metodol&oacute;gico (escala restrita, amostra hiper-selecionada, ou demand characteristics).</p>
+    </div>
+
+    <a class="btn-open" href="Widget_Effect_Size.html">&#9654; Abrir Widget</a>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- 3. PODER ESTATÍSTICO -->
+<!-- ============================================================ -->
+<section class="widget-section" id="power">
+  <div class="widget-header">
+    <div class="widget-icon" style="background:rgba(244,208,63,.12);color:var(--gold)">&#9889;</div>
+    <div class="widget-header-text">
+      <h2>Calculadora de Poder Estat&iacute;stico</h2>
+      <div class="widget-file">Widget_Power.html</div>
+    </div>
+  </div>
+  <div class="widget-body">
+
+    <p><strong>O que faz:</strong> conecta interativamente os quatro par&acirc;metros fundamentais da an&aacute;lise de poder: <strong>N</strong> (tamanho amostral por grupo), <strong>d</strong> (tamanho de efeito esperado), <strong>&alpha;</strong> (n&iacute;vel de signific&acirc;ncia) e <strong>poder</strong> (1 &minus; &beta;, probabilidade de detectar o efeito se ele existe). Ajuste tr&ecirc;s deles e o widget calcula o quarto. A <strong>curva de poder</strong> mostra como o poder muda em fun&ccedil;&atilde;o de N para o d escolhido.</p>
+
+    <p><strong>Por que importa:</strong> um estudo sem poder adequado (&lt; 80%) &eacute; um desperd&iacute;cio de recursos. Voc&ecirc; gasta tempo, dinheiro e esfor&ccedil;o dos participantes, e provavelmente n&atilde;o detectar&aacute; o efeito mesmo que ele exista. A an&aacute;lise de poder <em>a priori</em> &eacute; obrigat&oacute;ria em pr&eacute;-registros e cada vez mais exigida por peri&oacute;dicos.</p>
+
+    <div class="steps">
+      <div class="step"><div class="step-text"><strong>Defina d</strong> &mdash; use a estimativa da literatura ou as conven&ccedil;&otilde;es de Cohen (0.20, 0.50, 0.80).</div></div>
+      <div class="step"><div class="step-text"><strong>Defina &alpha;</strong> &mdash; geralmente 0.05 (bidirecional).</div></div>
+      <div class="step"><div class="step-text"><strong>Defina o poder desejado</strong> &mdash; 0.80 &eacute; o m&iacute;nimo aceit&aacute;vel; 0.90 &eacute; ideal.</div></div>
+      <div class="step"><div class="step-text"><strong>Leia o N necess&aacute;rio</strong> &mdash; e ajuste os par&acirc;metros para explorar cen&aacute;rios.</div></div>
+    </div>
+
+    <div class="box box-observe">
+      <div class="box-title">&#128065; O que observar</div>
+      <ul>
+        <li>Para <strong>d = 0.50 e poder = 0.80</strong>, o N necess&aacute;rio fica em torno de 64 por grupo (128 total). Esse &eacute; um benchmark &uacute;til.</li>
+        <li>Reduzir d pela metade (de 0.50 para 0.25) <strong>quadruplica</strong> o N necess&aacute;rio. Efeitos pequenos custam caro.</li>
+        <li>A curva de poder tem forma de &ldquo;S&rdquo; &mdash; ganhos de poder s&atilde;o r&aacute;pidos no in&iacute;cio e depois desaceleram. Passar de 80% para 90% custa bem mais N do que passar de 60% para 70%.</li>
+        <li>Mudar &alpha; de 0.05 para 0.01 aumenta substancialmente o N necess&aacute;rio.</li>
+      </ul>
+    </div>
+
+    <div class="box box-exercise">
+      <div class="box-title">&#128218; Exerc&iacute;cios sugeridos</div>
+      <ul>
+        <li><strong>Exerc&iacute;cio 1:</strong> Voc&ecirc; espera d = 0.40 e quer poder de 80%. Quantos participantes por grupo precisa? Agora aumente para poder de 90%. Quantos a mais?</li>
+        <li><strong>Exerc&iacute;cio 2:</strong> Seu or&ccedil;amento permite no m&aacute;ximo 30 participantes por grupo. Com &alpha; = 0.05, qual &eacute; o menor d que voc&ecirc; consegue detectar com 80% de poder? O que isso significa para seu desenho?</li>
+        <li><strong>Exerc&iacute;cio 3:</strong> Compare o N necess&aacute;rio para d = 0.20 vs. d = 0.80 (ambos com poder = 0.80 e &alpha; = 0.05). Qual &eacute; a raz&atilde;o? O que isso ensina sobre a import&acirc;ncia de estimativas realistas de d na literatura?</li>
+      </ul>
+    </div>
+
+    <div class="box box-connect">
+      <div class="box-title">&#128279; Conex&atilde;o com a teoria</div>
+      <p>A an&aacute;lise de poder complementa diretamente o Widget de Tamanho de Efeito. Primeiro voc&ecirc; estima d (usando a literatura ou o Widget de Effect Size para calibrar sua intui&ccedil;&atilde;o), depois usa este widget para calcular o N. No G*Power, o procedimento &eacute; id&ecirc;ntico &mdash; este widget &eacute; uma vers&atilde;o simplificada para fins did&aacute;ticos.</p>
+    </div>
+
+    <a class="btn-open" href="Widget_Power.html">&#9654; Abrir Widget</a>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- 4. LATIN SQUARE -->
+<!-- ============================================================ -->
+<section class="widget-section" id="latin-square">
+  <div class="widget-header">
+    <div class="widget-icon" style="background:rgba(155,89,182,.15);color:var(--purple)">&#9638;</div>
+    <div class="widget-header-text">
+      <h2>Latin Square e Counterbalancing</h2>
+      <div class="widget-file">Widget_LatinSquare.html</div>
+    </div>
+  </div>
+  <div class="widget-body">
+
+    <p><strong>O que faz:</strong> explica e demonstra os princ&iacute;pios do <strong>counterbalancing</strong> em desenhos within-subjects. O widget gera <strong>quadrados latinos</strong> de diferentes tamanhos (3&times;3, 4&times;4, 5&times;5...), apresenta o <strong>Williams Design</strong> (quadrado latino balanceado para efeitos de carry-over), e oferece um construtor interativo onde voc&ecirc; monta seu pr&oacute;prio quadrado e o widget valida se ele atende aos crit&eacute;rios.</p>
+
+    <p><strong>Por que importa:</strong> em desenhos within-subjects, cada participante passa por todas as condi&ccedil;&otilde;es. Isso cria problemas potenciais: <strong>efeitos de ordem</strong> (a primeira condi&ccedil;&atilde;o sempre leva vantagem por novidade ou desvantagem por fadiga) e <strong>efeitos de carry-over</strong> (a condi&ccedil;&atilde;o A contamina a resposta &agrave; condi&ccedil;&atilde;o B). O counterbalancing com quadrados latinos &eacute; a solu&ccedil;&atilde;o cl&aacute;ssica.</p>
+
+    <div class="steps">
+      <div class="step"><div class="step-text"><strong>Escolha o n&uacute;mero de condi&ccedil;&otilde;es</strong> &mdash; por exemplo, 3 sabores de produto a serem testados.</div></div>
+      <div class="step"><div class="step-text"><strong>Gere o quadrado latino</strong> &mdash; observe que cada condi&ccedil;&atilde;o aparece exatamente uma vez em cada posi&ccedil;&atilde;o.</div></div>
+      <div class="step"><div class="step-text"><strong>Compare com Williams Design</strong> &mdash; note a propriedade adicional de balanceamento de carry-over.</div></div>
+      <div class="step"><div class="step-text"><strong>Use o construtor</strong> &mdash; tente montar um quadrado v&aacute;lido manualmente. O widget dir&aacute; se voc&ecirc; errou.</div></div>
+    </div>
+
+    <div class="box box-observe">
+      <div class="box-title">&#128065; O que observar</div>
+      <ul>
+        <li>Um <strong>quadrado latino k &times; k</strong> requer que cada tratamento apare&ccedil;a exatamente uma vez em cada linha (participante) e cada coluna (per&iacute;odo).</li>
+        <li>O <strong>Williams Design</strong> acrescenta uma restri&ccedil;&atilde;o: cada tratamento tamb&eacute;m &eacute; precedido por cada outro tratamento o mesmo n&uacute;mero de vezes. Isso controla carry-over de primeira ordem.</li>
+        <li>O n&uacute;mero m&iacute;nimo de participantes &eacute; igual ao n&uacute;mero de condi&ccedil;&otilde;es (um por linha), mas o ideal &eacute; m&uacute;ltiplos desse n&uacute;mero.</li>
+      </ul>
+    </div>
+
+    <div class="box box-exercise">
+      <div class="box-title">&#128218; Exerc&iacute;cios sugeridos</div>
+      <ul>
+        <li><strong>Exerc&iacute;cio 1:</strong> Voc&ecirc; est&aacute; testando 4 layouts de site. Gere um quadrado latino 4&times;4. Quantos participantes no m&iacute;nimo precisa? Se quiser 5 r&eacute;plicas por sequ&ecirc;ncia, quantos no total?</li>
+        <li><strong>Exerc&iacute;cio 2:</strong> No construtor, tente montar um quadrado 3&times;3 v&aacute;lido. Depois, verifique: ele tamb&eacute;m &eacute; um Williams Design? Por qu&ecirc; ou por que n&atilde;o?</li>
+        <li><strong>Exerc&iacute;cio 3:</strong> Um colega argumenta que &ldquo;basta colocar metade dos participantes na ordem ABC e metade na ordem CBA&rdquo;. Isso resolve o efeito de ordem? E o carry-over? Use o widget para comparar essa abordagem com um quadrado latino completo.</li>
+      </ul>
+    </div>
+
+    <div class="box box-trap">
+      <div class="box-title">&#9888; Armadilha comum</div>
+      <p>Counterbalancing <strong>n&atilde;o elimina</strong> efeitos de ordem &mdash; ele os <strong>distribui igualmente</strong> entre as condi&ccedil;&otilde;es. Se o efeito de fadiga for muito forte, ele ainda afetar&aacute; os resultados. Em casos extremos, considere um <strong>washout period</strong> entre condi&ccedil;&otilde;es.</p>
+    </div>
+
+    <a class="btn-open" href="Widget_LatinSquare.html">&#9654; Abrir Widget</a>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- 5. AMEAÇAS À VALIDADE -->
+<!-- ============================================================ -->
+<section class="widget-section" id="ameacas">
+  <div class="widget-header">
+    <div class="widget-icon" style="background:rgba(230,126,34,.12);color:var(--orange)">&#128737;</div>
+    <div class="widget-header-text">
+      <h2>Identificador de Amea&ccedil;as &agrave; Validade</h2>
+      <div class="widget-file">Widget_Ameacas_Validade.html</div>
+    </div>
+  </div>
+  <div class="widget-body">
+
+    <p><strong>O que faz:</strong> apresenta <strong>10 cen&aacute;rios realistas de administra&ccedil;&atilde;o</strong> &mdash; situa&ccedil;&otilde;es como um treinamento corporativo, uma campanha de marketing, ou um programa de fidelidade &mdash; e pede que voc&ecirc; identifique a(s) <strong>amea&ccedil;a(s) &agrave; validade interna</strong> presente(s). S&atilde;o 12 tipos de amea&ccedil;a cobertos: hist&oacute;ria, matura&ccedil;&atilde;o, testing, instrumenta&ccedil;&atilde;o, regress&atilde;o &agrave; m&eacute;dia, sele&ccedil;&atilde;o, mortalidade, intera&ccedil;&atilde;o sele&ccedil;&atilde;o-matura&ccedil;&atilde;o, difus&atilde;o, compensa&ccedil;&atilde;o, desmoraliza&ccedil;&atilde;o e imitação do tratamento.</p>
+
+    <p><strong>Por que importa:</strong> a validade interna &eacute; a condi&ccedil;&atilde;o <em>sine qua non</em> de um experimento. Se existe uma explica&ccedil;&atilde;o alternativa para o resultado, a infer&ecirc;ncia causal est&aacute; comprometida. Reconhecer amea&ccedil;as &eacute; t&atilde;o importante quanto saber construir o desenho &mdash; voc&ecirc; precisa diagnostic&aacute;-las nos estudos que l&ecirc; e evit&aacute;-las nos que planeja.</p>
+
+    <div class="steps">
+      <div class="step"><div class="step-text"><strong>Leia o cen&aacute;rio</strong> com aten&ccedil;&atilde;o &mdash; identifique o que poderia confundir a rela&ccedil;&atilde;o causal.</div></div>
+      <div class="step"><div class="step-text"><strong>Selecione a amea&ccedil;a</strong> &mdash; escolha entre as 12 op&ccedil;&otilde;es.</div></div>
+      <div class="step"><div class="step-text"><strong>Confira o feedback</strong> &mdash; o widget explica por que a amea&ccedil;a selecionada &eacute; correta (ou n&atilde;o).</div></div>
+      <div class="step"><div class="step-text"><strong>Tente todos os 10 cen&aacute;rios</strong> &mdash; cada um exercita uma combina&ccedil;&atilde;o diferente de amea&ccedil;as.</div></div>
+    </div>
+
+    <div class="box box-observe">
+      <div class="box-title">&#128065; O que observar</div>
+      <ul>
+        <li>Alguns cen&aacute;rios t&ecirc;m <strong>mais de uma amea&ccedil;a</strong> &mdash; problemas raramente v&ecirc;m sozinhos na pr&aacute;tica.</li>
+        <li>Observe como <strong>regress&atilde;o &agrave; m&eacute;dia</strong> e <strong>sele&ccedil;&atilde;o</strong> s&atilde;o frequentemente confundidas. Regress&atilde;o ocorre quando voc&ecirc; seleciona participantes por escores extremos; sele&ccedil;&atilde;o ocorre quando os grupos diferem sistematicamente antes do tratamento.</li>
+        <li>Note que <strong>hist&oacute;ria</strong> n&atilde;o se refere &agrave; &ldquo;hist&oacute;ria&rdquo; do participante, mas a <strong>eventos externos</strong> que acontecem entre o pr&eacute;-teste e o p&oacute;s-teste.</li>
+      </ul>
+    </div>
+
+    <div class="box box-exercise">
+      <div class="box-title">&#128218; Exerc&iacute;cios sugeridos</div>
+      <ul>
+        <li><strong>Exerc&iacute;cio 1:</strong> Ap&oacute;s completar os 10 cen&aacute;rios, crie um cen&aacute;rio pr&oacute;prio da sua &aacute;rea de pesquisa que contenha pelo menos duas amea&ccedil;as &agrave; validade. Descreva como voc&ecirc; redesenharia o estudo para elimin&aacute;-las.</li>
+        <li><strong>Exerc&iacute;cio 2:</strong> Escolha um artigo experimental publicado e identifique se alguma das 12 amea&ccedil;as pode estar presente. O(s) autor(es) reconheceu(ram) essa limita&ccedil;&atilde;o?</li>
+        <li><strong>Exerc&iacute;cio 3:</strong> Para cada tipo de amea&ccedil;a, pense em <strong>um mecanismo de controle</strong> (grupo controle, randomiza&ccedil;&atilde;o, blinding, etc.) que ajudaria a neutraliz&aacute;-la.</li>
+      </ul>
+    </div>
+
+    <div class="box box-connect">
+      <div class="box-title">&#128279; Conex&atilde;o com a teoria</div>
+      <p>Os 12 tipos de amea&ccedil;a s&atilde;o baseados em <strong>Shadish, Cook &amp; Campbell (2002)</strong> e <strong>Campbell &amp; Stanley (1963)</strong>. No Guia de Estudo, a se&ccedil;&atilde;o sobre <em>Validade Interna e 8 Amea&ccedil;as</em> cobre as mais comuns &mdash; este widget adiciona 4 amea&ccedil;as de contextos entre-grupos (difus&atilde;o, compensa&ccedil;&atilde;o, desmoraliza&ccedil;&atilde;o, imita&ccedil;&atilde;o).</p>
+    </div>
+
+    <a class="btn-open" href="Widget_Ameacas_Validade.html">&#9654; Abrir Widget</a>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- 6. DANÇA DOS P-VALUES -->
+<!-- ============================================================ -->
+<section class="widget-section" id="danca-p">
+  <div class="widget-header">
+    <div class="widget-icon" style="background:rgba(231,76,60,.12);color:var(--red)">&#128131;</div>
+    <div class="widget-header-text">
+      <h2>Dan&ccedil;a dos P-values</h2>
+      <div class="widget-file">Widget_Danca_Pvalues.html</div>
+    </div>
+  </div>
+  <div class="widget-body">
+
+    <p><strong>O que faz:</strong> simula <strong>100 replica&ccedil;&otilde;es</strong> de um mesmo experimento com par&acirc;metros fixos (N e d definidos por voc&ecirc;). Cada replica&ccedil;&atilde;o gera um novo p-value. O widget mostra um <strong>histograma</strong> de todos os 100 p-values e marca a propor&ccedil;&atilde;o que ficou abaixo de 0.05 (significativa) versus acima (n&atilde;o significativa). Baseado no trabalho de <strong>Geoff Cumming (2012)</strong>.</p>
+
+    <p><strong>Por que importa:</strong> muitos pesquisadores tratam o p-value como se fosse est&aacute;vel &mdash; como se replicar o estudo produzisse um valor semelhante. Na realidade, o p-value <strong>&ldquo;dan&ccedil;a&rdquo;</strong>: varia enormemente de replica&ccedil;&atilde;o para replica&ccedil;&atilde;o. Esse widget destr&oacute;i a ilus&atilde;o de estabilidade e motiva a transi&ccedil;&atilde;o para intervalos de confian&ccedil;a e tamanho de efeito.</p>
+
+    <div class="steps">
+      <div class="step"><div class="step-text"><strong>Defina N por grupo</strong> &mdash; ex.: 30 participantes por condi&ccedil;&atilde;o.</div></div>
+      <div class="step"><div class="step-text"><strong>Defina o d verdadeiro</strong> &mdash; o efeito populacional &ldquo;real&rdquo; que estamos tentando detectar.</div></div>
+      <div class="step"><div class="step-text"><strong>Rode a simula&ccedil;&atilde;o</strong> &mdash; observe os 100 p-values sendo gerados.</div></div>
+      <div class="step"><div class="step-text"><strong>Analise o histograma</strong> &mdash; veja quantos ca&iacute;ram abaixo de 0.05 e como se distribu&iacute;ram.</div></div>
+    </div>
+
+    <div class="box box-observe">
+      <div class="box-title">&#128065; O que observar</div>
+      <ul>
+        <li>Com <strong>d = 0.50 e N = 30</strong>, mesmo existindo um efeito real, muitas replica&ccedil;&otilde;es produzem p &gt; 0.05 &mdash; o poder &eacute; insuficiente.</li>
+        <li>Com <strong>d = 0 (sem efeito)</strong>, aproximadamente 5% dos p-values ficam abaixo de 0.05 &mdash; exatamente a taxa de Erro Tipo I (&alpha;).</li>
+        <li>Dois estudos id&ecirc;nticos podem produzir p = 0.001 e p = 0.35 &mdash; a <strong>dan&ccedil;a &eacute; natural</strong>, n&atilde;o indica fraude.</li>
+        <li>O p-value &eacute; <strong>uniformemente distribu&iacute;do</strong> sob H&#8320; verdadeira. Sob H&#8321; verdadeira, acumula-se &agrave; esquerda (perto de zero) &mdash; mas com subst&acirc;ncial espalhamento.</li>
+      </ul>
+    </div>
+
+    <div class="box box-exercise">
+      <div class="box-title">&#128218; Exerc&iacute;cios sugeridos</div>
+      <ul>
+        <li><strong>Exerc&iacute;cio 1:</strong> Com d = 0.50 e N = 20, anote a % de p &lt; 0.05. Agora aumente N para 100. Compare. Isso ilustra qual conceito?</li>
+        <li><strong>Exerc&iacute;cio 2:</strong> Com d = 0 (H&#8320; verdadeira), rode a simula&ccedil;&atilde;o. Quantos &ldquo;resultados significativos&rdquo; aparecem? Se um pesquisador publicasse apenas esses, o que isso representaria?</li>
+        <li><strong>Exerc&iacute;cio 3:</strong> Rode 100 replica&ccedil;&otilde;es com d = 0.30 e N = 50. Anote o p-value m&iacute;nimo e o m&aacute;ximo encontrados. A amplitude entre eles surpreende voc&ecirc;? Relacione isso com a crise de replica&ccedil;&atilde;o.</li>
+      </ul>
+    </div>
+
+    <div class="box box-trap">
+      <div class="box-title">&#9888; Armadilha comum</div>
+      <p>A <strong>fal&aacute;cia da probabilidade inversa</strong>: p = 0.03 <em>n&atilde;o</em> significa que h&aacute; 97% de chance de o efeito ser real. O p-value &eacute; P(dados | H&#8320;), n&atilde;o P(H&#8320; | dados). Essa confus&atilde;o &eacute; uma das mais persistentes em pesquisa emp&iacute;rica.</p>
+    </div>
+
+    <a class="btn-open" href="Widget_Danca_Pvalues.html">&#9654; Abrir Widget</a>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- 7. ANOVA DECOMPOSITOR -->
+<!-- ============================================================ -->
+<section class="widget-section" id="anova">
+  <div class="widget-header">
+    <div class="widget-icon" style="background:rgba(46,204,113,.12);color:var(--green)">&#128202;</div>
+    <div class="widget-header-text">
+      <h2>ANOVA Decompositor</h2>
+      <div class="widget-file">Widget_ANOVA_Decompositor.html</div>
+    </div>
+  </div>
+  <div class="widget-body">
+
+    <p><strong>O que faz:</strong> decompõe visualmente a <strong>variância total</strong> de um conjunto de dados em seus dois componentes fundamentais: <strong>SS Between</strong> (vari&acirc;ncia entre grupos, atribu&iacute;vel ao tratamento) e <strong>SS Within</strong> (vari&acirc;ncia dentro dos grupos, atribu&iacute;vel a diferen&ccedil;as individuais e erro). O widget usa um <strong>dotplot</strong> interativo onde voc&ecirc; v&ecirc; cada ponto de dados, as m&eacute;dias por grupo e a m&eacute;dia geral. <strong>Barras proporcionais</strong> mostram a decomposi&ccedil;&atilde;o SS Total = SS Between + SS Within, e o <strong>teste F</strong> &eacute; calculado em tempo real.</p>
+
+    <p><strong>Por que importa:</strong> a ANOVA &eacute; o teste padr&atilde;o para comparar 3 ou mais grupos experimentais. Muitos alunos aprendem a f&oacute;rmula mecanicamente sem entender a <em>l&oacute;gica</em>: a ANOVA pergunta &ldquo;a varia&ccedil;&atilde;o entre os grupos &eacute; grande o suficiente, comparada &agrave; varia&ccedil;&atilde;o dentro dos grupos, para concluir que os tratamentos fazem diferen&ccedil;a?&rdquo; Este widget torna essa l&oacute;gica <strong>vis&iacute;vel</strong>.</p>
+
+    <div class="steps">
+      <div class="step"><div class="step-text"><strong>Observe os dados no dotplot</strong> &mdash; cada ponto &eacute; um participante, agrupado por condi&ccedil;&atilde;o.</div></div>
+      <div class="step"><div class="step-text"><strong>Identifique as m&eacute;dias</strong> &mdash; linhas horizontais mostram a m&eacute;dia de cada grupo e a m&eacute;dia geral.</div></div>
+      <div class="step"><div class="step-text"><strong>Ajuste os dados</strong> &mdash; mova os pontos ou altere par&acirc;metros para ver como SS Between e SS Within mudam.</div></div>
+      <div class="step"><div class="step-text"><strong>Interprete o F</strong> &mdash; observe como F = MS Between / MS Within muda &agrave; medida que voc&ecirc; altera a separa&ccedil;&atilde;o entre grupos ou a dispers&atilde;o dentro dos grupos.</div></div>
+    </div>
+
+    <div class="box box-observe">
+      <div class="box-title">&#128065; O que observar</div>
+      <ul>
+        <li>Quando as m&eacute;dias dos grupos est&atilde;o <strong>muito separadas</strong> (grande SS Between) e os pontos dentro de cada grupo est&atilde;o <strong>pr&oacute;ximos</strong> (pequeno SS Within), o F &eacute; grande &rarr; resultado significativo.</li>
+        <li>Quando os grupos se sobrep&otilde;em bastante, o F fica pequeno &mdash; a varia&ccedil;&atilde;o intra-grupo &ldquo;engole&rdquo; a varia&ccedil;&atilde;o entre grupos.</li>
+        <li>A <strong>propor&ccedil;&atilde;o SS Between / SS Total</strong> &eacute; o <strong>&eta;&sup2;</strong> (eta-quadrado) &mdash; a medida de tamanho de efeito para ANOVA.</li>
+        <li>Os <strong>graus de liberdade</strong> aparecem no c&aacute;lculo: df Between = k &minus; 1 (n&uacute;mero de grupos menos 1) e df Within = N &minus; k (total de observa&ccedil;&otilde;es menos n&uacute;mero de grupos).</li>
+      </ul>
+    </div>
+
+    <div class="box box-exercise">
+      <div class="box-title">&#128218; Exerc&iacute;cios sugeridos</div>
+      <ul>
+        <li><strong>Exerc&iacute;cio 1:</strong> Configure 3 grupos com m&eacute;dias parecidas (ex.: 50, 51, 52) e dispers&atilde;o alta. Observe o F. Agora aumente a separa&ccedil;&atilde;o (50, 60, 70) mantendo a dispers&atilde;o. Compare os valores de F e &eta;&sup2;.</li>
+        <li><strong>Exerc&iacute;cio 2:</strong> Mantenha as m&eacute;dias fixas (50, 60, 70) e aumente a dispers&atilde;o dentro dos grupos. O que acontece com F? Isso ilustra por que a <strong>variabilidade do erro</strong> &eacute; inimiga da significância.</li>
+        <li><strong>Exerc&iacute;cio 3:</strong> Usando os valores gerados pelo widget, calcule manualmente: (a) SS Between, (b) SS Within, (c) MS Between, (d) MS Within, (e) F. Compare com os valores exibidos. Esse exerc&iacute;cio &eacute; fundamental para entender a mec&acirc;nica da ANOVA.</li>
+      </ul>
+    </div>
+
+    <div class="box box-tip">
+      <div class="box-title">&#128161; Dica</div>
+      <p>A l&oacute;gica &ldquo;vari&acirc;ncia entre vs. vari&acirc;ncia dentro&rdquo; n&atilde;o se aplica apenas &agrave; ANOVA one-way. &Eacute; a mesma l&oacute;gica de <strong>toda a fam&iacute;lia F</strong>: ANOVA fatorial decompõe a variância entre em efeitos principais e interação; ANOVA de medidas repetidas adiciona a variância entre-sujeitos; ANCOVA retira a variância explicada pela covariável. Entenda a decomposição aqui e você entende todas.</p>
+    </div>
+
+    <a class="btn-open" href="Widget_ANOVA_Decompositor.html">&#9654; Abrir Widget</a>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- TABELA RESUMO -->
+<!-- ============================================================ -->
+<section class="widget-section" id="resumo" style="scroll-margin-top:70px">
+  <div class="widget-header">
+    <div class="widget-icon" style="background:rgba(26,188,156,.15);color:var(--accent)">&#128203;</div>
+    <div class="widget-header-text">
+      <h2>Resumo: Qual Widget Usar Quando?</h2>
+    </div>
+  </div>
+  <div class="widget-body">
+    <table class="info-table">
+      <thead>
+        <tr><th>Se voc&ecirc; quer...</th><th>Use este widget</th><th>Conceito central</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Entender por que randomizamos</td><td><a href="Widget_Randomizacao.html" style="color:var(--accent)">Randomiza&ccedil;&atilde;o</a></td><td>Equil&iacute;brio de confounders</td></tr>
+        <tr><td>Calibrar intui&ccedil;&atilde;o sobre d</td><td><a href="Widget_Effect_Size.html" style="color:var(--blue)">Tamanho de Efeito</a></td><td>Cohen&rsquo;s d, overlap, NNT</td></tr>
+        <tr><td>Calcular N necess&aacute;rio</td><td><a href="Widget_Power.html" style="color:var(--gold)">Poder Estat&iacute;stico</a></td><td>N, d, &alpha;, 1&minus;&beta;</td></tr>
+        <tr><td>Planejar um within-subjects</td><td><a href="Widget_LatinSquare.html" style="color:var(--purple)">Latin Square</a></td><td>Counterbalancing, carry-over</td></tr>
+        <tr><td>Diagnosticar falhas de desenho</td><td><a href="Widget_Ameacas_Validade.html" style="color:var(--orange)">Amea&ccedil;as &agrave; Validade</a></td><td>12 amea&ccedil;as &agrave; validade interna</td></tr>
+        <tr><td>Entender instabilidade de p</td><td><a href="Widget_Danca_Pvalues.html" style="color:var(--red)">Dan&ccedil;a dos P-values</a></td><td>Variabilidade, replica&ccedil;&atilde;o</td></tr>
+        <tr><td>Visualizar a l&oacute;gica da ANOVA</td><td><a href="Widget_ANOVA_Decompositor.html" style="color:var(--green)">ANOVA Decompositor</a></td><td>SS Between vs. SS Within, F</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- ROTEIRO SUGERIDO -->
+<!-- ============================================================ -->
+<section class="widget-section" id="roteiro" style="scroll-margin-top:70px">
+  <div class="widget-header">
+    <div class="widget-icon" style="background:rgba(233,30,143,.12);color:var(--pink)">&#128197;</div>
+    <div class="widget-header-text">
+      <h2>Roteiro de Estudo Sugerido</h2>
+    </div>
+  </div>
+  <div class="widget-body">
+
+    <p>Se voc&ecirc; est&aacute; estudando pela primeira vez, sugerimos a seguinte sequ&ecirc;ncia:</p>
+
+    <div class="steps">
+      <div class="step"><div class="step-text"><strong>Randomiza&ccedil;&atilde;o</strong> &mdash; comece entendendo por que alocamos participantes aleatoriamente. Rode o auto-repeat para ver o equ&iacute;brio se formando.</div></div>
+      <div class="step"><div class="step-text"><strong>Amea&ccedil;as &agrave; Validade</strong> &mdash; agora que voc&ecirc; sabe o que a randomiza&ccedil;&atilde;o resolve, veja o que pode dar errado <em>al&eacute;m</em> da falta de randomiza&ccedil;&atilde;o.</div></div>
+      <div class="step"><div class="step-text"><strong>Tamanho de Efeito</strong> &mdash; antes de falar em signific&acirc;ncia, calibre sua intui&ccedil;&atilde;o sobre o que &ldquo;pequeno&rdquo; e &ldquo;grande&rdquo; significam.</div></div>
+      <div class="step"><div class="step-text"><strong>Poder Estat&iacute;stico</strong> &mdash; com d calibrado, calcule quantos participantes voc&ecirc; precisa.</div></div>
+      <div class="step"><div class="step-text"><strong>Dan&ccedil;a dos P-values</strong> &mdash; entenda por que o p-value n&atilde;o &eacute; confi&aacute;vel como m&eacute;trica &uacute;nica. Isso motiva o uso de ES + CI.</div></div>
+      <div class="step"><div class="step-text"><strong>ANOVA Decompositor</strong> &mdash; visualize a l&oacute;gica do teste mais usado em experimentos com 3+ grupos.</div></div>
+      <div class="step"><div class="step-text"><strong>Latin Square</strong> &mdash; se seu desenho &eacute; within-subjects, aprenda como controlar efeitos de ordem.</div></div>
+    </div>
+
+    <div class="box box-tip">
+      <div class="box-title">&#128161; Combina&ccedil;&atilde;o com outros materiais</div>
+      <p>Use este guia junto com o <a href="Guia_Estudo.html" style="color:var(--gold)">Guia de Estudo Completo</a> para a teoria e com os <a href="Experimentos_2026 Aulas 1 e 2.pdf" style="color:var(--blue)">Slides das Aulas 1 e 2</a> para o conte&uacute;do formal. Os widgets s&atilde;o a camada pr&aacute;tica &mdash; use-os para <strong>experimentar</strong> o que os textos explicam.</p>
+    </div>
+
+  </div>
+</section>
+
+</div>
+
+<div class="footer">
+  <strong>Prof. Dr. Leonardo Vils</strong> &middot; Programa de P&oacute;s-Gradua&ccedil;&atilde;o em Administra&ccedil;&atilde;o<br>
+  Fundamentos de Estudos Experimentais I &middot; 2026/1<br><br>
+  <a href="https://leovils.github.io/FAQ_Experimentos/" target="_blank">Portal da Disciplina</a> &middot;
+  <a href="https://creativecommons.org/licenses/by-nc/4.0/deed.pt-br" target="_blank">CC BY-NC 4.0</a>
+</div>
+
+<script>
+// Sticky nav active state
+const sections = document.querySelectorAll('.widget-section');
+const navLinks = document.querySelectorAll('.nav a');
+const observer = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      navLinks.forEach(l => l.classList.remove('active'));
+      const id = e.target.id;
+      const link = document.querySelector(`.nav a[href="#${id}"]`);
+      if (link) link.classList.add('active');
+    }
+  });
+}, { rootMargin: '-80px 0px -60% 0px', threshold: 0 });
+sections.forEach(s => observer.observe(s));
+</script>
+
+</body>
+</html>

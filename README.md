@@ -23,6 +23,8 @@
 | **Exercício (.docx)** | Versão Word para o aluno preencher e entregar | [Baixar →](Exercicio_Planejamento_Experimental.docx) |
 | **Simulador** | Simulador interativo de experimentos | [Abrir →](Simulador_Experimentos_OdinDinho.html) |
 | **Quiz Aula 1** | 25 questões sobre fundamentos e desenho experimental | [Abrir →](Quiz_Aula1.html) |
+| **Guia de Estudo** | 25 conceitos explicados em detalhe — texto complementar aos slides | [Abrir →](Guia_Estudo.html) |
+| **Guia dos Widgets** | Como usar cada widget, o que observar e exercícios práticos | [Abrir →](Guia_Widgets.html) |
 | **Ementa** | Programa da disciplina — 2026/1 PPGA | [Baixar →](Ementa_Experimentos_2026-1_PPGA.docx) |
 
 ### Widgets Interativos
@@ -120,6 +122,8 @@ Programa oficial da disciplina "Fundamentos de Estudos Experimentais I" — 2026
    - Quiz: `https://leovils.github.io/FAQ_Experimentos/Quiz_Aula1.html`
    - Widgets: `https://leovils.github.io/FAQ_Experimentos/Widget_Randomizacao.html` (etc.)
    - Simulador: `https://leovils.github.io/FAQ_Experimentos/Simulador_Experimentos_OdinDinho.html`
+   - Guia de Estudo: `https://leovils.github.io/FAQ_Experimentos/Guia_Estudo.html`
+   - Guia dos Widgets: `https://leovils.github.io/FAQ_Experimentos/Guia_Widgets.html`
    - Os arquivos .docx e .pdf ficam disponíveis para download direto pelo GitHub
 
 ### Opção 2: Abrir localmente
@@ -136,6 +140,8 @@ Basta abrir os arquivos HTML em qualquer navegador. Funcionam 100% offline.
 ├── Exercicio_Planejamento_Experimental.docx    ← Exercício para entrega (Word)
 ├── Simulador_Experimentos_OdinDinho.html       ← Simulador interativo
 ├── Quiz_Aula1.html                             ← Quiz 25 questões
+├── Guia_Estudo.html                            ← Guia de Estudo Completo (25 conceitos)
+├── Guia_Widgets.html                           ← Guia dos Widgets Interativos
 ├── Widget_Randomizacao.html                    ← Widget: Randomização
 ├── Widget_Effect_Size.html                     ← Widget: Tamanho de Efeito
 ├── Widget_Power.html                           ← Widget: Poder Estatístico
